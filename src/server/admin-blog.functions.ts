@@ -116,8 +116,14 @@ Return ONLY valid JSON with this exact shape:
       parsed = { content_markdown: text };
     }
 
-    const update: Record<string, unknown> = { updated_at: new Date().toISOString() };
-    if (parsed.content_markdown) update.content = parsed.content_markdown;
+    const update: {
+      updated_at: string;
+      content?: string;
+      excerpt?: string;
+      seo_title?: string;
+      seo_description?: string;
+    } = { updated_at: new Date().toISOString() };
+    if (parsed.content_markdown) update.content = String(parsed.content_markdown);
     if (parsed.excerpt) update.excerpt = String(parsed.excerpt).slice(0, 280);
     if (parsed.seo_title) update.seo_title = String(parsed.seo_title).slice(0, 60);
     if (parsed.seo_description) update.seo_description = String(parsed.seo_description).slice(0, 160);
