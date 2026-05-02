@@ -508,7 +508,7 @@ export const adminGetLearnerDetail = createServerFn({ method: "POST" })
         id: e.id as string,
         course_slug: e.course_slug as string,
         event_type: e.event_type as string,
-        metadata: (e.metadata ?? null) as { [x: string]: unknown } | null,
+        metadata: (e.metadata ?? null) as { [x: string]: {} } | null,
         created_at: e.created_at as string,
       })),
       completions: (compRes.data ?? []) as AdminLearnerDetail["completions"],
