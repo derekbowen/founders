@@ -1,13 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { listBuilderStates } from "@/server/builders.functions";
+import { listBuilderStates, listAllBuilders } from "@/server/builders.functions";
 import { SiteHeader, SiteFooter } from "@/components/site-layout";
 import { JoinNetworkForm } from "@/components/recruit-forms";
+import { BuildersFilter, type BuilderRow } from "@/components/builders-filter";
 import { buildMeta, breadcrumbJsonLd, itemListJsonLd, ldJsonScript } from "@/lib/seo";
 
-const listStates = listBuilderStates;
-
 export const Route = createFileRoute("/pool-builders/")({
-  loader: () => listStates(),
+  loader: async () => {
+    const [states, all] = await Promise.all([listBuilderStates(), listAllBuilders()]);
+    return { ...states, ...all };
+  },
   head: ({ loaderData }) => {
     const total = (loaderData?.states ?? []).reduce((sum, s) => sum + s.count, 0);
     const meta = buildMeta({
@@ -32,7 +34,7 @@ export const Route = createFileRoute("/pool-builders/")({
 });
 
 function PoolBuildersIndex() {
-  const { states } = Route.useLoaderData();
+  const { states, providers } = Route.useLoaderData();
   const total = states.reduce((sum, s) => sum + s.count, 0);
   return (
     <div className="flex min-h-screen flex-col">
@@ -44,11 +46,18 @@ function PoolBuildersIndex() {
             {total.toLocaleString()}+ Pool Builders Across the US
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
-            Find a verified pool builder, contractor, or service provider near you. Browse by state or claim your business listing.
+            Find a verified pool builder, contractor, or service provider near you. Search by city, rating, or category.
           </p>
         </header>
 
-        <section className="mt-12">
+        <section className="mt-10">
+          <BuildersFilter
+            providers={providers as unknown as BuilderRow[]}
+            showCityFilter
+          />
+        </section>
+
+        <section className="mt-16">
           <h2 className="text-xl font-semibold text-foreground">Browse by state</h2>
           <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
             {states.map((s) => (
