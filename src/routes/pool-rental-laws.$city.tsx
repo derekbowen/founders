@@ -223,7 +223,7 @@ function PoolRentalLawsPage() {
               </p>
             </div>
             <Button asChild size="lg">
-              <Link to="/list-your-pool" search={{ city: city.slug } as never}>
+              <Link to="/auth" search={{ mode: "signup", redirect: `/pool-rental-laws/${city.slug}` } as never}>
                 Check eligibility
               </Link>
             </Button>
@@ -320,7 +320,7 @@ function PoolRentalLawsPage() {
             </li>
             <li>
               →{" "}
-              <Link to="/list-your-pool" className="text-primary hover:underline">
+              <Link to="/auth" search={{ mode: "signup" } as never} className="text-primary hover:underline">
                 List your pool and start earning
               </Link>
             </li>
@@ -369,7 +369,7 @@ function PoolRentalLawsPage() {
             We pre-check zoning, walk you through the permit, and include $2M liability on every booking.
           </p>
           <Button asChild size="lg" variant="secondary" className="mt-4">
-            <Link to="/list-your-pool" search={{ city: city.slug } as never}>
+            <Link to="/auth" search={{ mode: "signup", redirect: `/pool-rental-laws/${city.slug}` } as never}>
               Start your host application
             </Link>
           </Button>
