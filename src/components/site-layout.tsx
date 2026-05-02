@@ -39,6 +39,7 @@ export function SiteHeader() {
           <Link to="/" className="text-sm font-medium text-muted-foreground hover:text-foreground" activeOptions={{ exact: true }} activeProps={{ className: "text-foreground" }}>Home</Link>
           <Link to="/category/$slug" params={{ slug: "heated-pools" }} className="text-sm font-medium text-muted-foreground hover:text-foreground">Categories</Link>
           <Link to="/blog" className="text-sm font-medium text-muted-foreground hover:text-foreground">Blog</Link>
+          <Link to="/host-tools" className="text-sm font-medium text-muted-foreground hover:text-foreground">Host Tools</Link>
           <Link to="/providers" className="text-sm font-medium text-muted-foreground hover:text-foreground">Providers</Link>
           <a href="https://www.poolrentalnearme.com/public-pools" className="text-sm font-medium text-muted-foreground hover:text-foreground">Public Pools</a>
         </nav>
