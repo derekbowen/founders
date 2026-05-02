@@ -1,70 +1,51 @@
 ## Goal
 
-Make SEO consistently strong across the entire site: a single source of truth for canonical URLs / OG metadata, site-wide structured data on every page, ItemList schema for footer-linked navigation hubs, and a sitemap that covers academy + courses.
+Make every footer/header link resolve correctly on the deployed `www.poolrentalnearme.com` domain by:
+1. Routing internal TanStack pages through `<Link>` so they SSR + prefetch.
+2. Converting absolute `https://www.poolrentalnearme.com/...` legacy links to root-relative paths so they work on production AND preview without hardcoding the apex/www host.
 
-## What's already in place
+## Confirmed setup
 
-- `src/lib/seo.ts` has `buildMeta` (canonical, OG, Twitter, prev/next, noindex) + `breadcrumbJsonLd` + `ldJsonScript`.
-- Most leaf routes already use `buildMeta` and emit relevant JSON-LD (Article, Course, LocalBusiness, FAQ, ItemList, Breadcrumbs).
-- Sitemap covers cities, categories, providers, blog posts.
+User confirmed: TanStack Start owns `/`, `/blog`, `/blog/$slug`, `/providers`, `/providers/$slug`, `/academy`, `/academy/$slug`, `/pool-rental/$city`, `/category/$slug`, `/l/$slug/$id`. The legacy backend handles everything else (`/signup`, `/s`, `/p/*`, `/terms-of-service`, `/privacy-policy`) on the same www domain.
 
-## Gaps to fix
+## Audit + remediation
 
-1. Root route emits no canonical, no Twitter image, no Organization/WebSite JSON-LD, and a generic OG meta repeated on every page.
-2. `academy.tsx` (layout) and a few list routes lack their own meta beyond `buildMeta` defaults — no breadcrumbs/ItemList.
-3. Sitemap omits `/academy`, academy course pages, and key footer hubs (`/blog`, `/providers` already there but missing `/academy`).
-4. No default OG image; pages without a hero share an empty card.
-5. No site-wide `SearchAction` (sitelinks search box) or `Organization` schema with sameAs (socials live in footer already).
+### `src/components/site-layout.tsx` (header + footer)
 
-## Plan
+- Drop the `const SITE = "https://www.poolrentalnearme.com"` constant.
+- Replace every `${SITE}/path` with the bare path `/path` so the link stays on whatever host is serving the page (works on `id-preview-*.lovable.app`, `*.lovable.app`, custom domain, www).
+- Replace `<a href="${SITE}/signup">` (CTA button in header) with `<a href="/signup">`.
+- Footer columns:
+  - **Explore**: keep all as `<a href="/...">` (legacy app paths).
+  - **Become a Host**: keep all as `<a href="/...">` (legacy app paths).
+  - **Company**: `Blog` already uses `<Link to="/blog">` — leave; the rest become `<a href="/...">`.
+  - **Popular Markets**: already uses `<Link to="/pool-rental/$city">` — no change.
+  - "All Locations" → `<a href="/s">`.
+- Brand logo link in header/footer already uses `<Link to="/">` — no change.
 
-### 1. Extend `src/lib/seo.ts`
+### `src/routes/index.tsx`
 
-- Add `DEFAULT_OG_IMAGE` constant (use `/og-default.png`, file already in `public/` or fallback to existing hero).
-- In `buildMeta`, when no `image` passed, use `DEFAULT_OG_IMAGE` so every page has a share card.
-- Add helpers:
-  - `organizationJsonLd()` — `Organization` with name, url, logo, sameAs (Facebook/X/YouTube/LinkedIn/Instagram/TikTok/Pinterest, matching the footer SOCIALS list), contactPoint (phone + email from footer).
-  - `websiteJsonLd()` — `WebSite` with `potentialAction` SearchAction pointing to `https://www.poolrentalnearme.com/s?q={search_term_string}`.
-  - `itemListJsonLd(items)` — generic ItemList helper (used by hub pages).
+- Hero CTA "Find a pool near you" currently hits `https://www.poolrentalnearme.com` (the home of the app itself). Repoint to legacy search: `<a href="/s">Find a pool near you</a>`.
+- "List your pool" CTA: `<a href="/signup">`.
+- "View all →" link: `<a href="/s">`.
+- `sameAs` in JSON-LD organization (line 46): leave as absolute SITE_URL — that's correct for structured data.
 
-### 2. Root route (`src/routes/__root.tsx`)
+### `src/routes/l.$slug.$id.tsx`
 
-- Replace the inline `head()` with `buildMeta({...})` so root gets a canonical for `/` AND a default OG image.
-- Add `scripts: [ldJsonScript(organizationJsonLd()), ldJsonScript(websiteJsonLd())]` so every page on the site carries Organization + WebSite structured data.
-- Keep child routes overriding title/description/canonical via their own `head()`.
+- `externalUrl` is the canonical URL emitted in `Product` JSON-LD; leave as `${SITE_URL}/l/...` (absolute is required for schema.org `url` fields). No change.
 
-### 3. Footer hub routes — add proper meta + ItemList
+### `src/routes/pool-rental.$city.tsx`
 
-- `src/routes/academy.tsx` (layout): currently has no head. Move into `academy.index.tsx` (already done) — but add a noop head on the layout to avoid inheriting stale meta. No change if layout has none; verified.
-- `src/routes/providers.tsx`: already has `buildMeta`. Extend to include `breadcrumbJsonLd([{Home}, {Providers}])` and `itemListJsonLd(providers.map(...))`.
-- `src/routes/blog.tsx`: already has ItemList — leave as is.
-
-### 4. Sitemap (`src/routes/api/sitemap[.]xml.ts`)
-
-- Add static entries: `/academy`, `/academy?lang=es`.
-- Query `courses` table (published) and emit `/academy/$slug` URLs with `lastmod`.
-- Add `/category` index isn't a route — skip.
-
-### 5. Site footer / header
-
-- No structural changes; the new `Organization.sameAs` mirrors the footer SOCIALS so the existing footer markup is unchanged.
-
-## Technical notes
-
-- All JSON-LD goes in `head().scripts` via `ldJsonScript(...)` so it's SSR-rendered (TanStack `<HeadContent />` already in root shell).
-- `buildMeta` already handles canonical, prev/next, noindex — no API change beyond the new default image fallback.
-- Cache for sitemap stays at 1 hour.
-- No DB schema changes; only adds course rows to the existing sitemap query.
-
-## Files to touch
-
-- `src/lib/seo.ts` — add helpers + default OG.
-- `src/routes/__root.tsx` — switch to `buildMeta` + Org/WebSite JSON-LD.
-- `src/routes/providers.tsx` — add Breadcrumbs + ItemList JSON-LD.
-- `src/routes/api/sitemap[.]xml.ts` — include academy + courses.
-- `public/og-default.png` — add a simple branded fallback (if missing, generate a 1200×630 placeholder via existing pool-hero asset).
+- The `const SITE` constant is used for what? Let me note: any `${SITE}/...` usages there should follow the same rule — convert to relative for legacy paths, leave absolute only inside JSON-LD `url` fields. Will inspect and fix in implementation.
 
 ## Out of scope
 
-- Image generation pipeline for per-page OG cards (only fallback added).
-- Hreflang for the Spanish academy variant — can be a follow-up once `/academy/es` becomes its own route.
+- The TanStack-owned `<Link to="/...">` paths (blog, providers, academy, popular markets) already work; not touching them.
+- Absolute URLs inside JSON-LD payloads stay absolute (required by spec).
+- No new routes, no DB changes.
+
+## Files to touch
+
+- `src/components/site-layout.tsx`
+- `src/routes/index.tsx`
+- `src/routes/pool-rental.$city.tsx` (only if `${SITE}/...` is used in user-facing links)
