@@ -142,7 +142,7 @@ function BlogIndex() {
           >
             All posts <span className="ml-1 opacity-70">({total + (activeTopic ? 0 : 0)})</span>
           </Link>
-          {topics.map((t) => {
+          {topics.map((t: { slug: string; count: number }) => {
             const meta = topicMeta(t.slug);
             const active = activeTopic === t.slug;
             return (
@@ -168,7 +168,7 @@ function BlogIndex() {
             <p className="text-muted-foreground">No posts found{activeTopic ? " in this topic" : ""}.</p>
           ) : (
             <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-              {posts.map((p) => {
+              {posts.map((p: { slug: string; title: string; excerpt: string | null; cover_image_url: string | null; published_at: string | null; topic: string | null }) => {
                 const tMeta = p.topic ? topicMeta(p.topic) : null;
                 return (
                   <article key={p.slug} className="group">
