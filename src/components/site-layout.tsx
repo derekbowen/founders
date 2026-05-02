@@ -142,7 +142,7 @@ export function SiteFooter() {
           <FooterColumn title="Company" items={COMPANY} />
           {/* Popular Markets */}
           <div className="lg:col-span-2">
-            <h4 className="text-sm font-semibold text-foreground">Popular Markets</h4>
+            <h4 className="text-base font-semibold text-foreground">Popular Markets</h4>
             <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
               {POPULAR_MARKETS.map((m) => (
                 <li key={m.slug}>
@@ -158,8 +158,8 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <div className="mt-12 border-t border-border pt-6 text-xs text-muted-foreground">
-          © {new Date().getFullYear()} PRNM CORP &middot; Riverside, CA 92509
+        <div className="mt-12 pt-6 text-xs text-muted-foreground">
+          © {new Date().getFullYear()} PRNM CORP Riverside, Ca 92509
         </div>
       </div>
     </footer>
