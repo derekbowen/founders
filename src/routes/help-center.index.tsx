@@ -199,7 +199,7 @@ function HelpCenterIndex() {
           </p>
 
           <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {categories.map((c) => (
+            {categories.map((c: { slug: string; name: string; description: string | null; icon: string | null }) => (
               <Link
                 key={c.slug}
                 to="/help-center/$category"
