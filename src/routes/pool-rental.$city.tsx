@@ -403,28 +403,11 @@ function CityPage() {
         </section>
 
         {/* NEARBY CITIES — internal linking */}
-        {nearby.length > 0 && (
-          <section className="border-t border-border bg-secondary/20">
-            <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-              <h2 className="text-2xl font-bold tracking-tight text-foreground">
-                Other pool rentals in {city.state}
-              </h2>
-              <ul className="mt-6 grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
-                {nearby.map((n: { slug: string; name: string; state_code: string }) => (
-                  <li key={n.slug}>
-                    <Link
-                      to="/pool-rental/$city"
-                      params={{ city: n.slug }}
-                      className="text-muted-foreground hover:text-primary hover:underline"
-                    >
-                      Pool rentals in {n.name}, {n.state_code}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </section>
-        )}
+        <NearbyCities
+          cities={nearby as Array<{ slug: string; name: string; state: string; state_code: string; distance_km: number | null }>}
+          currentStateCode={city.state_code}
+          currentStateName={city.state}
+        />
 
         {/* HOST CTA */}
         <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
@@ -452,5 +435,89 @@ function CityPage() {
       </main>
       <SiteFooter />
     </div>
+  );
+}
+
+type NearbyCity = {
+  slug: string;
+  name: string;
+  state: string;
+  state_code: string;
+  distance_km: number | null;
+};
+
+function NearbyCities({
+  cities,
+  currentStateCode,
+  currentStateName,
+}: {
+  cities: NearbyCity[];
+  currentStateCode: string;
+  currentStateName: string;
+}) {
+  const sameState = cities.filter((c) => c.state_code === currentStateCode);
+  const otherState = cities.filter((c) => c.state_code !== currentStateCode);
+
+  return (
+    <section className="border-t border-border bg-secondary/20">
+      <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+        <h2 className="text-2xl font-bold tracking-tight text-foreground">
+          Nearby pool rentals
+        </h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Explore private pools in cities close by.
+        </p>
+
+        {cities.length === 0 ? (
+          <p className="mt-6 text-sm text-muted-foreground">
+            More cities coming soon.
+          </p>
+        ) : (
+          <>
+            {sameState.length > 0 && (
+              <div className="mt-6">
+                <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                  More in {currentStateName}
+                </h3>
+                <ul className="mt-3 grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+                  {sameState.map((n) => (
+                    <li key={n.slug}>
+                      <Link
+                        to="/pool-rental/$city"
+                        params={{ city: n.slug }}
+                        className="text-muted-foreground hover:text-primary hover:underline"
+                      >
+                        Pool rentals in {n.name}, {n.state_code}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {otherState.length > 0 && (
+              <div className="mt-8">
+                <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                  Nearby cities
+                </h3>
+                <ul className="mt-3 grid grid-cols-2 gap-x-6 gap-y-2 text-sm sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+                  {otherState.map((n) => (
+                    <li key={n.slug}>
+                      <Link
+                        to="/pool-rental/$city"
+                        params={{ city: n.slug }}
+                        className="text-muted-foreground hover:text-primary hover:underline"
+                      >
+                        Pool rentals in {n.name}, {n.state_code}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </section>
   );
 }
