@@ -1,59 +1,44 @@
 ## Goal
 
-Make the SSR footer in `SiteLayout` visually and structurally match the live `poolrentalnearme.com` footer, so every route renders the same footer the user sees in production.
+Replace the current Sharetribe Integration API Client ID with a new one and confirm city pages (e.g. `/pool-rental/los-angeles-ca`) actually render live pool listings instead of an empty grid.
 
-## What's already correct
+## Background
 
-The current `SiteFooter` in `src/components/site-layout.tsx` already has the right **content**:
+- `src/server/sharetribe.server.ts` already targets the Integration API (`flex-integ-api.sharetribe.com`, `client_credentials` + `scope=integ`) using `SHARETRIBE_CLIENT_ID` and `SHARETRIBE_CLIENT_SECRET`.
+- The currently published worker is running an older build that references `getAnonymousToken` / `marketplaceGet` and is failing — that's why the city grid is empty in production. A fresh deploy with the updated secret will replace it with the Integration API code.
+- All listing surfaces (home, `/category/$slug`, `/pool-rental/$city`, `/l/$slug/$id`) already flow through `searchListings` / `fetchListing` in this file, so no other code paths need changes.
 
-- 4 columns with matching titles ("Explore", "Become a Host", "Company", "Popular Markets") and identical link labels in the same order.
-- Same Popular Markets list (LA, San Diego, Riverside, Sacramento, Tampa, Scottsdale, Nashville, Katy) plus "All Locations".
-- Same 7 social icons (Facebook, X, YouTube, LinkedIn, Instagram, TikTok, Pinterest).
-- Same phone (888-940-4247), hours (10am - 5pm PST), email (support@poolrentalnearme.com), copyright (PRNM CORP, Riverside, CA 92509).
-- Footer is already imported by `__root.tsx` via `SiteLayout`, so every route that uses `<SiteLayout>` gets it under SSR. Verified all 11 route files use it.
+## Steps
 
-## What needs to change
+1. **Prompt for the new Client ID**
+   - Use `add_secret` for `SHARETRIBE_CLIENT_ID` so you can paste the new Integration API client_id securely.
+   - Leave `SHARETRIBE_CLIENT_SECRET` and `SHARETRIBE_MARKETPLACE_URL` as-is (you didn't indicate they changed). If the new app is a different Integration app, we'll re-prompt for the secret in step 4 if auth fails.
 
-Pure visual/markup adjustments to match the live layout (verified via headless screenshot):
+2. **Sanity-check `sharetribe.server.ts`**
+   - No code change expected. Just confirm `getClientId` / `getClientSecret` read from `process.env` inside the handler path (they do), so the new value is picked up without a code edit.
 
-### 1. Brand block (left column)
+3. **Verify Integration API auth and listings**
+   - Add a temporary internal-only diagnostic server route at `src/routes/api/_sharetribe-check.ts` that:
+     - Calls `searchListings({ perPage: 3 })`.
+     - Returns `{ ok, total, sample: listings.map(l => ({ id, title, city, state })) }` as JSON.
+     - Guarded by a header check (`x-debug-token` matching a constant we set, or simply gated to non-published `import.meta.env.DEV`-style check via `process.env.NODE_ENV !== "production"` is unreliable in Workers — we'll use a header token).
+   - Invoke it via `stack_modern--invoke-server-function` with the header. Inspect:
+     - Token request returns 200 (no `Sharetribe auth failed [401]`).
+     - `total` > 0 and at least one `title` comes back.
 
-- Replace circular SVG icon + "Pool Rental Near Me" text with **just the logo image** (`src/assets/logo.png`, already in the project from the earlier logo task) — the live site shows logo only, no wordmark next to it.
-- Sizing: `h-14 w-auto`.
+4. **If auth fails (401/403)**
+   - Most likely cause: the new Client ID belongs to an Integration app whose secret is different. Re-prompt with `add_secret` for `SHARETRIBE_CLIENT_SECRET`.
+   - Re-run the diagnostic route until it returns listings.
 
-### 2. Contact line formatting
+5. **Verify city grid end-to-end**
+   - Invoke `/pool-rental/los-angeles-ca` (and one more city) via `stack_modern--invoke-server-function`.
+   - Confirm the returned HTML contains listing card markup (titles / prices), not just the empty-state message.
+   - Tail `stack_modern--server-function-logs` filtering by `sharetribe` to confirm no errors.
 
-- Render call info on **one line** as it appears live: `Call us 888-940-4247 10am - 5pm PST` (phone is the link, hours follow inline in muted color).
-- Email stays on its own line below.
-- Drop the `block` on hours; use inline `<span className="text-muted-foreground">`.
+6. **Clean up**
+   - Delete `src/routes/api/_sharetribe-check.ts` once verified so the diagnostic isn't shipped.
 
-### 3. Copyright line
+## Deliverable
 
-- Live: `© 2026 PRNM CORP Riverside, Ca 92509` (space-separated, "Ca" not "CA", no `·`).
-- Update string to: `© {year} PRNM CORP Riverside, Ca 92509`.
-- Remove the `border-t` divider above it (live site has no divider — just spacing).
-
-### 4. Column proportions
-
-- Live layout gives the brand block more horizontal room and the link columns are tighter. Switch grid to `lg:grid-cols-12` with `lg:col-span-3` for brand and `lg:col-span-2` (already used) for each of the 4 link columns plus a small gap. This is already the structure — only ensure the brand column doesn't grow on the wordmark removal (remove the `inline-flex items-center gap-2` wrapper since there's no longer a side-by-side icon+text).
-
-### 5. Link column titles
-
-- Live uses bolder, slightly larger column headings. Change `text-sm font-semibold` → `text-base font-semibold` in `FooterColumn` and the inline Popular Markets heading.
-
-### 6. SSR/no behavior changes
-
-- All hrefs stay as-is (legacy backend handles `/p/*`, `/s`, `/signup`; TanStack handles `/blog`, `/academy`, `/pool-rental/$city`, `/category/$slug`).
-- Footer remains a server-rendered React component inside `__root.tsx`'s shell — no client-only conditionals, no `useEffect` — so it appears identically on every SSR page.
-
-## Files to edit
-
-- `src/components/site-layout.tsx` — `SiteFooter` brand block, contact lines, copyright, and `FooterColumn` heading size.
-
-## Out of scope
-
-- Header (separate concern; logo there was already updated).
-- Adding new links or columns (live and current already align).
-- Restyling link hover colors or fonts beyond the heading size bump.
-
-Approve to implement.
+- New `SHARETRIBE_CLIENT_ID` saved in Cloud secrets.
+- Confirmation message stating that auth succeeded, how many listings the Integration API returned, and that the city page now renders pool cards. No lingering diagnostic routes in the repo.
