@@ -114,7 +114,7 @@ function ResetPasswordPage() {
                 {busy ? "Sending…" : "Send reset link"}
               </Button>
               <p className="text-center text-sm text-muted-foreground">
-                <Link to="/auth" className="hover:text-primary">
+                <Link to="/auth" search={{ redirect: "/account/learning", mode: "signin" }} className="hover:text-primary">
                   Back to sign in
                 </Link>
               </p>
