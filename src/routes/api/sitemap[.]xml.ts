@@ -6,12 +6,14 @@ export const Route = createFileRoute("/api/sitemap.xml")({
   server: {
     handlers: {
       GET: async () => {
-        const [cities, categories, providers, posts, courses] = await Promise.all([
+        const [cities, categories, providers, posts, courses, helpCats, helpArticles] = await Promise.all([
           supabaseAdmin.from("cities").select("slug, updated_at").eq("is_published", true),
           supabaseAdmin.from("categories").select("slug, updated_at").eq("is_published", true),
           supabaseAdmin.from("providers").select("slug, updated_at").eq("is_published", true),
           supabaseAdmin.from("blog_posts").select("slug, updated_at").eq("is_published", true),
           supabaseAdmin.from("courses").select("slug, updated_at").eq("is_published", true),
+          supabaseAdmin.from("help_categories").select("slug, updated_at").eq("is_published", true),
+          supabaseAdmin.from("help_articles").select("slug, category_slug, updated_at").eq("is_published", true),
         ]);
 
         const urls: Array<{ loc: string; lastmod?: string; priority?: string }> = [
@@ -19,6 +21,7 @@ export const Route = createFileRoute("/api/sitemap.xml")({
           { loc: `${SITE_URL}/blog`, priority: "0.7" },
           { loc: `${SITE_URL}/providers`, priority: "0.7" },
           { loc: `${SITE_URL}/academy`, priority: "0.8" },
+          { loc: `${SITE_URL}/help-center`, priority: "0.8" },
         ];
 
         for (const c of cities.data ?? []) {
