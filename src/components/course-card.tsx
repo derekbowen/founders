@@ -25,6 +25,7 @@ export function CourseCard({
 }) {
   const t = I18N[lang];
   const cat = getCategoryMeta(course.category, lang);
+  const tier = getTierMeta(course.tier);
   return (
     <article
       className={`group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card transition hover:border-primary/40 hover:shadow-lg ${
