@@ -1,5 +1,6 @@
-import { createFileRoute, Link, useRouter, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter, notFound, redirect } from "@tanstack/react-router";
 import { getBlogPost, getBlogLinkTargets } from "@/server/content.functions";
+import { resolveSlug } from "@/lib/blog-slugs";
 import { SiteHeader, SiteFooter } from "@/components/site-layout";
 import { Breadcrumbs } from "@/components/listing-card";
 import { buildMeta, breadcrumbJsonLd, ldJsonScript, SITE_URL, SITE_NAME } from "@/lib/seo";
@@ -43,6 +44,18 @@ function extractFaqJsonLd(content: string) {
 }
 
 export const Route = createFileRoute("/blog/$slug")({
+  beforeLoad: ({ params }) => {
+    const { canonical, redirect: shouldRedirect } = resolveSlug(params.slug);
+    if (shouldRedirect && canonical && canonical !== params.slug) {
+      // 301 to the canonical URL
+      throw redirect({
+        to: "/blog/$slug",
+        params: { slug: canonical },
+        statusCode: 301,
+        replace: true,
+      });
+    }
+  },
   loader: async ({ params }) => {
     const [{ post }, linkData] = await Promise.all([
       getBlogPost({ data: { slug: params.slug } }),
