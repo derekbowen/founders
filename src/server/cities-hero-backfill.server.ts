@@ -19,27 +19,19 @@ export type BackfillResult = {
 };
 
 // Cities whose source key on poolrentalnearme.com differs from a naive
-// "lowercase + strip non-letters" of city name.
+// "lowercase + strip non-letters" of city name. Slugs in our DB usually omit
+// the state suffix (e.g. "los-angeles", not "los-angeles-ca"). The override
+// map is for cities where the source key uses an abbreviation our city name
+// doesn't share (Saint -> St, Fort/Mount left as-is by the source).
 const SOURCE_KEY_OVERRIDES: Record<string, string> = {
-  // db slug -> source key
-  "kansas-city-mo": "kansascity",
-  "kansas-city-ks": "kansascityks",
-  "saint-petersburg-fl": "stpetersburg",
-  "saint-paul-mn": "stpaul",
-  "saint-louis-mo": "stlouis",
-  "saint-augustine-fl": "staugustine",
-  "fort-lauderdale-fl": "fortlauderdale",
-  "fort-worth-tx": "fortworth",
-  "fort-myers-fl": "fortmyers",
-  "fort-collins-co": "fortcollins",
-  "las-vegas-nv": "lasvegas",
-  "los-angeles-ca": "losangeles",
-  "san-diego-ca": "sandiego",
-  "san-francisco-ca": "sanfrancisco",
-  "san-jose-ca": "sanjose",
-  "san-antonio-tx": "sanantonio",
-  "new-york-ny": "newyork",
-  "new-orleans-la": "neworleans",
+  // db slug -> source key on poolrentalnearme.com
+  "saint-petersburg": "stpetersburg",
+  "saint-paul": "stpaul",
+  "saint-louis": "stlouis",
+  "saint-augustine": "staugustine",
+  "saint-george": "stgeorge",
+  "saint-johns": "stjohns",
+  "mount-pleasant": "mountpleasant",
 };
 
 export function deriveSourceKey(citySlug: string, cityName: string): string {
