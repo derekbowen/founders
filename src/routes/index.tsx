@@ -96,7 +96,7 @@ function HomePage() {
                 <h2 className="text-3xl font-bold tracking-tight text-foreground">Featured pools</h2>
                 <p className="mt-2 text-muted-foreground">Live listings from hosts across the country.</p>
               </div>
-              <a href="https://www.poolrentalnearme.com/s" className="hidden text-sm font-semibold text-primary hover:underline sm:inline">View all →</a>
+              <a href="/s" className="hidden text-sm font-semibold text-primary hover:underline sm:inline">View all →</a>
             </div>
             <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {listings.map((l: ListingSummary) => (
