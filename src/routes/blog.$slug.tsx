@@ -43,7 +43,10 @@ export const Route = createFileRoute("/blog/$slug")({
       { name: "Blog", path: "/blog" },
       { name: p.title, path: `/blog/${params.slug}` },
     ]);
-    return { ...meta, scripts: [ldJsonScript(article), ldJsonScript(crumbs)] };
+    const scripts = [ldJsonScript(article), ldJsonScript(crumbs)];
+    const faq = extractFaqJsonLd(p.content || "");
+    if (faq) scripts.push(ldJsonScript(faq));
+    return { ...meta, scripts };
   },
   component: BlogPostPage,
   errorComponent: ({ error, reset }) => {
