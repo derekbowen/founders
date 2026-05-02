@@ -70,11 +70,11 @@ async function scrape(slug: string, name: string) {
   const sourceUrl = `https://www.poolrentalnearme.com/p/${key}`;
   try {
     const res: any = await client.scrape(sourceUrl, {
-      formats: ["html"],
+      formats: ["rawHtml"],
       onlyMainContent: false,
       waitFor: 3000,
     });
-    const html: string = res.html ?? res.data?.html ?? "";
+    const html: string = res.rawHtml ?? res.data?.rawHtml ?? "";
     const heroRaw = extractHeroUrl(html);
     if (!heroRaw) return { slug, name, sourceUrl, status: "miss" as const };
     const hero = normalize(heroRaw);
