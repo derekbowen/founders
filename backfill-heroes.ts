@@ -10,24 +10,7 @@ const client = new Firecrawl({ apiKey: FIRECRAWL_API_KEY });
 const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 const SOURCE_KEY_OVERRIDES: Record<string, string> = {
-  "kansas-city-mo": "kansascity",
-  "kansas-city-ks": "kansascityks",
-  "saint-petersburg-fl": "stpetersburg",
-  "saint-paul-mn": "stpaul",
-  "saint-louis-mo": "stlouis",
-  "saint-augustine-fl": "staugustine",
-  "fort-lauderdale-fl": "fortlauderdale",
-  "fort-worth-tx": "fortworth",
-  "fort-myers-fl": "fortmyers",
-  "fort-collins-co": "fortcollins",
-  "las-vegas-nv": "lasvegas",
-  "los-angeles-ca": "losangeles",
-  "san-diego-ca": "sandiego",
-  "san-francisco-ca": "sanfrancisco",
-  "san-jose-ca": "sanjose",
-  "san-antonio-tx": "sanantonio",
-  "new-york-ny": "newyork",
-  "new-orleans-la": "neworleans",
+  "saint-petersburg": "stpetersburg","saint-paul": "stpaul","saint-louis": "stlouis","saint-augustine": "staugustine","saint-george": "stgeorge","mount-pleasant": "mountpleasant",
 };
 
 function deriveSourceKey(slug: string, name: string) {

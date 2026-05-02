@@ -103,14 +103,14 @@ async function scrapeOne(
   const sourceUrl = sourceUrlFor(citySlug, cityName);
   try {
     const res = await client.scrape(sourceUrl, {
-      formats: ["html"],
+      formats: ["rawHtml"],
       onlyMainContent: false,
       waitFor: 3000,
     });
-    // SDK shape: { html, metadata, ... } | { data: {...} }
+    // SDK shape: { rawHtml, metadata, ... } | { data: {...} }
     const html =
-      (res as { html?: string }).html ??
-      (res as { data?: { html?: string } }).data?.html ??
+      (res as { rawHtml?: string }).rawHtml ??
+      (res as { data?: { rawHtml?: string } }).data?.rawHtml ??
       "";
     const heroRaw = extractHeroUrl(html);
     if (!heroRaw) {
