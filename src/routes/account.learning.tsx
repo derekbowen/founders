@@ -1,9 +1,15 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { listMyLearning, type MyLearningRow } from "@/server/learning.functions";
+import {
+  listMyLearning,
+  listMyProgress,
+  type CourseProgress,
+  type MyLearningRow,
+} from "@/server/learning.functions";
 import { SiteHeader, SiteFooter } from "@/components/site-layout";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 
 export const Route = createFileRoute("/account/learning")({
   beforeLoad: async ({ location }) => {
@@ -21,11 +27,20 @@ export const Route = createFileRoute("/account/learning")({
 
 function MyLearningPage() {
   const [rows, setRows] = useState<MyLearningRow[] | null>(null);
+  const [progress, setProgress] = useState<Map<string, CourseProgress>>(new Map());
   const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
-    void listMyLearning({ data: undefined as never })
-      .then((r) => setRows(r.rows))
+    void Promise.all([
+      listMyLearning({ data: undefined as never }),
+      listMyProgress({ data: undefined as never }),
+    ])
+      .then(([l, p]) => {
+        setRows(l.rows);
+        const m = new Map<string, CourseProgress>();
+        for (const r of p.rows) m.set(r.course_slug, r);
+        setProgress(m);
+      })
       .catch((e) => setErr(e instanceof Error ? e.message : String(e)));
   }, []);
 
