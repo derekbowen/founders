@@ -20,6 +20,7 @@ import { Route as CategorySlugRouteImport } from './routes/category.$slug'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as ApiSitemapDotxmlRouteImport } from './routes/api/sitemap[.]xml'
 import { Route as ApiRobotsDottxtRouteImport } from './routes/api/robots[.]txt'
+import { Route as AdminClickReportRouteImport } from './routes/admin.click-report'
 import { Route as AdminCitiesHeroesRouteImport } from './routes/admin.cities-heroes'
 import { Route as AcademySlugRouteImport } from './routes/academy.$slug'
 import { Route as LSlugIdRouteImport } from './routes/l.$slug.$id'
@@ -80,6 +81,11 @@ const ApiRobotsDottxtRoute = ApiRobotsDottxtRouteImport.update({
   path: '/api/robots.txt',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminClickReportRoute = AdminClickReportRouteImport.update({
+  id: '/admin/click-report',
+  path: '/admin/click-report',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminCitiesHeroesRoute = AdminCitiesHeroesRouteImport.update({
   id: '/admin/cities-heroes',
   path: '/admin/cities-heroes',
@@ -108,6 +114,7 @@ export interface FileRoutesByFullPath {
   '/providers': typeof ProvidersRouteWithChildren
   '/academy/$slug': typeof AcademySlugRoute
   '/admin/cities-heroes': typeof AdminCitiesHeroesRoute
+  '/admin/click-report': typeof AdminClickReportRoute
   '/api/robots.txt': typeof ApiRobotsDottxtRoute
   '/api/sitemap.xml': typeof ApiSitemapDotxmlRoute
   '/blog/$slug': typeof BlogSlugRoute
@@ -124,6 +131,7 @@ export interface FileRoutesByTo {
   '/providers': typeof ProvidersRouteWithChildren
   '/academy/$slug': typeof AcademySlugRoute
   '/admin/cities-heroes': typeof AdminCitiesHeroesRoute
+  '/admin/click-report': typeof AdminClickReportRoute
   '/api/robots.txt': typeof ApiRobotsDottxtRoute
   '/api/sitemap.xml': typeof ApiSitemapDotxmlRoute
   '/blog/$slug': typeof BlogSlugRoute
@@ -142,6 +150,7 @@ export interface FileRoutesById {
   '/providers': typeof ProvidersRouteWithChildren
   '/academy/$slug': typeof AcademySlugRoute
   '/admin/cities-heroes': typeof AdminCitiesHeroesRoute
+  '/admin/click-report': typeof AdminClickReportRoute
   '/api/robots.txt': typeof ApiRobotsDottxtRoute
   '/api/sitemap.xml': typeof ApiSitemapDotxmlRoute
   '/blog/$slug': typeof BlogSlugRoute
@@ -161,6 +170,7 @@ export interface FileRouteTypes {
     | '/providers'
     | '/academy/$slug'
     | '/admin/cities-heroes'
+    | '/admin/click-report'
     | '/api/robots.txt'
     | '/api/sitemap.xml'
     | '/blog/$slug'
@@ -177,6 +187,7 @@ export interface FileRouteTypes {
     | '/providers'
     | '/academy/$slug'
     | '/admin/cities-heroes'
+    | '/admin/click-report'
     | '/api/robots.txt'
     | '/api/sitemap.xml'
     | '/blog/$slug'
@@ -194,6 +205,7 @@ export interface FileRouteTypes {
     | '/providers'
     | '/academy/$slug'
     | '/admin/cities-heroes'
+    | '/admin/click-report'
     | '/api/robots.txt'
     | '/api/sitemap.xml'
     | '/blog/$slug'
@@ -211,6 +223,7 @@ export interface RootRouteChildren {
   BlogRoute: typeof BlogRouteWithChildren
   ProvidersRoute: typeof ProvidersRouteWithChildren
   AdminCitiesHeroesRoute: typeof AdminCitiesHeroesRoute
+  AdminClickReportRoute: typeof AdminClickReportRoute
   ApiRobotsDottxtRoute: typeof ApiRobotsDottxtRoute
   ApiSitemapDotxmlRoute: typeof ApiSitemapDotxmlRoute
   CategorySlugRoute: typeof CategorySlugRoute
@@ -298,6 +311,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiRobotsDottxtRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/click-report': {
+      id: '/admin/click-report'
+      path: '/admin/click-report'
+      fullPath: '/admin/click-report'
+      preLoaderRoute: typeof AdminClickReportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/cities-heroes': {
       id: '/admin/cities-heroes'
       path: '/admin/cities-heroes'
@@ -370,6 +390,7 @@ const rootRouteChildren: RootRouteChildren = {
   BlogRoute: BlogRouteWithChildren,
   ProvidersRoute: ProvidersRouteWithChildren,
   AdminCitiesHeroesRoute: AdminCitiesHeroesRoute,
+  AdminClickReportRoute: AdminClickReportRoute,
   ApiRobotsDottxtRoute: ApiRobotsDottxtRoute,
   ApiSitemapDotxmlRoute: ApiSitemapDotxmlRoute,
   CategorySlugRoute: CategorySlugRoute,
