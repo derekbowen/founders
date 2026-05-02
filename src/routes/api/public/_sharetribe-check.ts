@@ -3,7 +3,7 @@ import { searchListings } from "@/server/sharetribe.server";
 
 const DEBUG_TOKEN = "lovable-st-check-2026";
 
-export const Route = createFileRoute("/api/_sharetribe-check")({
+export const Route = createFileRoute("/api/public/_sharetribe-check")({
   server: {
     handlers: {
       GET: async ({ request }) => {
