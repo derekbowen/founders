@@ -457,7 +457,7 @@ export const adminGetLearnerDetail = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
     z.object({ user_id: z.string().uuid() }).parse(input),
   )
-  .handler(async ({ data, context }): Promise<AdminLearnerDetail> => {
+  .handler(async ({ data, context }) => {
     const { userId } = context as { userId: string };
     await requireAdmin(userId);
 
