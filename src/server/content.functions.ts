@@ -84,3 +84,38 @@ export const listAllSitemapEntries = createServerFn({ method: "GET" }).handler(
     };
   },
 );
+
+const nearbyInputSchema = z.object({
+  slug: z.string().min(1).max(120).regex(/^[a-z0-9-]+$/),
+  state_code: z.string().length(2).optional(),
+  limit: z.number().int().min(1).max(24).optional(),
+});
+
+/** Get other published cities in the same state (excluding the current one). */
+export const getNearbyCities = createServerFn({ method: "GET" })
+  .inputValidator((d: unknown) => nearbyInputSchema.parse(d))
+  .handler(async ({ data }) => {
+    let q = supabaseAdmin
+      .from("cities")
+      .select("slug, name, state_code")
+      .eq("is_published", true)
+      .neq("slug", data.slug)
+      .limit(data.limit ?? 12);
+    if (data.state_code) q = q.eq("state_code", data.state_code);
+    const { data: rows, error } = await q;
+    if (error) console.error("getNearbyCities:", error);
+    return { cities: rows ?? [] };
+  });
+
+/** All published categories (slug, name, icon). */
+export const listCategories = createServerFn({ method: "GET" }).handler(
+  async () => {
+    const { data, error } = await supabaseAdmin
+      .from("categories")
+      .select("slug, name, icon")
+      .eq("is_published", true)
+      .order("name");
+    if (error) console.error("listCategories:", error);
+    return { categories: data ?? [] };
+  },
+);
