@@ -28,6 +28,7 @@ export type Database = {
           seo_title: string | null
           slug: string
           title: string
+          topic: string | null
           updated_at: string
         }
         Insert: {
@@ -43,6 +44,7 @@ export type Database = {
           seo_title?: string | null
           slug: string
           title: string
+          topic?: string | null
           updated_at?: string
         }
         Update: {
@@ -58,6 +60,7 @@ export type Database = {
           seo_title?: string | null
           slug?: string
           title?: string
+          topic?: string | null
           updated_at?: string
         }
         Relationships: []
