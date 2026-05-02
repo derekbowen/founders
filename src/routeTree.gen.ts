@@ -14,11 +14,13 @@ import { Route as BlogRouteImport } from './routes/blog'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AcademyRouteImport } from './routes/academy'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as HostToolsIndexRouteImport } from './routes/host-tools.index'
 import { Route as AcademyIndexRouteImport } from './routes/academy.index'
 import { Route as VerifyUidRouteImport } from './routes/verify.$uid'
 import { Route as ProvidersSlugRouteImport } from './routes/providers.$slug'
 import { Route as PoolRentalCityRouteImport } from './routes/pool-rental.$city'
 import { Route as PoolRentalLawsCityRouteImport } from './routes/pool-rental-laws.$city'
+import { Route as HostToolsSlugRouteImport } from './routes/host-tools.$slug'
 import { Route as CategorySlugRouteImport } from './routes/category.$slug'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth.reset-password'
@@ -60,6 +62,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HostToolsIndexRoute = HostToolsIndexRouteImport.update({
+  id: '/host-tools/',
+  path: '/host-tools/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AcademyIndexRoute = AcademyIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -83,6 +90,11 @@ const PoolRentalCityRoute = PoolRentalCityRouteImport.update({
 const PoolRentalLawsCityRoute = PoolRentalLawsCityRouteImport.update({
   id: '/pool-rental-laws/$city',
   path: '/pool-rental-laws/$city',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HostToolsSlugRoute = HostToolsSlugRouteImport.update({
+  id: '/host-tools/$slug',
+  path: '/host-tools/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CategorySlugRoute = CategorySlugRouteImport.update({
@@ -178,11 +190,13 @@ export interface FileRoutesByFullPath {
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
+  '/host-tools/$slug': typeof HostToolsSlugRoute
   '/pool-rental-laws/$city': typeof PoolRentalLawsCityRoute
   '/pool-rental/$city': typeof PoolRentalCityRoute
   '/providers/$slug': typeof ProvidersSlugRoute
   '/verify/$uid': typeof VerifyUidRoute
   '/academy/': typeof AcademyIndexRoute
+  '/host-tools/': typeof HostToolsIndexRoute
   '/admin/learning/$userId': typeof AdminLearningUserIdRoute
   '/api/public/track-city-click': typeof ApiPublicTrackCityClickRoute
   '/l/$slug/$id': typeof LSlugIdRoute
@@ -204,11 +218,13 @@ export interface FileRoutesByTo {
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
+  '/host-tools/$slug': typeof HostToolsSlugRoute
   '/pool-rental-laws/$city': typeof PoolRentalLawsCityRoute
   '/pool-rental/$city': typeof PoolRentalCityRoute
   '/providers/$slug': typeof ProvidersSlugRoute
   '/verify/$uid': typeof VerifyUidRoute
   '/academy': typeof AcademyIndexRoute
+  '/host-tools': typeof HostToolsIndexRoute
   '/admin/learning/$userId': typeof AdminLearningUserIdRoute
   '/api/public/track-city-click': typeof ApiPublicTrackCityClickRoute
   '/l/$slug/$id': typeof LSlugIdRoute
@@ -232,11 +248,13 @@ export interface FileRoutesById {
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
+  '/host-tools/$slug': typeof HostToolsSlugRoute
   '/pool-rental-laws/$city': typeof PoolRentalLawsCityRoute
   '/pool-rental/$city': typeof PoolRentalCityRoute
   '/providers/$slug': typeof ProvidersSlugRoute
   '/verify/$uid': typeof VerifyUidRoute
   '/academy/': typeof AcademyIndexRoute
+  '/host-tools/': typeof HostToolsIndexRoute
   '/admin/learning/$userId': typeof AdminLearningUserIdRoute
   '/api/public/track-city-click': typeof ApiPublicTrackCityClickRoute
   '/l/$slug/$id': typeof LSlugIdRoute
@@ -261,11 +279,13 @@ export interface FileRouteTypes {
     | '/auth/reset-password'
     | '/blog/$slug'
     | '/category/$slug'
+    | '/host-tools/$slug'
     | '/pool-rental-laws/$city'
     | '/pool-rental/$city'
     | '/providers/$slug'
     | '/verify/$uid'
     | '/academy/'
+    | '/host-tools/'
     | '/admin/learning/$userId'
     | '/api/public/track-city-click'
     | '/l/$slug/$id'
@@ -287,11 +307,13 @@ export interface FileRouteTypes {
     | '/auth/reset-password'
     | '/blog/$slug'
     | '/category/$slug'
+    | '/host-tools/$slug'
     | '/pool-rental-laws/$city'
     | '/pool-rental/$city'
     | '/providers/$slug'
     | '/verify/$uid'
     | '/academy'
+    | '/host-tools'
     | '/admin/learning/$userId'
     | '/api/public/track-city-click'
     | '/l/$slug/$id'
@@ -314,11 +336,13 @@ export interface FileRouteTypes {
     | '/auth/reset-password'
     | '/blog/$slug'
     | '/category/$slug'
+    | '/host-tools/$slug'
     | '/pool-rental-laws/$city'
     | '/pool-rental/$city'
     | '/providers/$slug'
     | '/verify/$uid'
     | '/academy/'
+    | '/host-tools/'
     | '/admin/learning/$userId'
     | '/api/public/track-city-click'
     | '/l/$slug/$id'
@@ -339,9 +363,11 @@ export interface RootRouteChildren {
   ApiRobotsDottxtRoute: typeof ApiRobotsDottxtRoute
   ApiSitemapDotxmlRoute: typeof ApiSitemapDotxmlRoute
   CategorySlugRoute: typeof CategorySlugRoute
+  HostToolsSlugRoute: typeof HostToolsSlugRoute
   PoolRentalLawsCityRoute: typeof PoolRentalLawsCityRoute
   PoolRentalCityRoute: typeof PoolRentalCityRoute
   VerifyUidRoute: typeof VerifyUidRoute
+  HostToolsIndexRoute: typeof HostToolsIndexRoute
   ApiPublicTrackCityClickRoute: typeof ApiPublicTrackCityClickRoute
   LSlugIdRoute: typeof LSlugIdRoute
   ApiCertificatesUidPdfRoute: typeof ApiCertificatesUidPdfRoute
@@ -384,6 +410,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/host-tools/': {
+      id: '/host-tools/'
+      path: '/host-tools'
+      fullPath: '/host-tools/'
+      preLoaderRoute: typeof HostToolsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/academy/': {
       id: '/academy/'
       path: '/'
@@ -417,6 +450,13 @@ declare module '@tanstack/react-router' {
       path: '/pool-rental-laws/$city'
       fullPath: '/pool-rental-laws/$city'
       preLoaderRoute: typeof PoolRentalLawsCityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/host-tools/$slug': {
+      id: '/host-tools/$slug'
+      path: '/host-tools/$slug'
+      fullPath: '/host-tools/$slug'
+      preLoaderRoute: typeof HostToolsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/category/$slug': {
@@ -598,9 +638,11 @@ const rootRouteChildren: RootRouteChildren = {
   ApiRobotsDottxtRoute: ApiRobotsDottxtRoute,
   ApiSitemapDotxmlRoute: ApiSitemapDotxmlRoute,
   CategorySlugRoute: CategorySlugRoute,
+  HostToolsSlugRoute: HostToolsSlugRoute,
   PoolRentalLawsCityRoute: PoolRentalLawsCityRoute,
   PoolRentalCityRoute: PoolRentalCityRoute,
   VerifyUidRoute: VerifyUidRoute,
+  HostToolsIndexRoute: HostToolsIndexRoute,
   ApiPublicTrackCityClickRoute: ApiPublicTrackCityClickRoute,
   LSlugIdRoute: LSlugIdRoute,
   ApiCertificatesUidPdfRoute: ApiCertificatesUidPdfRoute,
