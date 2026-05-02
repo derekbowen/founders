@@ -324,7 +324,7 @@ function PoolRentalLawsPage() {
                 List your pool and start earning
               </Link>
             </li>
-            {nearby.slice(0, 3).map((n) => (
+            {nearby.slice(0, 3).map((n: { slug: string; name: string; state_code: string }) => (
               <li key={n.slug}>
                 →{" "}
                 <Link
