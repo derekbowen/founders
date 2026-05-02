@@ -39,7 +39,7 @@ export const Route = createFileRoute("/academy/")({
       listCourseCategories({ data: { language } }),
       deps.page === 1 && !deps.category && !deps.q
         ? listFeaturedCourses({ data: { language, limit: 3 } })
-        : Promise.resolve({ courses: [] }),
+        : Promise.resolve({ courses: [] as Awaited<ReturnType<typeof listFeaturedCourses>>["courses"] }),
     ]);
     return {
       ...list,
@@ -219,7 +219,7 @@ function AcademyIndex() {
             <section className="mt-12">
               <h2 className="text-2xl font-bold tracking-tight text-foreground">⭐ Featured courses</h2>
               <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {data.featured.map((c: import("@/components/course-card").CourseCardCourse) => (
+                {(data.featured as unknown as import("@/components/course-card").CourseCardCourse[]).map((c) => (
                   <CourseCard key={c.slug} course={c} lang={lang} featured />
                 ))}
               </div>
