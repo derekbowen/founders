@@ -56,6 +56,39 @@ export const getBlogPost = createServerFn({ method: "GET" })
     return { post: post ?? null };
   });
 
+// Returns a curated set of internal-link targets used to auto-link blog posts
+// to pool rental city pages, permits/laws articles, and maintenance content.
+export const getBlogLinkTargets = createServerFn({ method: "GET" }).handler(
+  async () => {
+    const [cities, helpArticles, tools] = await Promise.all([
+      supabaseAdmin
+        .from("cities")
+        .select("slug, name, state, state_code")
+        .eq("is_published", true),
+      supabaseAdmin
+        .from("help_articles")
+        .select("slug, title, category_slug")
+        .eq("is_published", true)
+        .in("category_slug", [
+          "legal-and-compliance",
+          "safety-first",
+          "pool-management",
+          "for-hosts",
+          "getting-started-hub",
+        ]),
+      supabaseAdmin
+        .from("host_tools")
+        .select("slug, title")
+        .eq("is_published", true),
+    ]);
+    return {
+      cities: cities.data ?? [],
+      helpArticles: helpArticles.data ?? [],
+      tools: tools.data ?? [],
+    };
+  },
+);
+
 export const listAllSitemapEntries = createServerFn({ method: "GET" }).handler(
   async () => {
     const [cities, categories, providers, posts] = await Promise.all([

@@ -1,14 +1,18 @@
 import { createFileRoute, Link, useRouter, notFound } from "@tanstack/react-router";
-import { getBlogPost } from "@/server/content.functions";
+import { getBlogPost, getBlogLinkTargets } from "@/server/content.functions";
 import { SiteHeader, SiteFooter } from "@/components/site-layout";
 import { Breadcrumbs } from "@/components/listing-card";
 import { buildMeta, breadcrumbJsonLd, ldJsonScript, SITE_URL, SITE_NAME } from "@/lib/seo";
+import { AutoLinkedContent, buildBlogLinkTargets } from "@/components/auto-linked-content";
 
 export const Route = createFileRoute("/blog/$slug")({
   loader: async ({ params }) => {
-    const { post } = await getBlogPost({ data: { slug: params.slug } });
+    const [{ post }, linkData] = await Promise.all([
+      getBlogPost({ data: { slug: params.slug } }),
+      getBlogLinkTargets(),
+    ]);
     if (!post) throw notFound();
-    return { post };
+    return { post, linkTargets: buildBlogLinkTargets(linkData) };
   },
   head: ({ loaderData, params }) => {
     if (!loaderData?.post) return {};
@@ -70,7 +74,7 @@ export const Route = createFileRoute("/blog/$slug")({
 });
 
 function BlogPostPage() {
-  const { post } = Route.useLoaderData();
+  const { post, linkTargets } = Route.useLoaderData();
   const params = Route.useParams();
   return (
     <div className="flex min-h-screen flex-col">
@@ -100,9 +104,11 @@ function BlogPostPage() {
             <p className="mt-8 text-lg text-muted-foreground">{post.excerpt}</p>
           )}
           {post.content && (
-            <div className="prose prose-lg mt-8 max-w-none whitespace-pre-line text-foreground">
-              {post.content}
-            </div>
+            <AutoLinkedContent
+              text={post.content}
+              targets={linkTargets}
+              className="prose prose-lg mt-8 max-w-none whitespace-pre-line text-foreground"
+            />
           )}
         </article>
       </main>
