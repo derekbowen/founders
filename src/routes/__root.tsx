@@ -2,6 +2,13 @@ import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/r
 
 import appCss from "../styles.css?url";
 import { SiteHeader, SiteFooter } from "@/components/site-layout";
+import {
+  buildMeta,
+  ldJsonScript,
+  organizationJsonLd,
+  websiteJsonLd,
+  SITE_NAME,
+} from "@/lib/seo";
 
 function NotFoundComponent() {
   return (
