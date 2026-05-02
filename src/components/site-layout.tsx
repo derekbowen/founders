@@ -41,7 +41,7 @@ export function SiteHeader() {
           <Link to="/blog" className="text-sm font-medium text-muted-foreground hover:text-foreground">Blog</Link>
           <Link to="/providers" className="text-sm font-medium text-muted-foreground hover:text-foreground">Providers</Link>
         </nav>
-        <a href={"/signup"} className="inline-flex h-9 items-center justify-center rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary-glow">
+        <a href={rel("/signup")} className="inline-flex h-9 items-center justify-center rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary-glow">
           List Your Pool
         </a>
       </div>
