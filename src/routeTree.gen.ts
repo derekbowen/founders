@@ -20,6 +20,7 @@ import { Route as CategorySlugRouteImport } from './routes/category.$slug'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as ApiSitemapDotxmlRouteImport } from './routes/api/sitemap[.]xml'
 import { Route as ApiRobotsDottxtRouteImport } from './routes/api/robots[.]txt'
+import { Route as AdminCitiesHeroesRouteImport } from './routes/admin.cities-heroes'
 import { Route as AcademySlugRouteImport } from './routes/academy.$slug'
 import { Route as LSlugIdRouteImport } from './routes/l.$slug.$id'
 
@@ -78,6 +79,11 @@ const ApiRobotsDottxtRoute = ApiRobotsDottxtRouteImport.update({
   path: '/api/robots.txt',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminCitiesHeroesRoute = AdminCitiesHeroesRouteImport.update({
+  id: '/admin/cities-heroes',
+  path: '/admin/cities-heroes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AcademySlugRoute = AcademySlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
@@ -95,6 +101,7 @@ export interface FileRoutesByFullPath {
   '/blog': typeof BlogRouteWithChildren
   '/providers': typeof ProvidersRouteWithChildren
   '/academy/$slug': typeof AcademySlugRoute
+  '/admin/cities-heroes': typeof AdminCitiesHeroesRoute
   '/api/robots.txt': typeof ApiRobotsDottxtRoute
   '/api/sitemap.xml': typeof ApiSitemapDotxmlRoute
   '/blog/$slug': typeof BlogSlugRoute
@@ -109,6 +116,7 @@ export interface FileRoutesByTo {
   '/blog': typeof BlogRouteWithChildren
   '/providers': typeof ProvidersRouteWithChildren
   '/academy/$slug': typeof AcademySlugRoute
+  '/admin/cities-heroes': typeof AdminCitiesHeroesRoute
   '/api/robots.txt': typeof ApiRobotsDottxtRoute
   '/api/sitemap.xml': typeof ApiSitemapDotxmlRoute
   '/blog/$slug': typeof BlogSlugRoute
@@ -125,6 +133,7 @@ export interface FileRoutesById {
   '/blog': typeof BlogRouteWithChildren
   '/providers': typeof ProvidersRouteWithChildren
   '/academy/$slug': typeof AcademySlugRoute
+  '/admin/cities-heroes': typeof AdminCitiesHeroesRoute
   '/api/robots.txt': typeof ApiRobotsDottxtRoute
   '/api/sitemap.xml': typeof ApiSitemapDotxmlRoute
   '/blog/$slug': typeof BlogSlugRoute
@@ -142,6 +151,7 @@ export interface FileRouteTypes {
     | '/blog'
     | '/providers'
     | '/academy/$slug'
+    | '/admin/cities-heroes'
     | '/api/robots.txt'
     | '/api/sitemap.xml'
     | '/blog/$slug'
@@ -156,6 +166,7 @@ export interface FileRouteTypes {
     | '/blog'
     | '/providers'
     | '/academy/$slug'
+    | '/admin/cities-heroes'
     | '/api/robots.txt'
     | '/api/sitemap.xml'
     | '/blog/$slug'
@@ -171,6 +182,7 @@ export interface FileRouteTypes {
     | '/blog'
     | '/providers'
     | '/academy/$slug'
+    | '/admin/cities-heroes'
     | '/api/robots.txt'
     | '/api/sitemap.xml'
     | '/blog/$slug'
@@ -186,6 +198,7 @@ export interface RootRouteChildren {
   AcademyRoute: typeof AcademyRouteWithChildren
   BlogRoute: typeof BlogRouteWithChildren
   ProvidersRoute: typeof ProvidersRouteWithChildren
+  AdminCitiesHeroesRoute: typeof AdminCitiesHeroesRoute
   ApiRobotsDottxtRoute: typeof ApiRobotsDottxtRoute
   ApiSitemapDotxmlRoute: typeof ApiSitemapDotxmlRoute
   CategorySlugRoute: typeof CategorySlugRoute
@@ -272,6 +285,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiRobotsDottxtRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/cities-heroes': {
+      id: '/admin/cities-heroes'
+      path: '/admin/cities-heroes'
+      fullPath: '/admin/cities-heroes'
+      preLoaderRoute: typeof AdminCitiesHeroesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/academy/$slug': {
       id: '/academy/$slug'
       path: '/$slug'
@@ -329,6 +349,7 @@ const rootRouteChildren: RootRouteChildren = {
   AcademyRoute: AcademyRouteWithChildren,
   BlogRoute: BlogRouteWithChildren,
   ProvidersRoute: ProvidersRouteWithChildren,
+  AdminCitiesHeroesRoute: AdminCitiesHeroesRoute,
   ApiRobotsDottxtRoute: ApiRobotsDottxtRoute,
   ApiSitemapDotxmlRoute: ApiSitemapDotxmlRoute,
   CategorySlugRoute: CategorySlugRoute,
