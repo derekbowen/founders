@@ -107,8 +107,9 @@ export const Route = createFileRoute("/academy/$slug")({
 
 function CoursePage() {
   const { course, related, lang } = Route.useLoaderData();
-  const t = I18N[lang];
-  const cat = getCategoryMeta(course.category, lang);
+  const safeLang: Lang = lang === "es" ? "es" : "en";
+  const t = I18N[safeLang];
+  const cat = getCategoryMeta(course.category, safeLang);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -193,7 +194,7 @@ function CoursePage() {
             <section className="mt-10">
               <h2 className="text-2xl font-bold tracking-tight text-foreground">{t.inThisCourse}</h2>
               <div className="prose prose-neutral mt-4 max-w-none text-foreground">
-                {course.description.split(/\n\n+/).map((p, i) => (
+                {course.description.split(/\n\n+/).map((p: string, i: number) => (
                   <p key={i} className="mb-4 text-base leading-relaxed text-muted-foreground">
                     {p}
                   </p>
