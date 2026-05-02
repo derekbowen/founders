@@ -1,44 +1,55 @@
 ## Goal
 
-Replace the current Sharetribe Integration API Client ID with a new one and confirm city pages (e.g. `/pool-rental/los-angeles-ca`) actually render live pool listings instead of an empty grid.
+Make the "nearby cities" section on `/pool-rental/$city` always render with real, geographically-nearest internal links — even for single-city states like AK, HI, DC, ME, ND, NH, RI, SD, VT, WV, WY — and ensure those links navigate correctly.
 
-## Background
+## Why the current behavior breaks
 
-- `src/server/sharetribe.server.ts` already targets the Integration API (`flex-integ-api.sharetribe.com`, `client_credentials` + `scope=integ`) using `SHARETRIBE_CLIENT_ID` and `SHARETRIBE_CLIENT_SECRET`.
-- The currently published worker is running an older build that references `getAnonymousToken` / `marketplaceGet` and is failing — that's why the city grid is empty in production. A fresh deploy with the updated secret will replace it with the Integration API code.
-- All listing surfaces (home, `/category/$slug`, `/pool-rental/$city`, `/l/$slug/$id`) already flow through `searchListings` / `fetchListing` in this file, so no other code paths need changes.
+`getNearbyCities` (`src/server/content.functions.ts`) filters by `state_code` only. In states with one published city, the result is an empty array, so the entire `{nearby.length > 0 && ...}` block in `src/routes/pool-rental.$city.tsx` is hidden. The links themselves are correct (`<Link to="/pool-rental/$city" params={{ city: n.slug }}>`), but the section never renders for those cities.
 
-## Steps
+## Approach
 
-1. **Prompt for the new Client ID**
-   - Use `add_secret` for `SHARETRIBE_CLIENT_ID` so you can paste the new Integration API client_id securely.
-   - Leave `SHARETRIBE_CLIENT_SECRET` and `SHARETRIBE_MARKETPLACE_URL` as-is (you didn't indicate they changed). If the new app is a different Integration app, we'll re-prompt for the secret in step 4 if auth fails.
+Switch nearby cities from "same-state only" to "nearest by great-circle distance," with state as a tie-breaker / preferred bucket. 355 of 358 published cities have lat/lng, so distance ranking is reliable.
 
-2. **Sanity-check `sharetribe.server.ts`**
-   - No code change expected. Just confirm `getClientId` / `getClientSecret` read from `process.env` inside the handler path (they do), so the new value is picked up without a code edit.
+### Steps
 
-3. **Verify Integration API auth and listings**
-   - Add a temporary internal-only diagnostic server route at `src/routes/api/_sharetribe-check.ts` that:
-     - Calls `searchListings({ perPage: 3 })`.
-     - Returns `{ ok, total, sample: listings.map(l => ({ id, title, city, state })) }` as JSON.
-     - Guarded by a header check (`x-debug-token` matching a constant we set, or simply gated to non-published `import.meta.env.DEV`-style check via `process.env.NODE_ENV !== "production"` is unreliable in Workers — we'll use a header token).
-   - Invoke it via `stack_modern--invoke-server-function` with the header. Inspect:
-     - Token request returns 200 (no `Sharetribe auth failed [401]`).
-     - `total` > 0 and at least one `title` comes back.
+1. **Database: add a SQL helper for nearest cities.**
+   - Create migration `nearby_cities_by_distance(_slug text, _limit int)` — a SECURITY DEFINER function on `public` schema returning `slug, name, state, state_code, distance_km`.
+   - Implementation: use the haversine formula in pure SQL against `public.cities` filtered by `is_published = true` and `slug <> _slug`, ordered by distance ascending, limited to `_limit`. Cities without coordinates fall back to `state_code` match with distance set to a large sentinel so they appear last.
+   - Grant `EXECUTE` to `anon` and `authenticated` so the server can call it via the admin client without issue. No RLS implications (read-only function over already-public data).
 
-4. **If auth fails (401/403)**
-   - Most likely cause: the new Client ID belongs to an Integration app whose secret is different. Re-prompt with `add_secret` for `SHARETRIBE_CLIENT_SECRET`.
-   - Re-run the diagnostic route until it returns listings.
+2. **Server: rewrite `getNearbyCities`.**
+   - In `src/server/content.functions.ts`, change the handler to:
+     - Look up the source city's lat/lng/state_code from `cities`.
+     - If lat/lng exist, call the new RPC `nearby_cities_by_distance` with `_slug = data.slug`, `_limit = data.limit ?? 12`.
+     - If lat/lng missing, fall back to current same-state query.
+     - Return `{ cities: [...] }` with the same shape (`slug, name, state_code`) plus an additional `state` field so the UI can show full state name when useful.
+   - Update the Zod input schema (no change needed; `state_code` becomes optional/ignored).
 
-5. **Verify city grid end-to-end**
-   - Invoke `/pool-rental/los-angeles-ca` (and one more city) via `stack_modern--invoke-server-function`.
-   - Confirm the returned HTML contains listing card markup (titles / prices), not just the empty-state message.
-   - Tail `stack_modern--server-function-logs` filtering by `sharetribe` to confirm no errors.
+3. **Route: guarantee the section always renders.**
+   - In `src/routes/pool-rental.$city.tsx`:
+     - Remove the `{nearby.length > 0 && ...}` guard so the section renders unconditionally; render an empty-state line ("More cities coming soon") only if the array is somehow still empty.
+     - Update the heading from "Other pool rentals in {state}" to "Nearby pool rentals" since results are no longer state-scoped.
+     - Keep the existing `<Link to="/pool-rental/$city" params={{ city: n.slug }}>` usage — it's already type-safe and correct.
+     - Group the list into two visual subsections when the data has both same-state and out-of-state matches: "More in {city.state}" first, then "Nearby cities" — partition the array client-side by `n.state_code === city.state_code`.
 
-6. **Clean up**
-   - Delete `src/routes/api/_sharetribe-check.ts` once verified so the diagnostic isn't shipped.
+4. **SEO bonus: add reciprocal link to listings.**
+   - No change required, but verify `Breadcrumbs` and the `LocalBusiness` JSON-LD still build correctly after the new data shape. (`state` is already on city; we're only adding `state` to nearby items.)
 
-## Deliverable
+5. **Verification.**
+   - Hit `/pool-rental/<one-city-state-slug>` (e.g. an AK or DC city) via `stack_modern--invoke-server-function` and confirm the rendered HTML contains nearby city anchors with `/pool-rental/...` hrefs.
+   - Hit `/pool-rental/los-angeles-ca` and confirm the list is populated with CA cities first (nearest by distance), no duplicates, no self-link.
+   - Click a couple of nearby links in the preview to confirm they navigate without 404.
+   - Check `stack_modern--server-function-logs` filtered by `getNearbyCities` for any RPC errors.
 
-- New `SHARETRIBE_CLIENT_ID` saved in Cloud secrets.
-- Confirmation message stating that auth succeeded, how many listings the Integration API returned, and that the city page now renders pool cards. No lingering diagnostic routes in the repo.
+## Files touched
+
+- New migration: `nearby_cities_by_distance(_slug, _limit)` SQL function.
+- `src/server/content.functions.ts` — rewrite `getNearbyCities` handler + extend return shape with `state`.
+- `src/routes/pool-rental.$city.tsx` — drop empty-array guard, retitle, optional grouping by state.
+
+No changes to `Link` components are needed — the navigation contract is already correct; this fix is about (a) data availability and (b) unconditional rendering.
+
+## Out of scope
+
+- Changing how listings are fetched.
+- Adding nearby-city sections to other surfaces (home, category, listing detail) — can be a follow-up if you want it.
