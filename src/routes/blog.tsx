@@ -22,7 +22,7 @@ function topicMeta(slug: string) {
 
 const searchSchema = z.object({
   page: fallback(z.number().int().min(1).max(500), 1).default(1),
-  topic: fallback(z.string().min(1).max(48).regex(/^[a-z0-9-]+$/), "").default("").optional(),
+  topic: z.string().min(1).max(48).regex(/^[a-z0-9-]+$/).optional().catch(undefined),
 });
 
 export const Route = createFileRoute("/blog")({
