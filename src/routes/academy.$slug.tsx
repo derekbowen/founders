@@ -4,6 +4,7 @@ import { buildMeta, breadcrumbJsonLd, ldJsonScript, SITE_URL, SITE_NAME } from "
 import { getCategoryMeta, I18N, type Lang } from "@/lib/academy";
 import { getCourse, getRelatedCourses } from "@/server/courses.functions";
 import { CourseCard, type CourseCardCourse } from "@/components/course-card";
+import { ACADEMY_HERO_MAP } from "@/lib/academy-images";
 
 export const Route = createFileRoute("/academy/$slug")({
   loader: async ({ params }) => {
@@ -33,12 +34,16 @@ export const Route = createFileRoute("/academy/$slug")({
       c.excerpt ??
       (c.description ?? "").slice(0, 200);
     const path = `/academy/${c.slug}`;
+    const heroUrl =
+      c.cover_image_url && c.cover_image_url.startsWith("academy/")
+        ? null
+        : c.cover_image_url ?? null;
     const meta = buildMeta({
       title,
       description,
       path,
       type: "article",
-      image: c.cover_image_url ?? null,
+      image: heroUrl,
     });
 
     const breadcrumbs = breadcrumbJsonLd([
@@ -47,6 +52,10 @@ export const Route = createFileRoute("/academy/$slug")({
       { name: cat.label, path: `/academy?category=${c.category}` },
       { name: c.title, path },
     ]);
+
+    const lfc = (c.long_form_content ?? null) as null | {
+      faq?: Array<{ question: string; answer: string }>;
+    };
 
     const courseLd = {
       "@context": "https://schema.org",
@@ -61,7 +70,7 @@ export const Route = createFileRoute("/academy/$slug")({
       inLanguage: lang === "es" ? "es" : "en",
       educationalLevel: c.level ?? "All levels",
       isAccessibleForFree: true,
-      ...(c.cover_image_url ? { image: c.cover_image_url } : {}),
+      ...(heroUrl ? { image: heroUrl } : {}),
       hasCourseInstance: [
         {
           "@type": "CourseInstance",
@@ -71,10 +80,22 @@ export const Route = createFileRoute("/academy/$slug")({
       ],
     };
 
-    return {
-      ...meta,
-      scripts: [ldJsonScript(breadcrumbs), ldJsonScript(courseLd)],
-    };
+    const scripts = [ldJsonScript(breadcrumbs), ldJsonScript(courseLd)];
+    if (lfc?.faq && lfc.faq.length > 0) {
+      scripts.push(
+        ldJsonScript({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: lfc.faq.map((q) => ({
+            "@type": "Question",
+            name: q.question,
+            acceptedAnswer: { "@type": "Answer", text: q.answer },
+          })),
+        }),
+      );
+    }
+
+    return { ...meta, scripts };
   },
   errorComponent: ({ error }) => (
     <div className="flex min-h-screen flex-col">
@@ -105,11 +126,39 @@ export const Route = createFileRoute("/academy/$slug")({
   component: CoursePage,
 });
 
+interface LongFormContent {
+  overview?: string;
+  who_its_for?: string;
+  learning_outcomes?: string[];
+  modules?: Array<{ title: string; content: string }>;
+  host_playbook?: string;
+  pricing_tactics?: string;
+  common_mistakes?: string[];
+  faq?: Array<{ question: string; answer: string }>;
+  related_topics?: string[];
+}
+
+function Paragraphs({ text }: { text: string }) {
+  return (
+    <>
+      {text.split(/\n\n+/).map((p, i) => (
+        <p key={i} className="mb-4 text-base leading-relaxed text-muted-foreground">
+          {p}
+        </p>
+      ))}
+    </>
+  );
+}
+
 function CoursePage() {
   const { course, related, lang } = Route.useLoaderData();
   const safeLang: Lang = lang === "es" ? "es" : "en";
   const t = I18N[safeLang];
   const cat = getCategoryMeta(course.category, safeLang);
+  const lfc = (course.long_form_content ?? null) as LongFormContent | null;
+  const hero = (course as any).cover_image_url
+    ? ACADEMY_HERO_MAP[(course as any).cover_image_url] ?? (course as any).cover_image_url
+    : null;
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -159,6 +208,16 @@ function CoursePage() {
         </section>
 
         <div className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
+          {/* Hero image */}
+          {hero && (
+            <img
+              src={hero}
+              alt={course.title}
+              className="mb-8 w-full rounded-2xl border border-border object-cover shadow-md"
+              loading="eager"
+            />
+          )}
+
           {/* Embedded player */}
           {course.embed_url ? (
             <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-md">
@@ -173,44 +232,116 @@ function CoursePage() {
                 />
               </div>
             </div>
-          ) : course.external_detail_url ? (
-            <div className="rounded-2xl border border-border bg-card p-8 text-center">
-              <p className="text-muted-foreground">
-                This course is hosted on our main site.
-              </p>
-              <a
-                href={course.external_detail_url}
-                target="_blank"
-                rel="noopener"
-                className="mt-4 inline-flex items-center justify-center rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow hover:bg-primary-glow"
-              >
-                {t.startCourse} →
-              </a>
-            </div>
           ) : null}
 
-          {/* Description */}
-          {course.description && (
-            <section className="mt-10">
+          {/* Long-form content */}
+          {lfc?.overview && (
+            <section className="mt-12">
               <h2 className="text-2xl font-bold tracking-tight text-foreground">{t.inThisCourse}</h2>
               <div className="prose prose-neutral mt-4 max-w-none text-foreground">
-                {course.description.split(/\n\n+/).map((p: string, i: number) => (
-                  <p key={i} className="mb-4 text-base leading-relaxed text-muted-foreground">
-                    {p}
-                  </p>
+                <Paragraphs text={lfc.overview} />
+              </div>
+            </section>
+          )}
+
+          {lfc?.learning_outcomes && lfc.learning_outcomes.length > 0 && (
+            <section className="mt-10">
+              <h2 className="text-2xl font-bold tracking-tight text-foreground">What you'll learn</h2>
+              <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+                {lfc.learning_outcomes.map((o, i) => (
+                  <li key={i} className="flex gap-2 rounded-xl border border-border bg-card p-4 text-sm text-foreground">
+                    <span className="text-primary">✓</span>
+                    <span>{o}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {lfc?.who_its_for && (
+            <section className="mt-10">
+              <h2 className="text-2xl font-bold tracking-tight text-foreground">Who this is for</h2>
+              <div className="prose prose-neutral mt-4 max-w-none">
+                <Paragraphs text={lfc.who_its_for} />
+              </div>
+            </section>
+          )}
+
+          {lfc?.modules && lfc.modules.length > 0 && (
+            <section className="mt-10">
+              <h2 className="text-2xl font-bold tracking-tight text-foreground">Course modules</h2>
+              <div className="mt-4 space-y-6">
+                {lfc.modules.map((m, i) => (
+                  <article key={i} className="rounded-2xl border border-border bg-card p-6">
+                    <h3 className="text-lg font-semibold text-foreground">
+                      <span className="mr-2 text-primary">{String(i + 1).padStart(2, "0")}.</span>
+                      {m.title}
+                    </h3>
+                    <div className="prose prose-neutral mt-3 max-w-none">
+                      <Paragraphs text={m.content} />
+                    </div>
+                  </article>
                 ))}
               </div>
             </section>
           )}
 
-          {/* External link CTA */}
-          {course.external_detail_url && course.embed_url && (
-            <p className="mt-6 text-sm text-muted-foreground">
-              Prefer the full page?{" "}
-              <a href={course.external_detail_url} target="_blank" rel="noopener" className="text-primary hover:underline">
-                Open on poolrentalnearme.com →
-              </a>
-            </p>
+          {lfc?.host_playbook && (
+            <section className="mt-10">
+              <h2 className="text-2xl font-bold tracking-tight text-foreground">Host playbook</h2>
+              <div className="prose prose-neutral mt-4 max-w-none">
+                <Paragraphs text={lfc.host_playbook} />
+              </div>
+            </section>
+          )}
+
+          {lfc?.pricing_tactics && (
+            <section className="mt-10">
+              <h2 className="text-2xl font-bold tracking-tight text-foreground">Pricing tactics</h2>
+              <div className="prose prose-neutral mt-4 max-w-none">
+                <Paragraphs text={lfc.pricing_tactics} />
+              </div>
+            </section>
+          )}
+
+          {lfc?.common_mistakes && lfc.common_mistakes.length > 0 && (
+            <section className="mt-10">
+              <h2 className="text-2xl font-bold tracking-tight text-foreground">Common mistakes to avoid</h2>
+              <ul className="mt-4 space-y-2">
+                {lfc.common_mistakes.map((m, i) => (
+                  <li key={i} className="flex gap-2 text-sm text-muted-foreground">
+                    <span className="text-destructive">✗</span>
+                    <span>{m}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {lfc?.faq && lfc.faq.length > 0 && (
+            <section className="mt-10">
+              <h2 className="text-2xl font-bold tracking-tight text-foreground">Frequently asked questions</h2>
+              <div className="mt-4 space-y-4">
+                {lfc.faq.map((f, i) => (
+                  <details key={i} className="group rounded-xl border border-border bg-card p-5">
+                    <summary className="cursor-pointer list-none font-semibold text-foreground">
+                      {f.question}
+                    </summary>
+                    <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{f.answer}</p>
+                  </details>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Description fallback */}
+          {!lfc && course.description && (
+            <section className="mt-10">
+              <h2 className="text-2xl font-bold tracking-tight text-foreground">{t.inThisCourse}</h2>
+              <div className="prose prose-neutral mt-4 max-w-none text-foreground">
+                <Paragraphs text={course.description} />
+              </div>
+            </section>
           )}
 
           {/* Related */}
