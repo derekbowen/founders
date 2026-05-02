@@ -72,13 +72,13 @@ function HomePage() {
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <a
-                  href="https://www.poolrentalnearme.com"
+                  href="/s"
                   className="inline-flex items-center justify-center rounded-full bg-primary px-6 py-3 text-base font-semibold text-primary-foreground shadow-lg transition-transform hover:scale-105"
                 >
                   Find a pool near you
                 </a>
                 <a
-                  href="https://www.poolrentalnearme.com/signup"
+                  href="/signup"
                   className="inline-flex items-center justify-center rounded-full border border-border bg-card px-6 py-3 text-base font-semibold text-foreground transition-colors hover:bg-secondary"
                 >
                   List your pool
