@@ -233,7 +233,7 @@ function HelpCenterIndex() {
                 Popular articles
               </h2>
               <ul className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {popular.map((a) => (
+                {popular.map((a: { slug: string; title: string; category_slug: string }) => (
                   <li key={a.slug}>
                     <Link
                       to="/help-center/$category/$slug"
