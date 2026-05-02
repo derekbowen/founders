@@ -219,7 +219,7 @@ function AcademyIndex() {
             <section className="mt-12">
               <h2 className="text-2xl font-bold tracking-tight text-foreground">⭐ Featured courses</h2>
               <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {(data.featured as import("@/components/course-card").CourseCardCourse[]).map((c) => (
+                {(data.featured as unknown as import("@/components/course-card").CourseCardCourse[]).map((c) => (
                   <CourseCard key={c.slug} course={c} lang={lang} featured />
                 ))}
               </div>
