@@ -5,6 +5,7 @@ import { getCategoryMeta, I18N, type Lang } from "@/lib/academy";
 import { getCourse, getRelatedCourses } from "@/server/courses.functions";
 import { CourseCard, type CourseCardCourse } from "@/components/course-card";
 import { ACADEMY_HERO_MAP } from "@/lib/academy-images";
+import { CourseLearningControls } from "@/components/course-learning-controls";
 
 export const Route = createFileRoute("/academy/$slug")({
   loader: async ({ params }) => {
@@ -233,6 +234,9 @@ function CoursePage() {
               </div>
             </div>
           ) : null}
+
+          {/* Learning controls — enroll / mark complete / certificate */}
+          <CourseLearningControls courseSlug={course.slug} courseTitle={course.title} />
 
           {/* Long-form content */}
           {lfc?.overview && (
