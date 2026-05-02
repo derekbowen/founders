@@ -158,6 +158,36 @@ export type Database = {
         }
         Relationships: []
       }
+      cities_hero_backfill_log: {
+        Row: {
+          city_slug: string
+          error: string | null
+          id: string
+          image_url: string | null
+          ran_at: string
+          source_url: string | null
+          status: string
+        }
+        Insert: {
+          city_slug: string
+          error?: string | null
+          id?: string
+          image_url?: string | null
+          ran_at?: string
+          source_url?: string | null
+          status: string
+        }
+        Update: {
+          city_slug?: string
+          error?: string | null
+          id?: string
+          image_url?: string | null
+          ran_at?: string
+          source_url?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
       courses: {
         Row: {
           category: string
