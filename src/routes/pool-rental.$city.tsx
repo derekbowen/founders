@@ -4,6 +4,7 @@ import { queryListings, type ListingSummary } from "@/server/sharetribe.function
 import { SiteHeader, SiteFooter } from "@/components/site-layout";
 import { Breadcrumbs, ListingCard } from "@/components/listing-card";
 import { buildMeta, breadcrumbJsonLd, ldJsonScript, SITE_URL } from "@/lib/seo";
+import { resolveCityHero } from "@/lib/city-hero";
 import poolHeroDefault from "@/assets/pool-hero-default.jpg";
 
 
@@ -87,7 +88,7 @@ export const Route = createFileRoute("/pool-rental/$city")({
       title,
       description,
       path: `/pool-rental/${params.city}`,
-      image: c.hero_image_url || undefined,
+      image: resolveCityHero(params.city, c.hero_image_url),
     });
     const business = {
       "@context": "https://schema.org",
@@ -167,7 +168,7 @@ function CityNotFound() {
 function CityPage() {
   const { city, listings, total, nearby, categories } = Route.useLoaderData();
   const params = Route.useParams();
-  const heroImg = city.hero_image_url || poolHeroDefault;
+  const heroImg = resolveCityHero(city.slug, city.hero_image_url);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -181,6 +182,10 @@ function CityPage() {
             width={1920}
             height={1080}
             className="absolute inset-0 -z-10 h-full w-full object-cover"
+            onError={(e) => {
+              const img = e.currentTarget;
+              if (img.src !== poolHeroDefault) img.src = poolHeroDefault;
+            }}
           />
           <div className="absolute inset-0 -z-10 bg-gradient-to-r from-black/75 via-black/55 to-black/30" />
           <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-28">
