@@ -235,6 +235,9 @@ function CoursePage() {
             </div>
           ) : null}
 
+          {/* Learning controls — enroll / mark complete / certificate */}
+          <CourseLearningControls courseSlug={course.slug} courseTitle={course.title} />
+
           {/* Long-form content */}
           {lfc?.overview && (
             <section className="mt-12">
