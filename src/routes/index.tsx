@@ -152,8 +152,8 @@ function HomePage() {
             </p>
           </div>
           <div className="mt-10 grid gap-5 sm:grid-cols-2">
-            <Link
-              to="/s"
+            <a
+              href="/s"
               className="group flex items-center gap-5 rounded-2xl border border-border bg-card p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
             >
               <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-3xl" aria-hidden>🏊</div>
@@ -162,9 +162,9 @@ function HomePage() {
                 <p className="mt-1 text-sm text-muted-foreground">Book a private pool by the hour for your group, your kids, or just for yourself.</p>
               </div>
               <span className="text-2xl text-muted-foreground group-hover:text-primary" aria-hidden>→</span>
-            </Link>
-            <Link
-              to="/signup"
+            </a>
+            <a
+              href="/signup"
               className="group flex items-center gap-5 rounded-2xl border border-border bg-card p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
             >
               <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-3xl" aria-hidden>💰</div>
@@ -173,7 +173,7 @@ function HomePage() {
                 <p className="mt-1 text-sm text-muted-foreground">Top hosts earn $3K–$10K/month. Free to list. Insurance included on every booking.</p>
               </div>
               <span className="text-2xl text-muted-foreground group-hover:text-primary" aria-hidden>→</span>
-            </Link>
+            </a>
           </div>
         </section>
 
