@@ -34,12 +34,16 @@ export const Route = createFileRoute("/academy/$slug")({
       c.excerpt ??
       (c.description ?? "").slice(0, 200);
     const path = `/academy/${c.slug}`;
+    const heroUrl =
+      c.cover_image_url && c.cover_image_url.startsWith("academy/")
+        ? null
+        : c.cover_image_url ?? null;
     const meta = buildMeta({
       title,
       description,
       path,
       type: "article",
-      image: c.cover_image_url ?? null,
+      image: heroUrl,
     });
 
     const breadcrumbs = breadcrumbJsonLd([
