@@ -1,31 +1,59 @@
-## Root cause
+## Goal
 
-The Sharetribe client in `src/server/sharetribe.server.ts` calls the **Marketplace API** (`flex-api.sharetribe.com`) with `grant_type=client_credentials` and `scope=public-read`. The configured `SHARETRIBE_CLIENT_ID` returns **401 Unauthorized** on that endpoint.
+Make the SSR footer in `SiteLayout` visually and structurally match the live `poolrentalnearme.com` footer, so every route renders the same footer the user sees in production.
 
-I tested live against Sharetribe with the project's secrets:
+## What's already correct
 
-- `flex-api.sharetribe.com` + `scope=public-read` (no secret): **401 Unauthorized**
-- `flex-integ-api.sharetribe.com` + `client_secret` + `scope=integ`: **200 OK**, returns 72 published listings
+The current `SiteFooter` in `src/components/site-layout.tsx` already has the right **content**:
 
-The configured app is an **Integration API** application, not a Marketplace API app. That's why every listing query fails silently (the catch in `searchListings` returns `{ listings: [] }`, and the UI falls back to placeholders).
+- 4 columns with matching titles ("Explore", "Become a Host", "Company", "Popular Markets") and identical link labels in the same order.
+- Same Popular Markets list (LA, San Diego, Riverside, Sacramento, Tampa, Scottsdale, Nashville, Katy) plus "All Locations".
+- Same 7 social icons (Facebook, X, YouTube, LinkedIn, Instagram, TikTok, Pinterest).
+- Same phone (888-940-4247), hours (10am - 5pm PST), email (support@poolrentalnearme.com), copyright (PRNM CORP, Riverside, CA 92509).
+- Footer is already imported by `__root.tsx` via `SiteLayout`, so every route that uses `<SiteLayout>` gets it under SSR. Verified all 11 route files use it.
 
-## Fix
+## What needs to change
 
-Rewrite `src/server/sharetribe.server.ts` to use the Integration API:
+Pure visual/markup adjustments to match the live layout (verified via headless screenshot):
 
-1. **Auth** — `POST https://flex-integ-api.sharetribe.com/v1/auth/token` with `client_id` + `client_secret` + `grant_type=client_credentials` + `scope=integ`. Cache token until `expires_in`.
-2. **Requests** — `GET https://flex-integ-api.sharetribe.com/v1/integration_api/listings/{query|show}` with `Authorization: Bearer <token>`.
-3. **Public filtering** — Integration API returns drafts/pending/closed/published. Add `states=published` to `listings/query` and reject non-`published` results in `fetchListing` so we never leak a draft to a public URL.
-4. Keep the existing public surface (`fetchListing`, `searchListings`, `ListingSummary`, `SearchOptions`) so all callers (`index.tsx`, `category.$slug.tsx`, `pool-rental.$city.tsx`, `l.$slug.$id.tsx`, `listing-card.tsx`) keep working without changes.
-5. Improve `summarize()` slightly: derive `city` from `publicData.address` (split on `,`) when `publicData.location.city` is missing, since real listings only populate `publicData.address`/`location.lat,lng`.
-6. Drop the now-unused `SHARETRIBE_MARKETPLACE_URL` plumbing and the Marketplace-only `getApiBase()` helper.
+### 1. Brand block (left column)
 
-## Verification
+- Replace circular SVG icon + "Pool Rental Near Me" text with **just the logo image** (`src/assets/logo.png`, already in the project from the earlier logo task) — the live site shows logo only, no wordmark next to it.
+- Sizing: `h-14 w-auto`.
 
-After the swap, retest by hitting one of the routes that calls `searchListings` and confirming the response includes real listing IDs/titles instead of an empty list. I'll also call the function from a quick ad-hoc check after deploy.
+### 2. Contact line formatting
 
-## Files touched
+- Render call info on **one line** as it appears live: `Call us 888-940-4247 10am - 5pm PST` (phone is the link, hours follow inline in muted color).
+- Email stays on its own line below.
+- Drop the `block` on hours; use inline `<span className="text-muted-foreground">`.
 
-- `src/server/sharetribe.server.ts` — rewritten end-to-end (single file).
+### 3. Copyright line
 
-No DB, no secrets, no other route changes needed. `SHARETRIBE_MARKETPLACE_URL` secret can stay (ignored).
+- Live: `© 2026 PRNM CORP Riverside, Ca 92509` (space-separated, "Ca" not "CA", no `·`).
+- Update string to: `© {year} PRNM CORP Riverside, Ca 92509`.
+- Remove the `border-t` divider above it (live site has no divider — just spacing).
+
+### 4. Column proportions
+
+- Live layout gives the brand block more horizontal room and the link columns are tighter. Switch grid to `lg:grid-cols-12` with `lg:col-span-3` for brand and `lg:col-span-2` (already used) for each of the 4 link columns plus a small gap. This is already the structure — only ensure the brand column doesn't grow on the wordmark removal (remove the `inline-flex items-center gap-2` wrapper since there's no longer a side-by-side icon+text).
+
+### 5. Link column titles
+
+- Live uses bolder, slightly larger column headings. Change `text-sm font-semibold` → `text-base font-semibold` in `FooterColumn` and the inline Popular Markets heading.
+
+### 6. SSR/no behavior changes
+
+- All hrefs stay as-is (legacy backend handles `/p/*`, `/s`, `/signup`; TanStack handles `/blog`, `/academy`, `/pool-rental/$city`, `/category/$slug`).
+- Footer remains a server-rendered React component inside `__root.tsx`'s shell — no client-only conditionals, no `useEffect` — so it appears identically on every SSR page.
+
+## Files to edit
+
+- `src/components/site-layout.tsx` — `SiteFooter` brand block, contact lines, copyright, and `FooterColumn` heading size.
+
+## Out of scope
+
+- Header (separate concern; logo there was already updated).
+- Adding new links or columns (live and current already align).
+- Restyling link hover colors or fonts beyond the heading size bump.
+
+Approve to implement.
