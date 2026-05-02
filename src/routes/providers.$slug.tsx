@@ -2,6 +2,7 @@ import { createFileRoute, Link, useRouter, notFound } from "@tanstack/react-rout
 import { getProvider } from "@/server/content.functions";
 import { SiteHeader, SiteFooter } from "@/components/site-layout";
 import { Breadcrumbs } from "@/components/listing-card";
+import { ClaimListingCTA, JoinNetworkForm } from "@/components/recruit-forms";
 import { buildMeta, breadcrumbJsonLd, ldJsonScript, SITE_URL } from "@/lib/seo";
 
 export const Route = createFileRoute("/providers/$slug")({
@@ -34,9 +35,13 @@ export const Route = createFileRoute("/providers/$slug")({
         address: { "@type": "PostalAddress", addressLocality: p.city, addressRegion: p.state_code, addressCountry: "US" },
       }),
     };
+    const stateCode = (p.state_code as string | null)?.toLowerCase();
+    const citySlug = (p as { city_slug?: string | null }).city_slug ?? null;
     const crumbs = breadcrumbJsonLd([
       { name: "Home", path: "/" },
-      { name: "Providers", path: "/" },
+      { name: "Pool Builders", path: "/pool-builders" },
+      ...(stateCode ? [{ name: p.state_code as string, path: `/pool-builders/${stateCode}` }] : []),
+      ...(stateCode && citySlug && p.city ? [{ name: p.city as string, path: `/pool-builders/${stateCode}/${citySlug}` }] : []),
       { name: p.name, path: `/providers/${params.slug}` },
     ]);
     return { ...meta, scripts: [ldJsonScript(business), ldJsonScript(crumbs)] };
@@ -74,13 +79,17 @@ export const Route = createFileRoute("/providers/$slug")({
 function ProviderPage() {
   const { provider } = Route.useLoaderData();
   const params = Route.useParams();
+  const stateCode = (provider.state_code as string | null)?.toLowerCase() ?? null;
+  const citySlug = (provider as { city_slug?: string | null }).city_slug ?? null;
   return (
     <div className="flex min-h-screen flex-col">
       <SiteHeader />
       <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
         <Breadcrumbs items={[
           { name: "Home", path: "/" },
-          { name: "Providers", path: "/" },
+          { name: "Pool Builders", path: "/pool-builders" },
+          ...(stateCode ? [{ name: provider.state_code as string, path: `/pool-builders/${stateCode}` }] : []),
+          ...(stateCode && citySlug && provider.city ? [{ name: provider.city as string, path: `/pool-builders/${stateCode}/${citySlug}` }] : []),
           { name: provider.name, path: `/providers/${params.slug}` },
         ]}/>
         <header className="mt-6 flex items-start gap-6">
@@ -91,8 +100,17 @@ function ProviderPage() {
             <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{provider.name}</h1>
             {(provider.city || provider.state_code) && (
               <p className="mt-1 text-muted-foreground">
-                {[provider.city, provider.state_code].filter(Boolean).join(", ")}
+                {stateCode && citySlug && provider.city ? (
+                  <Link to="/pool-builders/$state/$city" params={{ state: stateCode, city: citySlug }} className="hover:text-primary">
+                    {provider.city}, {provider.state_code}
+                  </Link>
+                ) : (
+                  [provider.city, provider.state_code].filter(Boolean).join(", ")
+                )}
               </p>
+            )}
+            {typeof provider.rating === "number" && (
+              <p className="mt-1 text-sm text-muted-foreground">★ {provider.rating} {provider.rating_count ? `(${provider.rating_count} reviews)` : ""}</p>
             )}
             {provider.business_type && (
               <span className="mt-2 inline-flex items-center rounded-full bg-secondary px-3 py-1 text-xs font-medium text-secondary-foreground">
@@ -101,6 +119,10 @@ function ProviderPage() {
             )}
           </div>
         </header>
+
+        <div className="mt-6">
+          <ClaimListingCTA providerSlug={params.slug} providerName={provider.name} />
+        </div>
 
         {provider.hero_image_url && (
           <div className="mt-8 aspect-video overflow-hidden rounded-2xl">
@@ -128,10 +150,22 @@ function ProviderPage() {
         <section className="mt-10 rounded-2xl border border-border bg-card p-6">
           <h2 className="text-lg font-semibold text-foreground">Contact</h2>
           <ul className="mt-3 space-y-2 text-sm">
+            {provider.address && <li className="text-muted-foreground">{provider.address}</li>}
             {provider.website_url && <li><a href={provider.website_url} target="_blank" rel="noreferrer noopener" className="text-primary hover:underline">{provider.website_url}</a></li>}
             {provider.phone && <li>Phone: <a href={`tel:${provider.phone}`} className="text-primary hover:underline">{provider.phone}</a></li>}
             {provider.email && <li>Email: <a href={`mailto:${provider.email}`} className="text-primary hover:underline">{provider.email}</a></li>}
           </ul>
+        </section>
+
+        <section className="mt-12">
+          <JoinNetworkForm
+            heading="Are you a pool pro or pool owner?"
+            subheading="Get listed on Pool Rental Near Me — free directory plus pool-rental income for hosts."
+            defaultCity={provider.city ?? ""}
+            defaultState={provider.state_code ?? ""}
+            sourceProviderSlug={params.slug}
+            sourcePath={`/providers/${params.slug}`}
+          />
         </section>
       </main>
       <SiteFooter />

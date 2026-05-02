@@ -1,7 +1,7 @@
 project_id = "ptfjspcphskifoseidut"
 
-[functions.generate-course-content]
+[functions.seed-providers]
 verify_jwt = false
 
-[functions.generate-help-article]
+[functions.seed-blog-posts]
 verify_jwt = false

@@ -14,6 +14,7 @@ import { Route as BlogRouteImport } from './routes/blog'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AcademyRouteImport } from './routes/academy'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PoolBuildersIndexRouteImport } from './routes/pool-builders.index'
 import { Route as HostToolsIndexRouteImport } from './routes/host-tools.index'
 import { Route as HelpCenterIndexRouteImport } from './routes/help-center.index'
 import { Route as AcademyIndexRouteImport } from './routes/academy.index'
@@ -21,6 +22,7 @@ import { Route as VerifyUidRouteImport } from './routes/verify.$uid'
 import { Route as ProvidersSlugRouteImport } from './routes/providers.$slug'
 import { Route as PoolRentalCityRouteImport } from './routes/pool-rental.$city'
 import { Route as PoolRentalLawsCityRouteImport } from './routes/pool-rental-laws.$city'
+import { Route as PoolBuildersStateRouteImport } from './routes/pool-builders.$state'
 import { Route as HostToolsSlugRouteImport } from './routes/host-tools.$slug'
 import { Route as CategorySlugRouteImport } from './routes/category.$slug'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
@@ -34,6 +36,7 @@ import { Route as AdminBlogRouteImport } from './routes/admin.blog'
 import { Route as AccountLearningRouteImport } from './routes/account.learning'
 import { Route as AcademySlugRouteImport } from './routes/academy.$slug'
 import { Route as HelpCenterCategoryIndexRouteImport } from './routes/help-center.$category.index'
+import { Route as PoolBuildersStateCityRouteImport } from './routes/pool-builders.$state.$city'
 import { Route as LSlugIdRouteImport } from './routes/l.$slug.$id'
 import { Route as HelpCenterCategorySlugRouteImport } from './routes/help-center.$category.$slug'
 import { Route as ApiPublicTrackCityClickRouteImport } from './routes/api/public/track-city-click'
@@ -63,6 +66,11 @@ const AcademyRoute = AcademyRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PoolBuildersIndexRoute = PoolBuildersIndexRouteImport.update({
+  id: '/pool-builders/',
+  path: '/pool-builders/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HostToolsIndexRoute = HostToolsIndexRouteImport.update({
@@ -98,6 +106,11 @@ const PoolRentalCityRoute = PoolRentalCityRouteImport.update({
 const PoolRentalLawsCityRoute = PoolRentalLawsCityRouteImport.update({
   id: '/pool-rental-laws/$city',
   path: '/pool-rental-laws/$city',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PoolBuildersStateRoute = PoolBuildersStateRouteImport.update({
+  id: '/pool-builders/$state',
+  path: '/pool-builders/$state',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HostToolsSlugRoute = HostToolsSlugRouteImport.update({
@@ -165,6 +178,11 @@ const HelpCenterCategoryIndexRoute = HelpCenterCategoryIndexRouteImport.update({
   path: '/help-center/$category/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PoolBuildersStateCityRoute = PoolBuildersStateCityRouteImport.update({
+  id: '/$city',
+  path: '/$city',
+  getParentRoute: () => PoolBuildersStateRoute,
+} as any)
 const LSlugIdRoute = LSlugIdRouteImport.update({
   id: '/l/$slug/$id',
   path: '/l/$slug/$id',
@@ -209,6 +227,7 @@ export interface FileRoutesByFullPath {
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
   '/host-tools/$slug': typeof HostToolsSlugRoute
+  '/pool-builders/$state': typeof PoolBuildersStateRouteWithChildren
   '/pool-rental-laws/$city': typeof PoolRentalLawsCityRoute
   '/pool-rental/$city': typeof PoolRentalCityRoute
   '/providers/$slug': typeof ProvidersSlugRoute
@@ -216,10 +235,12 @@ export interface FileRoutesByFullPath {
   '/academy/': typeof AcademyIndexRoute
   '/help-center/': typeof HelpCenterIndexRoute
   '/host-tools/': typeof HostToolsIndexRoute
+  '/pool-builders/': typeof PoolBuildersIndexRoute
   '/admin/learning/$userId': typeof AdminLearningUserIdRoute
   '/api/public/track-city-click': typeof ApiPublicTrackCityClickRoute
   '/help-center/$category/$slug': typeof HelpCenterCategorySlugRoute
   '/l/$slug/$id': typeof LSlugIdRoute
+  '/pool-builders/$state/$city': typeof PoolBuildersStateCityRoute
   '/help-center/$category/': typeof HelpCenterCategoryIndexRoute
   '/api/certificates/$uid/pdf': typeof ApiCertificatesUidPdfRoute
 }
@@ -240,6 +261,7 @@ export interface FileRoutesByTo {
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
   '/host-tools/$slug': typeof HostToolsSlugRoute
+  '/pool-builders/$state': typeof PoolBuildersStateRouteWithChildren
   '/pool-rental-laws/$city': typeof PoolRentalLawsCityRoute
   '/pool-rental/$city': typeof PoolRentalCityRoute
   '/providers/$slug': typeof ProvidersSlugRoute
@@ -247,10 +269,12 @@ export interface FileRoutesByTo {
   '/academy': typeof AcademyIndexRoute
   '/help-center': typeof HelpCenterIndexRoute
   '/host-tools': typeof HostToolsIndexRoute
+  '/pool-builders': typeof PoolBuildersIndexRoute
   '/admin/learning/$userId': typeof AdminLearningUserIdRoute
   '/api/public/track-city-click': typeof ApiPublicTrackCityClickRoute
   '/help-center/$category/$slug': typeof HelpCenterCategorySlugRoute
   '/l/$slug/$id': typeof LSlugIdRoute
+  '/pool-builders/$state/$city': typeof PoolBuildersStateCityRoute
   '/help-center/$category': typeof HelpCenterCategoryIndexRoute
   '/api/certificates/$uid/pdf': typeof ApiCertificatesUidPdfRoute
 }
@@ -273,6 +297,7 @@ export interface FileRoutesById {
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
   '/host-tools/$slug': typeof HostToolsSlugRoute
+  '/pool-builders/$state': typeof PoolBuildersStateRouteWithChildren
   '/pool-rental-laws/$city': typeof PoolRentalLawsCityRoute
   '/pool-rental/$city': typeof PoolRentalCityRoute
   '/providers/$slug': typeof ProvidersSlugRoute
@@ -280,10 +305,12 @@ export interface FileRoutesById {
   '/academy/': typeof AcademyIndexRoute
   '/help-center/': typeof HelpCenterIndexRoute
   '/host-tools/': typeof HostToolsIndexRoute
+  '/pool-builders/': typeof PoolBuildersIndexRoute
   '/admin/learning/$userId': typeof AdminLearningUserIdRoute
   '/api/public/track-city-click': typeof ApiPublicTrackCityClickRoute
   '/help-center/$category/$slug': typeof HelpCenterCategorySlugRoute
   '/l/$slug/$id': typeof LSlugIdRoute
+  '/pool-builders/$state/$city': typeof PoolBuildersStateCityRoute
   '/help-center/$category/': typeof HelpCenterCategoryIndexRoute
   '/api/certificates/$uid/pdf': typeof ApiCertificatesUidPdfRoute
 }
@@ -307,6 +334,7 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/category/$slug'
     | '/host-tools/$slug'
+    | '/pool-builders/$state'
     | '/pool-rental-laws/$city'
     | '/pool-rental/$city'
     | '/providers/$slug'
@@ -314,10 +342,12 @@ export interface FileRouteTypes {
     | '/academy/'
     | '/help-center/'
     | '/host-tools/'
+    | '/pool-builders/'
     | '/admin/learning/$userId'
     | '/api/public/track-city-click'
     | '/help-center/$category/$slug'
     | '/l/$slug/$id'
+    | '/pool-builders/$state/$city'
     | '/help-center/$category/'
     | '/api/certificates/$uid/pdf'
   fileRoutesByTo: FileRoutesByTo
@@ -338,6 +368,7 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/category/$slug'
     | '/host-tools/$slug'
+    | '/pool-builders/$state'
     | '/pool-rental-laws/$city'
     | '/pool-rental/$city'
     | '/providers/$slug'
@@ -345,10 +376,12 @@ export interface FileRouteTypes {
     | '/academy'
     | '/help-center'
     | '/host-tools'
+    | '/pool-builders'
     | '/admin/learning/$userId'
     | '/api/public/track-city-click'
     | '/help-center/$category/$slug'
     | '/l/$slug/$id'
+    | '/pool-builders/$state/$city'
     | '/help-center/$category'
     | '/api/certificates/$uid/pdf'
   id:
@@ -370,6 +403,7 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/category/$slug'
     | '/host-tools/$slug'
+    | '/pool-builders/$state'
     | '/pool-rental-laws/$city'
     | '/pool-rental/$city'
     | '/providers/$slug'
@@ -377,10 +411,12 @@ export interface FileRouteTypes {
     | '/academy/'
     | '/help-center/'
     | '/host-tools/'
+    | '/pool-builders/'
     | '/admin/learning/$userId'
     | '/api/public/track-city-click'
     | '/help-center/$category/$slug'
     | '/l/$slug/$id'
+    | '/pool-builders/$state/$city'
     | '/help-center/$category/'
     | '/api/certificates/$uid/pdf'
   fileRoutesById: FileRoutesById
@@ -400,11 +436,13 @@ export interface RootRouteChildren {
   ApiSitemapDotxmlRoute: typeof ApiSitemapDotxmlRoute
   CategorySlugRoute: typeof CategorySlugRoute
   HostToolsSlugRoute: typeof HostToolsSlugRoute
+  PoolBuildersStateRoute: typeof PoolBuildersStateRouteWithChildren
   PoolRentalLawsCityRoute: typeof PoolRentalLawsCityRoute
   PoolRentalCityRoute: typeof PoolRentalCityRoute
   VerifyUidRoute: typeof VerifyUidRoute
   HelpCenterIndexRoute: typeof HelpCenterIndexRoute
   HostToolsIndexRoute: typeof HostToolsIndexRoute
+  PoolBuildersIndexRoute: typeof PoolBuildersIndexRoute
   ApiPublicTrackCityClickRoute: typeof ApiPublicTrackCityClickRoute
   HelpCenterCategorySlugRoute: typeof HelpCenterCategorySlugRoute
   LSlugIdRoute: typeof LSlugIdRoute
@@ -447,6 +485,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pool-builders/': {
+      id: '/pool-builders/'
+      path: '/pool-builders'
+      fullPath: '/pool-builders/'
+      preLoaderRoute: typeof PoolBuildersIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/host-tools/': {
@@ -496,6 +541,13 @@ declare module '@tanstack/react-router' {
       path: '/pool-rental-laws/$city'
       fullPath: '/pool-rental-laws/$city'
       preLoaderRoute: typeof PoolRentalLawsCityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pool-builders/$state': {
+      id: '/pool-builders/$state'
+      path: '/pool-builders/$state'
+      fullPath: '/pool-builders/$state'
+      preLoaderRoute: typeof PoolBuildersStateRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/host-tools/$slug': {
@@ -588,6 +640,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/help-center/$category/'
       preLoaderRoute: typeof HelpCenterCategoryIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/pool-builders/$state/$city': {
+      id: '/pool-builders/$state/$city'
+      path: '/$city'
+      fullPath: '/pool-builders/$state/$city'
+      preLoaderRoute: typeof PoolBuildersStateCityRouteImport
+      parentRoute: typeof PoolBuildersStateRoute
     }
     '/l/$slug/$id': {
       id: '/l/$slug/$id'
@@ -684,6 +743,17 @@ const AdminLearningRouteWithChildren = AdminLearningRoute._addFileChildren(
   AdminLearningRouteChildren,
 )
 
+interface PoolBuildersStateRouteChildren {
+  PoolBuildersStateCityRoute: typeof PoolBuildersStateCityRoute
+}
+
+const PoolBuildersStateRouteChildren: PoolBuildersStateRouteChildren = {
+  PoolBuildersStateCityRoute: PoolBuildersStateCityRoute,
+}
+
+const PoolBuildersStateRouteWithChildren =
+  PoolBuildersStateRoute._addFileChildren(PoolBuildersStateRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AcademyRoute: AcademyRouteWithChildren,
@@ -699,11 +769,13 @@ const rootRouteChildren: RootRouteChildren = {
   ApiSitemapDotxmlRoute: ApiSitemapDotxmlRoute,
   CategorySlugRoute: CategorySlugRoute,
   HostToolsSlugRoute: HostToolsSlugRoute,
+  PoolBuildersStateRoute: PoolBuildersStateRouteWithChildren,
   PoolRentalLawsCityRoute: PoolRentalLawsCityRoute,
   PoolRentalCityRoute: PoolRentalCityRoute,
   VerifyUidRoute: VerifyUidRoute,
   HelpCenterIndexRoute: HelpCenterIndexRoute,
   HostToolsIndexRoute: HostToolsIndexRoute,
+  PoolBuildersIndexRoute: PoolBuildersIndexRoute,
   ApiPublicTrackCityClickRoute: ApiPublicTrackCityClickRoute,
   HelpCenterCategorySlugRoute: HelpCenterCategorySlugRoute,
   LSlugIdRoute: LSlugIdRoute,
