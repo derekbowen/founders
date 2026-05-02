@@ -72,13 +72,13 @@ function HomePage() {
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <a
-                  href="https://www.poolrentalnearme.com"
+                  href="/s"
                   className="inline-flex items-center justify-center rounded-full bg-primary px-6 py-3 text-base font-semibold text-primary-foreground shadow-lg transition-transform hover:scale-105"
                 >
                   Find a pool near you
                 </a>
                 <a
-                  href="https://www.poolrentalnearme.com/signup"
+                  href="/signup"
                   className="inline-flex items-center justify-center rounded-full border border-border bg-card px-6 py-3 text-base font-semibold text-foreground transition-colors hover:bg-secondary"
                 >
                   List your pool
@@ -96,7 +96,7 @@ function HomePage() {
                 <h2 className="text-3xl font-bold tracking-tight text-foreground">Featured pools</h2>
                 <p className="mt-2 text-muted-foreground">Live listings from hosts across the country.</p>
               </div>
-              <a href="https://www.poolrentalnearme.com/s" className="hidden text-sm font-semibold text-primary hover:underline sm:inline">View all →</a>
+              <a href="/s" className="hidden text-sm font-semibold text-primary hover:underline sm:inline">View all →</a>
             </div>
             <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {listings.map((l: ListingSummary) => (
