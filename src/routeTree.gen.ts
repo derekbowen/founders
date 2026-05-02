@@ -22,7 +22,6 @@ import { Route as ApiSitemapDotxmlRouteImport } from './routes/api/sitemap[.]xml
 import { Route as ApiRobotsDottxtRouteImport } from './routes/api/robots[.]txt'
 import { Route as AcademySlugRouteImport } from './routes/academy.$slug'
 import { Route as LSlugIdRouteImport } from './routes/l.$slug.$id'
-import { Route as ApiPublicSharetribeCheckRouteImport } from './routes/api/public/_sharetribe-check'
 
 const ProvidersRoute = ProvidersRouteImport.update({
   id: '/providers',
@@ -89,12 +88,6 @@ const LSlugIdRoute = LSlugIdRouteImport.update({
   path: '/l/$slug/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicSharetribeCheckRoute =
-  ApiPublicSharetribeCheckRouteImport.update({
-    id: '/api/public/_sharetribe-check',
-    path: '/api/public',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -109,7 +102,6 @@ export interface FileRoutesByFullPath {
   '/pool-rental/$city': typeof PoolRentalCityRoute
   '/providers/$slug': typeof ProvidersSlugRoute
   '/academy/': typeof AcademyIndexRoute
-  '/api/public': typeof ApiPublicSharetribeCheckRoute
   '/l/$slug/$id': typeof LSlugIdRoute
 }
 export interface FileRoutesByTo {
@@ -124,7 +116,6 @@ export interface FileRoutesByTo {
   '/pool-rental/$city': typeof PoolRentalCityRoute
   '/providers/$slug': typeof ProvidersSlugRoute
   '/academy': typeof AcademyIndexRoute
-  '/api/public': typeof ApiPublicSharetribeCheckRoute
   '/l/$slug/$id': typeof LSlugIdRoute
 }
 export interface FileRoutesById {
@@ -141,7 +132,6 @@ export interface FileRoutesById {
   '/pool-rental/$city': typeof PoolRentalCityRoute
   '/providers/$slug': typeof ProvidersSlugRoute
   '/academy/': typeof AcademyIndexRoute
-  '/api/public/_sharetribe-check': typeof ApiPublicSharetribeCheckRoute
   '/l/$slug/$id': typeof LSlugIdRoute
 }
 export interface FileRouteTypes {
@@ -159,7 +149,6 @@ export interface FileRouteTypes {
     | '/pool-rental/$city'
     | '/providers/$slug'
     | '/academy/'
-    | '/api/public'
     | '/l/$slug/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -174,7 +163,6 @@ export interface FileRouteTypes {
     | '/pool-rental/$city'
     | '/providers/$slug'
     | '/academy'
-    | '/api/public'
     | '/l/$slug/$id'
   id:
     | '__root__'
@@ -190,7 +178,6 @@ export interface FileRouteTypes {
     | '/pool-rental/$city'
     | '/providers/$slug'
     | '/academy/'
-    | '/api/public/_sharetribe-check'
     | '/l/$slug/$id'
   fileRoutesById: FileRoutesById
 }
@@ -203,7 +190,6 @@ export interface RootRouteChildren {
   ApiSitemapDotxmlRoute: typeof ApiSitemapDotxmlRoute
   CategorySlugRoute: typeof CategorySlugRoute
   PoolRentalCityRoute: typeof PoolRentalCityRoute
-  ApiPublicSharetribeCheckRoute: typeof ApiPublicSharetribeCheckRoute
   LSlugIdRoute: typeof LSlugIdRoute
 }
 
@@ -300,13 +286,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LSlugIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/_sharetribe-check': {
-      id: '/api/public/_sharetribe-check'
-      path: '/api/public'
-      fullPath: '/api/public'
-      preLoaderRoute: typeof ApiPublicSharetribeCheckRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -354,7 +333,6 @@ const rootRouteChildren: RootRouteChildren = {
   ApiSitemapDotxmlRoute: ApiSitemapDotxmlRoute,
   CategorySlugRoute: CategorySlugRoute,
   PoolRentalCityRoute: PoolRentalCityRoute,
-  ApiPublicSharetribeCheckRoute: ApiPublicSharetribeCheckRoute,
   LSlugIdRoute: LSlugIdRoute,
 }
 export const routeTree = rootRouteImport
