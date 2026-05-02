@@ -104,11 +104,30 @@ export const Route = createFileRoute("/blog")({
 });
 
 function BlogIndex() {
-  const { posts, total, page, topic, topics } = Route.useLoaderData();
+  const { posts, total, page, topic, q, topics } = Route.useLoaderData();
   const navigate = useNavigate({ from: "/blog" });
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const activeTopic = topic ?? null;
+  const activeQuery = q ?? "";
   const activeMeta = activeTopic ? topicMeta(activeTopic) : null;
+
+  const [queryInput, setQueryInput] = useState(activeQuery);
+  useEffect(() => {
+    setQueryInput(activeQuery);
+  }, [activeQuery]);
+
+  const submitSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = queryInput.trim();
+    navigate({
+      search: (prev) => ({ ...prev, page: 1, q: trimmed.length ? trimmed : undefined }),
+    });
+  };
+
+  const clearSearch = () => {
+    setQueryInput("");
+    navigate({ search: (prev) => ({ ...prev, page: 1, q: undefined }) });
+  };
 
   return (
     <div className="flex min-h-screen flex-col">
