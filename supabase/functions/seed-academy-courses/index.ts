@@ -1,0 +1,48 @@
+// One-shot seed function: upsert all 15 academy courses from bundled seed.json
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { createClient } from "jsr:@supabase/supabase-js@2";
+import seed from "./seed.json" with { type: "json" };
+
+const cors = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response(null, { headers: cors });
+  try {
+    const url = Deno.env.get("SUPABASE_URL")!;
+    const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const sb = createClient(url, key);
+
+    const rows = (seed as any[]).map((r) => ({
+      slug: r.slug,
+      title: r.title,
+      subtitle: r.subtitle,
+      excerpt: r.excerpt,
+      category: r.category,
+      tier: r.tier,
+      embed_url: r.embed_url,
+      cover_image_url: r.cover_image_url,
+      seo_title: r.seo_title,
+      seo_description: r.seo_description,
+      duration_minutes: r.duration_minutes,
+      level: r.level,
+      long_form_content: r.long_form_content,
+      is_featured: r.is_featured,
+      is_published: true,
+      language: "en",
+    }));
+
+    const { data, error } = await sb.from("courses").upsert(rows, { onConflict: "slug" }).select("slug");
+    if (error) throw error;
+    return new Response(JSON.stringify({ ok: true, count: data?.length ?? 0, slugs: data?.map((d: any) => d.slug) }), {
+      headers: { ...cors, "Content-Type": "application/json" },
+    });
+  } catch (e) {
+    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : String(e) }), {
+      status: 500,
+      headers: { ...cors, "Content-Type": "application/json" },
+    });
+  }
+});
