@@ -33,7 +33,7 @@ function ProvidersIndex() {
         <p className="mt-3 text-lg text-muted-foreground">Browse trusted pool builders, cleaners, and service providers.</p>
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {providers.length === 0 && <p className="text-muted-foreground">No providers listed yet.</p>}
-          {providers.map((p) => (
+          {providers.map((p: { slug: string; name: string; business_type: string | null; city: string | null; state_code: string | null; logo_url: string | null }) => (
             <Link key={p.slug} to="/providers/$slug" params={{ slug: p.slug }}
               className="flex items-start gap-4 rounded-2xl border border-border bg-card p-5 transition-shadow hover:shadow-md">
               {p.logo_url ? (

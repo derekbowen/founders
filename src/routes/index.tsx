@@ -90,7 +90,7 @@ function HomePage() {
               Find the perfect pool for your occasion.
             </p>
             <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-              {categories.map((c) => (
+              {categories.map((c: { slug: string; name: string; icon: string | null }) => (
                 <Link
                   key={c.slug}
                   to="/category/$slug"
@@ -121,7 +121,7 @@ function HomePage() {
               {cities.length}+ cities across the US.
             </p>
             <div className="mt-8 grid grid-cols-2 gap-x-6 gap-y-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-              {cities.map((c) => (
+              {cities.map((c: { slug: string; name: string; state_code: string }) => (
                 <Link
                   key={c.slug}
                   to="/pool-rental/$city"

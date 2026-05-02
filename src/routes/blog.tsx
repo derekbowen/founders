@@ -34,7 +34,7 @@ function BlogIndex() {
         <p className="mt-3 text-lg text-muted-foreground">Tips, guides, and stories from the Pool Rental Near Me community.</p>
         <div className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {posts.length === 0 && <p className="text-muted-foreground">No posts yet.</p>}
-          {posts.map((p) => (
+          {posts.map((p: { slug: string; title: string; excerpt: string | null; cover_image_url: string | null; published_at: string | null }) => (
             <Link key={p.slug} to="/blog/$slug" params={{ slug: p.slug }} className="group block">
               <div className="aspect-[16/10] overflow-hidden rounded-2xl bg-muted">
                 {p.cover_image_url ? (

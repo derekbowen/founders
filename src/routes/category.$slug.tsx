@@ -94,7 +94,7 @@ function CategoryPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {listings.map((l) => <ListingCard key={l.id} listing={l} />)}
+              {listings.map((l: import("@/server/sharetribe.functions").ListingSummary) => <ListingCard key={l.id} listing={l} />)}
             </div>
           )}
         </section>
