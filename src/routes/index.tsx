@@ -4,6 +4,7 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { SiteHeader, SiteFooter } from "@/components/site-layout";
 import { ListingCard } from "@/components/listing-card";
 import { searchListings } from "@/server/sharetribe.server";
+import type { ListingSummary } from "@/server/sharetribe.functions";
 import { buildMeta, ldJsonScript, SITE_URL, SITE_NAME } from "@/lib/seo";
 
 const getHomeData = createServerFn({ method: "GET" }).handler(async () => {
@@ -98,7 +99,7 @@ function HomePage() {
               <a href="https://www.poolrentalnearme.com/s" className="hidden text-sm font-semibold text-primary hover:underline sm:inline">View all →</a>
             </div>
             <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {listings.map((l) => (
+              {listings.map((l: ListingSummary) => (
                 <ListingCard key={l.id} listing={l} />
               ))}
             </div>
