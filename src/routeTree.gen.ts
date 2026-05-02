@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AcademyRouteImport } from './routes/academy'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as HostToolsIndexRouteImport } from './routes/host-tools.index'
+import { Route as HelpCenterIndexRouteImport } from './routes/help-center.index'
 import { Route as AcademyIndexRouteImport } from './routes/academy.index'
 import { Route as VerifyUidRouteImport } from './routes/verify.$uid'
 import { Route as ProvidersSlugRouteImport } from './routes/providers.$slug'
@@ -65,6 +66,11 @@ const IndexRoute = IndexRouteImport.update({
 const HostToolsIndexRoute = HostToolsIndexRouteImport.update({
   id: '/host-tools/',
   path: '/host-tools/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HelpCenterIndexRoute = HelpCenterIndexRouteImport.update({
+  id: '/help-center/',
+  path: '/help-center/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AcademyIndexRoute = AcademyIndexRouteImport.update({
@@ -196,6 +202,7 @@ export interface FileRoutesByFullPath {
   '/providers/$slug': typeof ProvidersSlugRoute
   '/verify/$uid': typeof VerifyUidRoute
   '/academy/': typeof AcademyIndexRoute
+  '/help-center/': typeof HelpCenterIndexRoute
   '/host-tools/': typeof HostToolsIndexRoute
   '/admin/learning/$userId': typeof AdminLearningUserIdRoute
   '/api/public/track-city-click': typeof ApiPublicTrackCityClickRoute
@@ -224,6 +231,7 @@ export interface FileRoutesByTo {
   '/providers/$slug': typeof ProvidersSlugRoute
   '/verify/$uid': typeof VerifyUidRoute
   '/academy': typeof AcademyIndexRoute
+  '/help-center': typeof HelpCenterIndexRoute
   '/host-tools': typeof HostToolsIndexRoute
   '/admin/learning/$userId': typeof AdminLearningUserIdRoute
   '/api/public/track-city-click': typeof ApiPublicTrackCityClickRoute
@@ -254,6 +262,7 @@ export interface FileRoutesById {
   '/providers/$slug': typeof ProvidersSlugRoute
   '/verify/$uid': typeof VerifyUidRoute
   '/academy/': typeof AcademyIndexRoute
+  '/help-center/': typeof HelpCenterIndexRoute
   '/host-tools/': typeof HostToolsIndexRoute
   '/admin/learning/$userId': typeof AdminLearningUserIdRoute
   '/api/public/track-city-click': typeof ApiPublicTrackCityClickRoute
@@ -285,6 +294,7 @@ export interface FileRouteTypes {
     | '/providers/$slug'
     | '/verify/$uid'
     | '/academy/'
+    | '/help-center/'
     | '/host-tools/'
     | '/admin/learning/$userId'
     | '/api/public/track-city-click'
@@ -313,6 +323,7 @@ export interface FileRouteTypes {
     | '/providers/$slug'
     | '/verify/$uid'
     | '/academy'
+    | '/help-center'
     | '/host-tools'
     | '/admin/learning/$userId'
     | '/api/public/track-city-click'
@@ -342,6 +353,7 @@ export interface FileRouteTypes {
     | '/providers/$slug'
     | '/verify/$uid'
     | '/academy/'
+    | '/help-center/'
     | '/host-tools/'
     | '/admin/learning/$userId'
     | '/api/public/track-city-click'
@@ -367,6 +379,7 @@ export interface RootRouteChildren {
   PoolRentalLawsCityRoute: typeof PoolRentalLawsCityRoute
   PoolRentalCityRoute: typeof PoolRentalCityRoute
   VerifyUidRoute: typeof VerifyUidRoute
+  HelpCenterIndexRoute: typeof HelpCenterIndexRoute
   HostToolsIndexRoute: typeof HostToolsIndexRoute
   ApiPublicTrackCityClickRoute: typeof ApiPublicTrackCityClickRoute
   LSlugIdRoute: typeof LSlugIdRoute
@@ -415,6 +428,13 @@ declare module '@tanstack/react-router' {
       path: '/host-tools'
       fullPath: '/host-tools/'
       preLoaderRoute: typeof HostToolsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/help-center/': {
+      id: '/help-center/'
+      path: '/help-center'
+      fullPath: '/help-center/'
+      preLoaderRoute: typeof HelpCenterIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/academy/': {
@@ -642,6 +662,7 @@ const rootRouteChildren: RootRouteChildren = {
   PoolRentalLawsCityRoute: PoolRentalLawsCityRoute,
   PoolRentalCityRoute: PoolRentalCityRoute,
   VerifyUidRoute: VerifyUidRoute,
+  HelpCenterIndexRoute: HelpCenterIndexRoute,
   HostToolsIndexRoute: HostToolsIndexRoute,
   ApiPublicTrackCityClickRoute: ApiPublicTrackCityClickRoute,
   LSlugIdRoute: LSlugIdRoute,
