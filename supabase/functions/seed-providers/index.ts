@@ -11,10 +11,10 @@ const corsHeaders = {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   try {
-    const auth = req.headers.get("authorization") ?? "";
-    const token = auth.replace(/^Bearer\s+/i, "");
+    // Simple shared-secret check using a header to avoid exposure
+    const secret = req.headers.get("x-seed-secret") ?? "";
     const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    if (!token || token !== SERVICE_KEY) {
+    if (secret !== SERVICE_KEY) {
       return new Response(JSON.stringify({ error: "unauthorized" }), {
         status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
