@@ -2,10 +2,13 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { SiteHeader, SiteFooter } from "@/components/site-layout";
+import { ListingCard } from "@/components/listing-card";
+import { searchListings } from "@/server/sharetribe.server";
+import type { ListingSummary } from "@/server/sharetribe.functions";
 import { buildMeta, ldJsonScript, SITE_URL, SITE_NAME } from "@/lib/seo";
 
 const getHomeData = createServerFn({ method: "GET" }).handler(async () => {
-  const [cities, categories] = await Promise.all([
+  const [cities, categories, listingsResult] = await Promise.all([
     supabaseAdmin
       .from("cities")
       .select("slug, name, state_code")
@@ -17,8 +20,13 @@ const getHomeData = createServerFn({ method: "GET" }).handler(async () => {
       .select("slug, name, icon")
       .eq("is_published", true)
       .order("name"),
+    searchListings({ perPage: 12 }),
   ]);
-  return { cities: cities.data ?? [], categories: categories.data ?? [] };
+  return {
+    cities: cities.data ?? [],
+    categories: categories.data ?? [],
+    listings: listingsResult.listings,
+  };
 });
 
 export const Route = createFileRoute("/")({
@@ -43,7 +51,7 @@ export const Route = createFileRoute("/")({
 });
 
 function HomePage() {
-  const { cities, categories } = Route.useLoaderData();
+  const { cities, categories, listings } = Route.useLoaderData();
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -79,6 +87,24 @@ function HomePage() {
             </div>
           </div>
         </section>
+
+        {/* Featured Live Listings */}
+        {listings.length > 0 && (
+          <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <h2 className="text-3xl font-bold tracking-tight text-foreground">Featured pools</h2>
+                <p className="mt-2 text-muted-foreground">Live listings from hosts across the country.</p>
+              </div>
+              <a href="https://www.poolrentalnearme.com/s" className="hidden text-sm font-semibold text-primary hover:underline sm:inline">View all →</a>
+            </div>
+            <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {listings.map((l: ListingSummary) => (
+                <ListingCard key={l.id} listing={l} />
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Categories */}
         {categories.length > 0 && (
