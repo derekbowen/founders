@@ -68,7 +68,7 @@ const FAQS = [
   },
 ];
 
-export const Route = createFileRoute("/referral")({
+export const Route = createFileRoute("/referral" as any)({
   head: () => {
     const meta = buildMeta({ title: TITLE, description: DESCRIPTION, path: PATH });
     return {
