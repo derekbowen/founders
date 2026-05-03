@@ -78,14 +78,12 @@ export const lookupContentPage = createServerFn({ method: "GET" })
     return { kind: "not_found" };
   });
 
-const hreflangSchema = z.object({ pageId: z.string().uuid() });
-
 /**
  * Returns the EN↔ES sibling for a page if hreflang_alt is set. Used by the
  * dispatcher to emit hreflang link tags pointing both ways.
  */
 export const getHreflangSibling = createServerFn({ method: "GET" })
-  .inputValidator((data: unknown) => hreflangSchema.parse(data))
+  .inputValidator((data: unknown) => z.object({ pageId: z.string().uuid() }).parse(data))
   .handler(async ({ data }) => {
     const { data: row } = await (supabaseAdmin as any)
       .from("content_pages")
