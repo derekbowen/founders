@@ -303,10 +303,9 @@ function HomePage() {
               </p>
               <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
                 {categories.map((c: { slug: string; name: string; icon: string | null }) => (
-                  <Link
+                  <a
                     key={c.slug}
-                    to="/category/$slug"
-                    params={{ slug: c.slug }}
+                    href={`/s?pub_category=${encodeURIComponent(c.slug)}`}
                     className="group rounded-2xl border border-border bg-card p-5 text-center transition-all hover:-translate-y-0.5 hover:shadow-md"
                   >
                     {c.icon && (
@@ -317,7 +316,7 @@ function HomePage() {
                     <div className="mt-2 text-sm font-semibold text-foreground group-hover:text-primary">
                       {c.name}
                     </div>
-                  </Link>
+                  </a>
                 ))}
               </div>
             </div>
