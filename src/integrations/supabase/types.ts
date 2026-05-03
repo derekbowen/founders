@@ -267,11 +267,14 @@ export type Database = {
         Row: {
           body_markdown: string | null
           category: string
+          content: string | null
           created_at: string
+          description: string | null
           hero_image_url: string | null
           hreflang_group: string | null
           id: string
           in_sitemap: boolean
+          legacy_slugs: string[] | null
           locale: string
           migrated_at: string | null
           priority: number
@@ -282,21 +285,24 @@ export type Database = {
           seo_title: string | null
           sitemap_source: string | null
           slug: string | null
-          source_url: string
+          source_url: string | null
           status: string
           template_type: string | null
           title: string | null
           updated_at: string
-          url_path: string
+          url_path: string | null
         }
         Insert: {
           body_markdown?: string | null
-          category: string
+          category?: string
+          content?: string | null
           created_at?: string
+          description?: string | null
           hero_image_url?: string | null
           hreflang_group?: string | null
           id?: string
           in_sitemap?: boolean
+          legacy_slugs?: string[] | null
           locale?: string
           migrated_at?: string | null
           priority?: number
@@ -307,21 +313,24 @@ export type Database = {
           seo_title?: string | null
           sitemap_source?: string | null
           slug?: string | null
-          source_url: string
+          source_url?: string | null
           status?: string
           template_type?: string | null
           title?: string | null
           updated_at?: string
-          url_path: string
+          url_path?: string | null
         }
         Update: {
           body_markdown?: string | null
           category?: string
+          content?: string | null
           created_at?: string
+          description?: string | null
           hero_image_url?: string | null
           hreflang_group?: string | null
           id?: string
           in_sitemap?: boolean
+          legacy_slugs?: string[] | null
           locale?: string
           migrated_at?: string | null
           priority?: number
@@ -332,12 +341,12 @@ export type Database = {
           seo_title?: string | null
           sitemap_source?: string | null
           slug?: string | null
-          source_url?: string
+          source_url?: string | null
           status?: string
           template_type?: string | null
           title?: string | null
           updated_at?: string
-          url_path?: string
+          url_path?: string | null
         }
         Relationships: []
       }
