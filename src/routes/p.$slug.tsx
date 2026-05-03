@@ -142,6 +142,12 @@ export const Route = createFileRoute("/p/$slug")({
       scripts.push(ldJsonScript(faqPageJsonLd(faqs)));
     }
 
+    // LocalBusiness/Service JSON-LD — city-scoped templates only
+    const localBiz = localBusinessForContentPage(p);
+    if (localBiz) {
+      scripts.push(ldJsonScript(localBiz));
+    }
+
     return { ...meta, scripts };
   },
   component: ContentPageDispatcher,
