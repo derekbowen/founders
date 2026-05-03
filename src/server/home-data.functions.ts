@@ -135,8 +135,10 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(async (): P
       }
     }
 
+    const cityList = (cities.data ?? []) as HomeCity[];
     return {
-      cities: (cities.data ?? []) as HomeCity[],
+      cities: cityList,
+      cityCount: cityCountRes.count ?? cityList.length,
       categories: (categories.data ?? []) as HomeCategory[],
       listings: listingsResult.listings,
       nearby: {
