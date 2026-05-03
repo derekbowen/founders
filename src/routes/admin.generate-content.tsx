@@ -185,17 +185,55 @@ function GenerateContentPage() {
             </label>
           </div>
 
-          <button
-            onClick={run}
-            disabled={busy}
-            className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"
-          >
-            {busy
-              ? "Generating… (60–120s)"
-              : dryRun
-                ? `Generate & Validate ${count} page(s)`
-                : `Generate & Insert ${count} page(s)`}
-          </button>
+          <div className="flex flex-wrap items-end gap-4 border-t border-border pt-4">
+            <label className="flex items-center gap-2 text-sm font-medium">
+              <input
+                type="checkbox"
+                checked={autoLoop}
+                onChange={(e) => setAutoLoop(e.target.checked)}
+              />
+              Auto-loop until queue empty
+            </label>
+            {autoLoop && (
+              <div>
+                <label className="block text-xs text-muted-foreground">Max batches</label>
+                <input
+                  type="number"
+                  min={1}
+                  max={500}
+                  value={maxBatches}
+                  onChange={(e) => setMaxBatches(Number(e.target.value) || 1)}
+                  className="mt-1 w-24 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                />
+              </div>
+            )}
+          </div>
+
+          <div className="flex gap-2">
+            <button
+              onClick={run}
+              disabled={busy}
+              className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50"
+            >
+              {busy
+                ? autoLoop
+                  ? `Looping… batch ${progress.batch}/${maxBatches}`
+                  : "Generating… (60–120s)"
+                : autoLoop
+                  ? `Auto-generate up to ${count * maxBatches} pages`
+                  : dryRun
+                    ? `Generate & Validate ${count} page(s)`
+                    : `Generate & Insert ${count} page(s)`}
+            </button>
+            {busy && autoLoop && (
+              <button
+                onClick={stop}
+                className="rounded-md border border-destructive px-4 py-2 text-sm font-medium text-destructive"
+              >
+                Stop after this batch
+              </button>
+            )}
+          </div>
 
           {error && (
             <div className="rounded-md border border-destructive bg-destructive/10 p-3 text-sm text-destructive">
@@ -203,6 +241,33 @@ function GenerateContentPage() {
             </div>
           )}
         </div>
+
+        {autoLoop && progress.batch > 0 && (
+          <div className="mt-6 rounded-lg border border-border bg-card p-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold">Auto-loop progress</h2>
+              <div className="text-sm text-muted-foreground">
+                Batch {progress.batch} · {progress.inserted} inserted ·{" "}
+                {progress.failed} failed
+              </div>
+            </div>
+            <ul className="mt-4 max-h-96 space-y-1 overflow-auto text-xs">
+              {progress.pages.map((p) => (
+                <li key={p.slug}>
+                  <a
+                    href={`/p/${p.slug}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-primary hover:underline"
+                  >
+                    /p/{p.slug}
+                  </a>
+                  <span className="ml-2 text-muted-foreground">{p.title}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         {result && (
           <div className="mt-6 rounded-lg border border-border bg-card p-6">
