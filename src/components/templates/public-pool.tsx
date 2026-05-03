@@ -22,6 +22,7 @@ export function PublicPoolTemplate({
   const title = page.title || page.seo_title || "Public pool";
   const description = page.seo_description || page.description || null;
   const body = page.body_markdown || page.content || null;
+  const faqs = faqsForContentPage(page);
 
   return (
     <div className="flex min-h-screen flex-col">
