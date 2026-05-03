@@ -64,23 +64,25 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(async (): P
 
     const [cities, categories, listingsResult, nearbyResult] = await Promise.all([
       safe(
-        supabaseAdmin
-          .from("cities")
-          .select("slug, name, state_code")
-          .eq("is_published", true)
-          .order("name")
-          .limit(60)
-          .then((r) => r),
+        Promise.resolve(
+          supabaseAdmin
+            .from("cities")
+            .select("slug, name, state_code")
+            .eq("is_published", true)
+            .order("name")
+            .limit(60),
+        ),
         "cities query",
         { data: [] as HomeCity[] } as { data: HomeCity[] | null },
       ),
       safe(
-        supabaseAdmin
-          .from("categories")
-          .select("slug, name, icon")
-          .eq("is_published", true)
-          .order("name")
-          .then((r) => r),
+        Promise.resolve(
+          supabaseAdmin
+            .from("categories")
+            .select("slug, name, icon")
+            .eq("is_published", true)
+            .order("name"),
+        ),
         "categories query",
         { data: [] as HomeCategory[] } as { data: HomeCategory[] | null },
       ),
