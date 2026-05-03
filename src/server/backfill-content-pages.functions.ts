@@ -349,4 +349,9 @@ export async function runBackfillContentPages(input: BackfillInput) {
       failed: results.filter((r) => !r.ok).length,
       results,
     };
-  });
+  }
+}
+
+// Backwards-compatible alias (used by existing imports, no longer an RPC).
+export const backfillContentPages = async ({ data }: { data: BackfillInput }) =>
+  runBackfillContentPages(data);
