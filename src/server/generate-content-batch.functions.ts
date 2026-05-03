@@ -325,8 +325,8 @@ export const generateContentBatch = createServerFn({ method: "POST" })
       }
       const body = gen.body_markdown ?? "";
       const words = body.split(/\s+/).filter(Boolean).length;
-      if (words < 900) {
-        errors.push(`${plan.slug}: too short (${words} words)`);
+      if (words < 2200) {
+        errors.push(`${plan.slug}: too short (${words} words, need 2,500+)`);
         continue;
       }
       const requiredLinks = (plan.internal_links ?? "")
@@ -340,8 +340,19 @@ export const generateContentBatch = createServerFn({ method: "POST" })
         );
         continue;
       }
-      if (!/##\s*Frequently asked questions/i.test(body)) {
-        errors.push(`${plan.slug}: missing FAQ section`);
+      const requiredSections: Array<[RegExp, string]> = [
+        [/##\s*How This Affects Pool Rental Hosts/i, "Section 5 (How This Affects Hosts)"],
+        [/##\s*Offset Your .+ Costs With Pool Rental Income/i, "Section 6 (Offset Costs)"],
+        [/##\s*Frequently Asked Questions/i, "Section 7 (FAQ)"],
+        [/##\s*Related Pool Owner Guides/i, "Section 8 (Related Guides)"],
+        [/##\s*Ready to Turn Your Pool Into Income\?/i, "Section 9 (Final CTA)"],
+        [/💰\s*\*\*Did you know\?\*\*/, "Section 4 (Mid-page Callout)"],
+      ];
+      const missingSections = requiredSections
+        .filter(([re]) => !re.test(body))
+        .map(([, label]) => label);
+      if (missingSections.length > 0) {
+        errors.push(`${plan.slug}: missing ${missingSections.join(", ")}`);
         continue;
       }
       okPages.push({ plan, body });
