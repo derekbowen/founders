@@ -144,8 +144,8 @@ function HomePageInner({ data }: { data: HomeData | undefined | null }) {
                 <input
                   name="address"
                   type="text"
-                  defaultValue={nearbyLabel ?? ""}
-                  placeholder="Where? (city or zip)"
+                  defaultValue=""
+                  placeholder={hydrated && nearbyLabel ? nearbyLabel : "Where? (city or zip)"}
                   aria-label="Location"
                   className="w-full bg-transparent text-base text-foreground placeholder:text-muted-foreground focus:outline-none"
                 />
