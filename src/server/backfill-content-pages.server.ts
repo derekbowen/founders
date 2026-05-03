@@ -332,7 +332,7 @@ export async function runBackfillContentPages(input: BackfillInput) {
         });
       } catch (e) {
         results.push({
-          url_path: row.url_path,
+          url_path: row.url_path ?? "",
           ok: false,
           error: e instanceof Error ? e.message : String(e),
         });
