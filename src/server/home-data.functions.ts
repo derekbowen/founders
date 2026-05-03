@@ -24,6 +24,8 @@ export type HomeData = {
     city: string | null;
     region: string | null;
     count: number;
+    /** Distance in miles to the nearest pool from the visitor location. */
+    nearestMiles: number | null;
   };
 };
 
@@ -33,8 +35,25 @@ const EMPTY_HOME_DATA: HomeData = {
   cities: [],
   categories: [],
   listings: [],
-  nearby: { city: null, region: null, count: 0 },
+  nearby: { city: null, region: null, count: 0, nearestMiles: null },
 };
+
+function haversineMiles(
+  lat1: number,
+  lng1: number,
+  lat2: number,
+  lng2: number,
+): number {
+  const R = 3958.7613; // Earth radius in miles
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+}
+
 
 export const getHomeData = createServerFn({ method: "GET" }).handler(async (): Promise<HomeData> => {
   try {
