@@ -68,6 +68,7 @@ import { Route as LSlugIdRouteImport } from './routes/l.$slug.$id'
 import { Route as HelpCenterCategorySlugRouteImport } from './routes/help-center.$category.$slug'
 import { Route as ApiPublicTrackCityClickRouteImport } from './routes/api/public/track-city-click'
 import { Route as AdminLearningUserIdRouteImport } from './routes/admin.learning.$userId'
+import { Route as ApiPublicHooksSyncListingsRouteImport } from './routes/api/public/hooks.sync-listings'
 import { Route as ApiCertificatesUidPdfRouteImport } from './routes/api/certificates.$uid.pdf'
 
 const SmAmenitiesDotxmlRoute = SmAmenitiesDotxmlRouteImport.update({
@@ -374,6 +375,12 @@ const AdminLearningUserIdRoute = AdminLearningUserIdRouteImport.update({
   path: '/$userId',
   getParentRoute: () => AdminLearningRoute,
 } as any)
+const ApiPublicHooksSyncListingsRoute =
+  ApiPublicHooksSyncListingsRouteImport.update({
+    id: '/api/public/hooks/sync-listings',
+    path: '/api/public/hooks/sync-listings',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiCertificatesUidPdfRoute = ApiCertificatesUidPdfRouteImport.update({
   id: '/api/certificates/$uid/pdf',
   path: '/api/certificates/$uid/pdf',
@@ -441,6 +448,7 @@ export interface FileRoutesByFullPath {
   '/pool-builders/$state/$city': typeof PoolBuildersStateCityRoute
   '/help-center/$category/': typeof HelpCenterCategoryIndexRoute
   '/api/certificates/$uid/pdf': typeof ApiCertificatesUidPdfRoute
+  '/api/public/hooks/sync-listings': typeof ApiPublicHooksSyncListingsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -502,6 +510,7 @@ export interface FileRoutesByTo {
   '/pool-builders/$state/$city': typeof PoolBuildersStateCityRoute
   '/help-center/$category': typeof HelpCenterCategoryIndexRoute
   '/api/certificates/$uid/pdf': typeof ApiCertificatesUidPdfRoute
+  '/api/public/hooks/sync-listings': typeof ApiPublicHooksSyncListingsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -565,6 +574,7 @@ export interface FileRoutesById {
   '/pool-builders/$state/$city': typeof PoolBuildersStateCityRoute
   '/help-center/$category/': typeof HelpCenterCategoryIndexRoute
   '/api/certificates/$uid/pdf': typeof ApiCertificatesUidPdfRoute
+  '/api/public/hooks/sync-listings': typeof ApiPublicHooksSyncListingsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -629,6 +639,7 @@ export interface FileRouteTypes {
     | '/pool-builders/$state/$city'
     | '/help-center/$category/'
     | '/api/certificates/$uid/pdf'
+    | '/api/public/hooks/sync-listings'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -690,6 +701,7 @@ export interface FileRouteTypes {
     | '/pool-builders/$state/$city'
     | '/help-center/$category'
     | '/api/certificates/$uid/pdf'
+    | '/api/public/hooks/sync-listings'
   id:
     | '__root__'
     | '/'
@@ -752,6 +764,7 @@ export interface FileRouteTypes {
     | '/pool-builders/$state/$city'
     | '/help-center/$category/'
     | '/api/certificates/$uid/pdf'
+    | '/api/public/hooks/sync-listings'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -808,6 +821,7 @@ export interface RootRouteChildren {
   LSlugIdRoute: typeof LSlugIdRoute
   HelpCenterCategoryIndexRoute: typeof HelpCenterCategoryIndexRoute
   ApiCertificatesUidPdfRoute: typeof ApiCertificatesUidPdfRoute
+  ApiPublicHooksSyncListingsRoute: typeof ApiPublicHooksSyncListingsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1225,6 +1239,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLearningUserIdRouteImport
       parentRoute: typeof AdminLearningRoute
     }
+    '/api/public/hooks/sync-listings': {
+      id: '/api/public/hooks/sync-listings'
+      path: '/api/public/hooks/sync-listings'
+      fullPath: '/api/public/hooks/sync-listings'
+      preLoaderRoute: typeof ApiPublicHooksSyncListingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/certificates/$uid/pdf': {
       id: '/api/certificates/$uid/pdf'
       path: '/api/certificates/$uid/pdf'
@@ -1358,6 +1379,7 @@ const rootRouteChildren: RootRouteChildren = {
   LSlugIdRoute: LSlugIdRoute,
   HelpCenterCategoryIndexRoute: HelpCenterCategoryIndexRoute,
   ApiCertificatesUidPdfRoute: ApiCertificatesUidPdfRoute,
+  ApiPublicHooksSyncListingsRoute: ApiPublicHooksSyncListingsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
