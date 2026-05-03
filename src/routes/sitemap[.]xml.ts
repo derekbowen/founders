@@ -109,7 +109,7 @@ export const Route = createFileRoute("/sitemap.xml")({
         });
 
         // 5. Host profiles (optional — /u/{uuid})
-        const { count: hostCount } = await supabaseAdmin
+        const { count: hostCount } = await (supabaseAdmin as any)
           .from("host_profiles")
           .select("*", { count: "exact", head: true })
           .eq("is_published", true);
