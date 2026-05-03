@@ -1,18 +1,20 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { backfillContentPages } from "@/server/backfill-content-pages.functions";
+import { runBackfillContentPages } from "@/server/backfill-content-pages.functions";
 
 /**
- * POST /api/public/admin/backfill-content-pages
- * Body: { adminToken, limit?, model?, dryRun? }
- * adminToken must equal BACKFILL_ADMIN_TOKEN (or SUPABASE_SERVICE_ROLE_KEY fallback).
+ * POST /api/public/backfill-content-pages
+ * Body: { adminToken?, limit?, model?, dryRun? }
+ * If adminToken is omitted, falls back to BACKFILL_ADMIN_TOKEN / SUPABASE_SERVICE_ROLE_KEY
+ * from server env (so trusted callers don't have to ship the secret).
  */
 export const Route = createFileRoute("/api/public/backfill-content-pages")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        let body: any;
+        let body: any = {};
         try {
-          body = await request.json();
+          const text = await request.text();
+          body = text ? JSON.parse(text) : {};
         } catch {
           return new Response(JSON.stringify({ error: "Invalid JSON" }), {
             status: 400,
@@ -20,15 +22,11 @@ export const Route = createFileRoute("/api/public/backfill-content-pages")({
           });
         }
         try {
-          // Inject the server-side admin token so the route is callable from
-          // trusted server contexts without exposing the secret to clients.
           const adminToken =
             body?.adminToken ||
             process.env.BACKFILL_ADMIN_TOKEN ||
             process.env.SUPABASE_SERVICE_ROLE_KEY;
-          const result = await backfillContentPages({
-            data: { ...body, adminToken },
-          });
+          const result = await runBackfillContentPages({ ...body, adminToken });
           return new Response(JSON.stringify(result, null, 2), {
             status: 200,
             headers: { "Content-Type": "application/json" },
