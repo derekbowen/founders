@@ -154,9 +154,9 @@ export function SiteFooter() {
             <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
               {POPULAR_MARKETS.map((m) => (
                 <li key={m.slug}>
-                  <Link to="/pool-rental/$city" params={{ city: m.slug }} className="hover:text-primary">
+                  <a href={rel(`/s?address=${encodeURIComponent(m.name)}`)} className="hover:text-primary">
                     {m.name}
-                  </Link>
+                  </a>
                 </li>
               ))}
               <li>
