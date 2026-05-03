@@ -70,7 +70,7 @@ export const lookupContentPage = createServerFn({ method: "GET" })
       .from("content_pages")
       .select("*")
       .eq("slug", slug)
-      .in("status", ["drafted", "migrated", "published"])
+      .in("status", ["pending", "scraped", "drafted", "migrated", "published"])
       .maybeSingle();
 
     if (page) {
