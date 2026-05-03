@@ -126,19 +126,19 @@ function ReferralPage() {
               their bookings for 2 years.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link
-                to="/auth"
+              <a
+                href="/auth"
                 className="inline-flex items-center justify-center rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-lg transition hover:bg-primary/90"
               >
                 Sign in to get your link
-              </Link>
-              <Link
+              </a>
+              <a
                 to="/p/$slug"
                 params={{ slug: "hosting" }}
                 className="inline-flex items-center justify-center rounded-full border border-border bg-background px-6 py-3 text-sm font-semibold text-foreground transition hover:bg-muted"
               >
                 Become a host first
-              </Link>
+              </a>
             </div>
           </div>
         </section>
@@ -262,12 +262,12 @@ function ReferralPage() {
             .
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Link
-              to="/auth"
+            <a
+              href="/auth"
               className="inline-flex items-center justify-center rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-lg transition hover:bg-primary/90"
             >
               Get my referral link
-            </Link>
+            </a>
             <a
               href="mailto:referrals@poolrentalnearme.com?subject=Recruiter program application"
               className="inline-flex items-center justify-center rounded-full border border-border bg-background px-6 py-3 text-sm font-semibold text-foreground transition hover:bg-muted"
