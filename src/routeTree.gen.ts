@@ -51,6 +51,7 @@ import { Route as PoolRentalLawsCityRouteImport } from './routes/pool-rental-law
 import { Route as PoolBuildersStateRouteImport } from './routes/pool-builders.$state'
 import { Route as PHowItWorksRouteImport } from './routes/p.how-it-works'
 import { Route as PHostingRouteImport } from './routes/p.hosting'
+import { Route as PFreeHostToolsRouteImport } from './routes/p.free-host-tools'
 import { Route as PSlugRouteImport } from './routes/p.$slug'
 import { Route as PSplatRouteImport } from './routes/p.$'
 import { Route as HostToolsSlugRouteImport } from './routes/host-tools.$slug'
@@ -287,6 +288,11 @@ const PoolBuildersStateRoute = PoolBuildersStateRouteImport.update({
 const PHostingRoute = PHostingRouteImport.update({
   id: '/p/hosting',
   path: '/p/hosting',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PFreeHostToolsRoute = PFreeHostToolsRouteImport.update({
+  id: '/p/free-host-tools',
+  path: '/p/free-host-tools',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PHowItWorksRoute = PHowItWorksRouteImport.update({
@@ -861,6 +867,7 @@ export interface RootRouteChildren {
   PSlugRoute: typeof PSlugRoute
   PHowItWorksRoute: typeof PHowItWorksRoute
   PHostingRoute: typeof PHostingRoute
+  PFreeHostToolsRoute: typeof PFreeHostToolsRoute
   PoolBuildersStateRoute: typeof PoolBuildersStateRouteWithChildren
   PoolRentalLawsCityRoute: typeof PoolRentalLawsCityRoute
   PoolRentalCityRoute: typeof PoolRentalCityRoute
@@ -1451,6 +1458,7 @@ const rootRouteChildren: RootRouteChildren = {
   PSlugRoute: PSlugRoute,
   PHowItWorksRoute: PHowItWorksRoute,
   PHostingRoute: PHostingRoute,
+  PFreeHostToolsRoute: PFreeHostToolsRoute,
   PoolBuildersStateRoute: PoolBuildersStateRouteWithChildren,
   PoolRentalLawsCityRoute: PoolRentalLawsCityRoute,
   PoolRentalCityRoute: PoolRentalCityRoute,
