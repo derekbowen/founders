@@ -54,7 +54,6 @@ import { Route as HostToolsSlugRouteImport } from './routes/host-tools.$slug'
 import { Route as CategorySlugRouteImport } from './routes/category.$slug'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth.reset-password'
-import { Route as ApiDebugSharetribeRouteImport } from './routes/api/debug-sharetribe'
 import { Route as AdminMissingPagesRouteImport } from './routes/admin.missing-pages'
 import { Route as AdminLearningRouteImport } from './routes/admin.learning'
 import { Route as AdminContentMigrationRouteImport } from './routes/admin.content-migration'
@@ -68,6 +67,7 @@ import { Route as PoolBuildersStateCityRouteImport } from './routes/pool-builder
 import { Route as LSlugIdRouteImport } from './routes/l.$slug.$id'
 import { Route as HelpCenterCategorySlugRouteImport } from './routes/help-center.$category.$slug'
 import { Route as ApiPublicTrackCityClickRouteImport } from './routes/api/public/track-city-click'
+import { Route as ApiPublicDebugSharetribeRouteImport } from './routes/api/public/debug-sharetribe'
 import { Route as AdminLearningUserIdRouteImport } from './routes/admin.learning.$userId'
 import { Route as ApiCertificatesUidPdfRouteImport } from './routes/api/certificates.$uid.pdf'
 
@@ -305,11 +305,6 @@ const AuthResetPasswordRoute = AuthResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => AuthRoute,
 } as any)
-const ApiDebugSharetribeRoute = ApiDebugSharetribeRouteImport.update({
-  id: '/api/debug-sharetribe',
-  path: '/api/debug-sharetribe',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AdminMissingPagesRoute = AdminMissingPagesRouteImport.update({
   id: '/admin/missing-pages',
   path: '/admin/missing-pages',
@@ -375,6 +370,12 @@ const ApiPublicTrackCityClickRoute = ApiPublicTrackCityClickRouteImport.update({
   path: '/api/public/track-city-click',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicDebugSharetribeRoute =
+  ApiPublicDebugSharetribeRouteImport.update({
+    id: '/api/public/debug-sharetribe',
+    path: '/api/public/debug-sharetribe',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AdminLearningUserIdRoute = AdminLearningUserIdRouteImport.update({
   id: '/$userId',
   path: '/$userId',
@@ -425,7 +426,6 @@ export interface FileRoutesByFullPath {
   '/admin/content-migration': typeof AdminContentMigrationRoute
   '/admin/learning': typeof AdminLearningRouteWithChildren
   '/admin/missing-pages': typeof AdminMissingPagesRoute
-  '/api/debug-sharetribe': typeof ApiDebugSharetribeRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
@@ -442,6 +442,7 @@ export interface FileRoutesByFullPath {
   '/host-tools/': typeof HostToolsIndexRoute
   '/pool-builders/': typeof PoolBuildersIndexRoute
   '/admin/learning/$userId': typeof AdminLearningUserIdRoute
+  '/api/public/debug-sharetribe': typeof ApiPublicDebugSharetribeRoute
   '/api/public/track-city-click': typeof ApiPublicTrackCityClickRoute
   '/help-center/$category/$slug': typeof HelpCenterCategorySlugRoute
   '/l/$slug/$id': typeof LSlugIdRoute
@@ -487,7 +488,6 @@ export interface FileRoutesByTo {
   '/admin/content-migration': typeof AdminContentMigrationRoute
   '/admin/learning': typeof AdminLearningRouteWithChildren
   '/admin/missing-pages': typeof AdminMissingPagesRoute
-  '/api/debug-sharetribe': typeof ApiDebugSharetribeRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
@@ -504,6 +504,7 @@ export interface FileRoutesByTo {
   '/host-tools': typeof HostToolsIndexRoute
   '/pool-builders': typeof PoolBuildersIndexRoute
   '/admin/learning/$userId': typeof AdminLearningUserIdRoute
+  '/api/public/debug-sharetribe': typeof ApiPublicDebugSharetribeRoute
   '/api/public/track-city-click': typeof ApiPublicTrackCityClickRoute
   '/help-center/$category/$slug': typeof HelpCenterCategorySlugRoute
   '/l/$slug/$id': typeof LSlugIdRoute
@@ -551,7 +552,6 @@ export interface FileRoutesById {
   '/admin/content-migration': typeof AdminContentMigrationRoute
   '/admin/learning': typeof AdminLearningRouteWithChildren
   '/admin/missing-pages': typeof AdminMissingPagesRoute
-  '/api/debug-sharetribe': typeof ApiDebugSharetribeRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
@@ -568,6 +568,7 @@ export interface FileRoutesById {
   '/host-tools/': typeof HostToolsIndexRoute
   '/pool-builders/': typeof PoolBuildersIndexRoute
   '/admin/learning/$userId': typeof AdminLearningUserIdRoute
+  '/api/public/debug-sharetribe': typeof ApiPublicDebugSharetribeRoute
   '/api/public/track-city-click': typeof ApiPublicTrackCityClickRoute
   '/help-center/$category/$slug': typeof HelpCenterCategorySlugRoute
   '/l/$slug/$id': typeof LSlugIdRoute
@@ -616,7 +617,6 @@ export interface FileRouteTypes {
     | '/admin/content-migration'
     | '/admin/learning'
     | '/admin/missing-pages'
-    | '/api/debug-sharetribe'
     | '/auth/reset-password'
     | '/blog/$slug'
     | '/category/$slug'
@@ -633,6 +633,7 @@ export interface FileRouteTypes {
     | '/host-tools/'
     | '/pool-builders/'
     | '/admin/learning/$userId'
+    | '/api/public/debug-sharetribe'
     | '/api/public/track-city-click'
     | '/help-center/$category/$slug'
     | '/l/$slug/$id'
@@ -678,7 +679,6 @@ export interface FileRouteTypes {
     | '/admin/content-migration'
     | '/admin/learning'
     | '/admin/missing-pages'
-    | '/api/debug-sharetribe'
     | '/auth/reset-password'
     | '/blog/$slug'
     | '/category/$slug'
@@ -695,6 +695,7 @@ export interface FileRouteTypes {
     | '/host-tools'
     | '/pool-builders'
     | '/admin/learning/$userId'
+    | '/api/public/debug-sharetribe'
     | '/api/public/track-city-click'
     | '/help-center/$category/$slug'
     | '/l/$slug/$id'
@@ -741,7 +742,6 @@ export interface FileRouteTypes {
     | '/admin/content-migration'
     | '/admin/learning'
     | '/admin/missing-pages'
-    | '/api/debug-sharetribe'
     | '/auth/reset-password'
     | '/blog/$slug'
     | '/category/$slug'
@@ -758,6 +758,7 @@ export interface FileRouteTypes {
     | '/host-tools/'
     | '/pool-builders/'
     | '/admin/learning/$userId'
+    | '/api/public/debug-sharetribe'
     | '/api/public/track-city-click'
     | '/help-center/$category/$slug'
     | '/l/$slug/$id'
@@ -804,7 +805,6 @@ export interface RootRouteChildren {
   AdminContentMigrationRoute: typeof AdminContentMigrationRoute
   AdminLearningRoute: typeof AdminLearningRouteWithChildren
   AdminMissingPagesRoute: typeof AdminMissingPagesRoute
-  ApiDebugSharetribeRoute: typeof ApiDebugSharetribeRoute
   CategorySlugRoute: typeof CategorySlugRoute
   HostToolsSlugRoute: typeof HostToolsSlugRoute
   PSplatRoute: typeof PSplatRoute
@@ -816,6 +816,7 @@ export interface RootRouteChildren {
   HelpCenterIndexRoute: typeof HelpCenterIndexRoute
   HostToolsIndexRoute: typeof HostToolsIndexRoute
   PoolBuildersIndexRoute: typeof PoolBuildersIndexRoute
+  ApiPublicDebugSharetribeRoute: typeof ApiPublicDebugSharetribeRoute
   ApiPublicTrackCityClickRoute: typeof ApiPublicTrackCityClickRoute
   HelpCenterCategorySlugRoute: typeof HelpCenterCategorySlugRoute
   LSlugIdRoute: typeof LSlugIdRoute
@@ -1140,13 +1141,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthResetPasswordRouteImport
       parentRoute: typeof AuthRoute
     }
-    '/api/debug-sharetribe': {
-      id: '/api/debug-sharetribe'
-      path: '/api/debug-sharetribe'
-      fullPath: '/api/debug-sharetribe'
-      preLoaderRoute: typeof ApiDebugSharetribeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/admin/missing-pages': {
       id: '/admin/missing-pages'
       path: '/admin/missing-pages'
@@ -1236,6 +1230,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/track-city-click'
       fullPath: '/api/public/track-city-click'
       preLoaderRoute: typeof ApiPublicTrackCityClickRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/debug-sharetribe': {
+      id: '/api/public/debug-sharetribe'
+      path: '/api/public/debug-sharetribe'
+      fullPath: '/api/public/debug-sharetribe'
+      preLoaderRoute: typeof ApiPublicDebugSharetribeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/learning/$userId': {
@@ -1362,7 +1363,6 @@ const rootRouteChildren: RootRouteChildren = {
   AdminContentMigrationRoute: AdminContentMigrationRoute,
   AdminLearningRoute: AdminLearningRouteWithChildren,
   AdminMissingPagesRoute: AdminMissingPagesRoute,
-  ApiDebugSharetribeRoute: ApiDebugSharetribeRoute,
   CategorySlugRoute: CategorySlugRoute,
   HostToolsSlugRoute: HostToolsSlugRoute,
   PSplatRoute: PSplatRoute,
@@ -1374,6 +1374,7 @@ const rootRouteChildren: RootRouteChildren = {
   HelpCenterIndexRoute: HelpCenterIndexRoute,
   HostToolsIndexRoute: HostToolsIndexRoute,
   PoolBuildersIndexRoute: PoolBuildersIndexRoute,
+  ApiPublicDebugSharetribeRoute: ApiPublicDebugSharetribeRoute,
   ApiPublicTrackCityClickRoute: ApiPublicTrackCityClickRoute,
   HelpCenterCategorySlugRoute: HelpCenterCategorySlugRoute,
   LSlugIdRoute: LSlugIdRoute,
