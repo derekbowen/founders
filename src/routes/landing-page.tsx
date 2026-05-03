@@ -333,14 +333,13 @@ function HomePage() {
           </p>
           <div className="mt-8 grid grid-cols-2 gap-x-6 gap-y-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
             {cities.map((c: { slug: string; name: string; state_code: string }) => (
-              <Link
+              <a
                 key={c.slug}
-                to="/pool-rental/$city"
-                params={{ city: c.slug }}
+                href={`/s?address=${encodeURIComponent(`${c.name}, ${c.state_code}`)}`}
                 className="text-sm text-muted-foreground transition-colors hover:text-primary hover:underline"
               >
                 {c.name}, {c.state_code}
-              </Link>
+              </a>
             ))}
           </div>
         </section>
