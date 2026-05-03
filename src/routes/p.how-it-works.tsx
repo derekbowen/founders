@@ -396,7 +396,7 @@ function HowItWorksPage() {
               <p className="mt-1 text-sm text-muted-foreground">
                 Heated, hot tub, pet-friendly, slides, lap, and more.
               </p>
-            </Link>
+            </a>
             <a
               href="/p/become-a-pool-host"
               className="group rounded-2xl border border-border p-5 transition hover:border-primary hover:shadow-sm"
