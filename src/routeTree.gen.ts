@@ -48,6 +48,7 @@ import { Route as PoolRentalCityRouteImport } from './routes/pool-rental.$city'
 import { Route as PoolRentalLawsCityRouteImport } from './routes/pool-rental-laws.$city'
 import { Route as PoolBuildersStateRouteImport } from './routes/pool-builders.$state'
 import { Route as PSlugRouteImport } from './routes/p.$slug'
+import { Route as PSplatRouteImport } from './routes/p.$'
 import { Route as HostToolsSlugRouteImport } from './routes/host-tools.$slug'
 import { Route as CategorySlugRouteImport } from './routes/category.$slug'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
@@ -271,6 +272,11 @@ const PSlugRoute = PSlugRouteImport.update({
   path: '/p/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PSplatRoute = PSplatRouteImport.update({
+  id: '/p/$',
+  path: '/p/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HostToolsSlugRoute = HostToolsSlugRouteImport.update({
   id: '/host-tools/$slug',
   path: '/host-tools/$slug',
@@ -403,6 +409,7 @@ export interface FileRoutesByFullPath {
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
   '/host-tools/$slug': typeof HostToolsSlugRoute
+  '/p/$': typeof PSplatRoute
   '/p/$slug': typeof PSlugRoute
   '/pool-builders/$state': typeof PoolBuildersStateRouteWithChildren
   '/pool-rental-laws/$city': typeof PoolRentalLawsCityRoute
@@ -461,6 +468,7 @@ export interface FileRoutesByTo {
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
   '/host-tools/$slug': typeof HostToolsSlugRoute
+  '/p/$': typeof PSplatRoute
   '/p/$slug': typeof PSlugRoute
   '/pool-builders/$state': typeof PoolBuildersStateRouteWithChildren
   '/pool-rental-laws/$city': typeof PoolRentalLawsCityRoute
@@ -521,6 +529,7 @@ export interface FileRoutesById {
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
   '/host-tools/$slug': typeof HostToolsSlugRoute
+  '/p/$': typeof PSplatRoute
   '/p/$slug': typeof PSlugRoute
   '/pool-builders/$state': typeof PoolBuildersStateRouteWithChildren
   '/pool-rental-laws/$city': typeof PoolRentalLawsCityRoute
@@ -582,6 +591,7 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/category/$slug'
     | '/host-tools/$slug'
+    | '/p/$'
     | '/p/$slug'
     | '/pool-builders/$state'
     | '/pool-rental-laws/$city'
@@ -640,6 +650,7 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/category/$slug'
     | '/host-tools/$slug'
+    | '/p/$'
     | '/p/$slug'
     | '/pool-builders/$state'
     | '/pool-rental-laws/$city'
@@ -699,6 +710,7 @@ export interface FileRouteTypes {
     | '/blog/$slug'
     | '/category/$slug'
     | '/host-tools/$slug'
+    | '/p/$'
     | '/p/$slug'
     | '/pool-builders/$state'
     | '/pool-rental-laws/$city'
@@ -756,6 +768,7 @@ export interface RootRouteChildren {
   AdminLearningRoute: typeof AdminLearningRouteWithChildren
   CategorySlugRoute: typeof CategorySlugRoute
   HostToolsSlugRoute: typeof HostToolsSlugRoute
+  PSplatRoute: typeof PSplatRoute
   PSlugRoute: typeof PSlugRoute
   PoolBuildersStateRoute: typeof PoolBuildersStateRouteWithChildren
   PoolRentalLawsCityRoute: typeof PoolRentalLawsCityRoute
@@ -1046,6 +1059,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/p/$': {
+      id: '/p/$'
+      path: '/p/$'
+      fullPath: '/p/$'
+      preLoaderRoute: typeof PSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/host-tools/$slug': {
       id: '/host-tools/$slug'
       path: '/host-tools/$slug'
@@ -1282,6 +1302,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminLearningRoute: AdminLearningRouteWithChildren,
   CategorySlugRoute: CategorySlugRoute,
   HostToolsSlugRoute: HostToolsSlugRoute,
+  PSplatRoute: PSplatRoute,
   PSlugRoute: PSlugRoute,
   PoolBuildersStateRoute: PoolBuildersStateRouteWithChildren,
   PoolRentalLawsCityRoute: PoolRentalLawsCityRoute,
