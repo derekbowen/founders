@@ -377,8 +377,6 @@ export function HomePageContent({ data }: { data: HomeData | undefined | null })
           </section>
         )}
 
-        <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
         {cities.length > 0 && (
           <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
             <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
