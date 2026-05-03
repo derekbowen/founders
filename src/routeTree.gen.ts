@@ -290,6 +290,11 @@ const PHostingRoute = PHostingRouteImport.update({
   path: '/p/hosting',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PFreeHostToolsRoute = PFreeHostToolsRouteImport.update({
+  id: '/p/free-host-tools',
+  path: '/p/free-host-tools',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PHowItWorksRoute = PHowItWorksRouteImport.update({
   id: '/p/how-it-works',
   path: '/p/how-it-works',
