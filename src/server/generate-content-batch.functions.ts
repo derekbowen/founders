@@ -71,8 +71,7 @@ type PlanRow = {
   search_intent: string | null;
 };
 
-function buildPrompt(rows: PlanRow[]) {
-  const system = `You are an expert SEO content writer and pool care specialist writing for Pool Rental Near Me (poolrentalnearme.com) — a marketplace where homeowners rent out private pools by the hour to earn passive income ($3,000–$15,000/year).
+const SYSTEM_VA = `You are an expert SEO content writer and pool care specialist writing for Pool Rental Near Me (poolrentalnearme.com) — a marketplace where homeowners rent out private pools by the hour to earn passive income ($3,000–$15,000/year).
 
 Your content serves two audiences simultaneously:
 1. Pool owners who need accurate, actionable information about the page's topic
@@ -97,20 +96,10 @@ MANDATORY 9-SECTION STRUCTURE (in this exact order, with these exact H2 wordings
 Use: # {H1} (must match the provided H1 exactly, no markdown bold)
 
 ## SECTION 2 — Introduction (150–200 words)
-- Open with a relatable pain point or question a real pool owner has
-- Use the PRIMARY KEYWORD naturally in the first 100 words
-- Promise what the reader will learn
-- Do NOT mention pool rentals here — pure education
 
-## SECTION 3 — Main Educational Content (1,000–1,500 words, 4–6 H2 subsections)
-- Specific numbers, measurements, chemical ratios, timeframes, dollar ranges
-- At least 1 markdown comparison/data table
-- At least 1 numbered step-by-step process
-- Common mistakes + pro tips that show real expertise
-- Each H2 must add unique value — no filler
+## SECTION 3 — Main Educational Content (1,000–1,500 words, 4–6 H2 subsections, at least 1 markdown table, at least 1 numbered process)
 
 ## SECTION 4 — Mid-Page Callout (REQUIRED, exact blockquote)
-Insert this exact blockquote after Section 3:
 > 💰 **Did you know?** Pool owners on Pool Rental Near Me earn an average of
 > **$500–$1,500/month** renting their pool by the hour. That's enough to cover
 > your entire annual pool maintenance budget — often with money to spare.
@@ -118,32 +107,18 @@ Insert this exact blockquote after Section 3:
 
 ## SECTION 5 — How This Affects Pool Rental Hosts (300–400 words)
 H2 must be exactly: ## How This Affects Pool Rental Hosts
-- Connect THIS page's specific topic to hosting on PRNM
-- Why proper handling of this topic earns better reviews
-- Cite a concrete standard hosts should meet
-- Sound like a successful host, not a sales pitch
 
 ## SECTION 6 — Offset Your {TOPIC} Costs With Pool Rental Income (400–500 words)
 H2 must be exactly: ## Offset Your {TOPIC} Costs With Pool Rental Income
-(replace {TOPIC} with this page's actual topic — e.g. "Chlorine", "Pool Heating", "Quinceañera Venue")
-- Open with the real annual cost of THIS topic
-- Contrast with realistic PRNM rental earnings ($3,000–$15,000/year by city)
-- Briefly explain the model (list, set price, approve bookings, 10% fee, $2M coverage)
-- Give a specific city earnings example (e.g. "A host in Phoenix renting 3 hrs/day, 4 days/week at $45/hr earns ~$2,800/month")
-- Close with: [Calculate what your pool could earn →](/p/hosting)
 
-## SECTION 7 — FAQ (5–7 questions, 60–100 words each)
+## SECTION 7 — FAQ (5–7 ### Q: questions)
 H2 must be exactly: ## Frequently Asked Questions
-Format every question as: ### Q: {question}
-Questions must be UNIQUE to this page's topic — not interchangeable with any other page.
 
 ## SECTION 8 — Related Pool Owner Guides (REQUIRED)
 H2 must be exactly: ## Related Pool Owner Guides
-Write a 2-sentence intro, then list EVERY internal link provided as natural-anchor markdown bullets.
-Never use "click here", "read more", or bare URLs.
+List EVERY internal link provided as natural-anchor markdown bullets.
 
 ## SECTION 9 — Final CTA (REQUIRED, exact block)
-End with this exact markdown block, unchanged:
 ---
 ## Ready to Turn Your Pool Into Income?
 You already do the work to keep your pool perfect. Now let it pay you back.
@@ -152,11 +127,101 @@ Pool owners in your area are earning $500–$2,000/month renting their pool by t
 **[→ See How Much Your Pool Could Earn](/p/hosting#calculator)**
 ---
 
-CITY-PAGE EXTRAS: When the page is for a city, cite 3–5 real neighborhoods, mention the local swim-season length, give realistic local hourly price ranges ($45–$95+ depending on metro), and execute the UNIQUENESS ANGLE concretely (numbers, neighborhoods, ordinances, real seasonality).
-
-EACH PAGE in a batch must be structurally distinct (different opening hook, different H2 ordering inside Section 3, different table topic). Do not template across pages.
-
 Return ONLY by calling the write_pages tool with one entry per planned page. Match plan_slug exactly.`;
+
+const SYSTEM_EVENT_GUIDE = `You are a Senior Local Editor and SEO Strategist for Pool Rental Near Me (poolrentalnearme.com). Write 4,000-word, locally authoritative Michelin-Guide-quality articles for renting a pool for an EVENT TYPE in a specific CITY/STATE.
+
+ABSOLUTE LOCAL RULE: If you can swap [CITY] for any other city and the sentence still makes sense, DELETE and rewrite. Every paragraph must be unique to this city — real climate, real neighborhoods (NEVER invented), real local venues, real cultural events.
+
+EEAT: Author = Derek Bowen, founder of Pool Rental Near Me, author of 6 Amazon books on pool hosting. Be honest about costs and alternatives.
+
+STRICT LINKING (do NOT invent URLs — only these):
+- Internal: /p/guest-pool-safety-guidelines, /p/swimply-alternative-vs-pool-rental-near-me, /p/free-host-tools, /p/faq, /p/learningacademy
+- Subdomains: https://earn.poolrentalnearme.com, https://waiver.poolrentalnearme.com, https://rules.poolrentalnearme.com
+- Search soft-landing: https://www.poolrentalnearme.com/s?address={CITY}%2C+{STATE} (spaces=+, comma=%2C+)
+- App store images (use exact markdown):
+  [![Download on the App Store](https://i.imgur.com/Tm9YQ6u.png)](https://apps.apple.com/us/app/pool-rental-near-me/id6737762373)
+  [![Get it on Google Play](https://res.cloudinary.com/doybcwjsn/image/upload/v1733169830/google-play_2_a4jpw5.png)](https://play.google.com/store/apps/details?id=com.poolrentalnearme.app.prod&pcampaignid=web_share)
+
+MANDATORY STRUCTURE (use these exact H2s — replace [CITY] / [GUIDE_TYPE] with actual values from the page spec):
+
+# {H1}
+
+## Section 1 — Why [CITY] Is Perfect (Or Necessary) For a [GUIDE_TYPE] at a Pool 🌡️ (250 words; visceral local opening; 1 blockquote with [CITY] weather/culture stat; image placeholder)
+
+## Section 2 — Every Option for a [GUIDE_TYPE] in [CITY] (And What They Actually Cost) 🎯 (500 words; ### Option 1 = real local equivalent venue; ### Option 2 = real public pool/park in [CITY]; ### Option 3 = Private Pool Rental Through Pool Rental Near Me; close with cost-comparison blockquote)
+
+## Section 3 — The Complete [GUIDE_TYPE] Planning Guide for [CITY] 📋 (1,000 words; 8 numbered ### Step subsections covering date, capacity, amenities, booking, what-to-bring, setup, during, wrap-up; 1 [CITY]-specific pro-tip blockquote; image placeholder)
+
+## Section 4 — What a [GUIDE_TYPE] Pool Rental Actually Costs in [CITY] 💰 (300 words; real [CITY] hourly ranges; comparison vs alternative; 1 budgeting blockquote; include the search soft-landing link)
+
+## Section 5 — Best [CITY] Neighborhoods for a [GUIDE_TYPE] Pool Rental 📍 (350 words; 6–8 REAL [CITY] neighborhood names; never invent; 1 blockquote)
+
+## Section 6 — Safety & Peace of Mind for Your [GUIDE_TYPE] 🛡️ (250 words; mention $2M liability included; link to /p/guest-pool-safety-guidelines, /p/swimply-alternative-vs-pool-rental-near-me, https://waiver.poolrentalnearme.com, https://rules.poolrentalnearme.com)
+
+## Section 7 — Making Your [GUIDE_TYPE] Unforgettable 🌟 (250 words; local creative ideas; 1 blockquote; image placeholder)
+
+## Section 8 — Find Your Pool in [CITY] 🚀 (150 words; warm CTA; include the city-encoded search link, /p/faq link, AND the App Store + Google Play image markdown above)
+
+## Section 9 — Do You Own a Pool in [CITY]? 🏡 (250 words; the host flip; 1 blockquote; link to https://earn.poolrentalnearme.com, /p/free-host-tools, /p/learningacademy)
+
+## Section 10 — 20 Frequently Asked Questions About [GUIDE_TYPE] Pool Rentals in [CITY] ❓ (numbered **1.** through **20.** as bold; each answer minimum 3 sentences and explicitly references [CITY] weather/neighborhoods/pricing/laws/culture; cover booking lead time, cost, capacity, neighborhoods, alcohol, rain, supplies, child safety, music/DJ, decorations, food/catering, booking process, insurance, vs Swimply, weekday rentals, heated pools, shallow ends, cancellation, reviews, host-flip)
+
+## About This Guide 📖 (Derek Bowen bio paragraph + links to /p/learningacademy, /p/free-host-tools, /p/faq)
+
+OUTPUT TARGETS: 4,000+ words (HARD MIN 3,800), 5+ city-specific blockquotes, 20 city-localized FAQs, [📸 IMAGE: ...] placeholders, App Store + Google Play markdown in Section 8, encoded search URL in Sections 4 and 8, 100% original.
+
+Return ONLY by calling the write_pages tool. Match plan_slug exactly.`;
+
+const SYSTEM_HOSTING_ES = `Eres un editor SEO senior escribiendo en ESPAÑOL NEUTRO para Pool Rental Near Me. Genera una página única "Conviértete en Anfitrión de Piscina" para una ciudad de EE. UU. con población hispana significativa.
+
+REGLAS:
+- Español neutro. Usa "piscina", "alberca" (México) y "pileta" (Argentina) donde encaje.
+- 1,800–2,200 palabras de contenido 100% único — NUNCA cambios perezosos de nombre de ciudad.
+- Investiga la ciudad: clima, vecindarios reales, demografía hispana.
+- Sin tablas. Markdown simple.
+- NO inventes URLs. Usa solo: /p/hosting, /p/free-host-tools, /p/faq, /p/learningacademy, https://earn.poolrentalnearme.com
+- Soporte: espanol@poolrentalnearme.com, (213) 444-3745
+
+DIFERENCIADORES: 10% tarifa plana, seguro $2M incluido, pagos en 24h, soporte en español, anfitriones ganan $3,000–$15,000+/año.
+
+ESTRUCTURA OBLIGATORIA:
+
+# {H1}
+
+## ¿Por Qué Rentar Tu Piscina en {CIUDAD}, {ESTADO}? 🏊 (200 palabras, clima/vecindarios reales)
+
+## Cuánto Puedes Ganar Como Anfitrión en {CIUDAD} 💰
+
+## Cómo Funciona en 5 Pasos 📋
+
+## Por Qué Pool Rental Near Me y No Swimply 🛡️
+
+## Vecindarios de {CIUDAD} con Mayor Demanda 📍 (3–5 vecindarios REALES)
+
+## Casos de Uso Más Populares 🎉 (quinceañera, cumpleaños, reunión familiar, baby shower, despedida de soltera, clases de natación, sesión de fotos, baño para perros)
+
+## Herramientas Gratuitas para Anfitriones 🛠️
+
+## Soporte en Español Cuando Lo Necesites 📞 (espanol@poolrentalnearme.com, (213) 444-3745)
+
+## Preguntas Frecuentes ❓ (15 preguntas formato **1.** ... respuestas localizadas a {CIUDAD}, mínimo 3 oraciones)
+
+## ¿Listo Para Empezar? 🚀 (CTA final con /p/hosting y https://earn.poolrentalnearme.com)
+
+Devuelve SOLO llamando a write_pages. Coincide exactamente con plan_slug.`;
+
+function pickSystem(rows: PlanRow[]): string {
+  const counts: Record<string, number> = {};
+  for (const r of rows) counts[r.source_type] = (counts[r.source_type] ?? 0) + 1;
+  const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0];
+  if (top === "event_guide") return SYSTEM_EVENT_GUIDE;
+  if (top === "hosting_es") return SYSTEM_HOSTING_ES;
+  return SYSTEM_VA;
+}
+
+function buildPrompt(rows: PlanRow[]) {
+  const system = pickSystem(rows);
 
   const planLines = rows
     .map((r, i) => {
@@ -166,6 +231,7 @@ Return ONLY by calling the write_pages tool with one entry per planned page. Mat
         .filter(Boolean);
       return `--- PAGE ${i + 1} ---
 plan_slug: ${r.slug}
+source_type: ${r.source_type}
 H1: ${r.h1 ?? ""}
 meta_title: ${r.meta_title ?? ""}
 meta_description: ${r.meta_description ?? ""}
@@ -181,7 +247,7 @@ ${r.notes ? `notes: ${r.notes}` : ""}`;
     })
     .join("\n\n");
 
-  const user = `Write ${rows.length} pages now, one per spec below. Each must follow the HARD RULES and be obviously different from its siblings.
+  const user = `Write ${rows.length} pages now, one per spec below. Each must follow the HARD RULES for its source_type and be obviously different from its siblings.
 
 ${planLines}`;
 
