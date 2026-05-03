@@ -179,6 +179,8 @@ function ContentPageDispatcher() {
       return <HostAcqCityTemplate page={page} />;
     case "public_pool":
       return <PublicPoolTemplate page={page} />;
+    case "event_guide":
+      return <EventGuideTemplate page={page} />;
     case "resource":
       return <ResourceArticleTemplate page={page} />;
     default:
