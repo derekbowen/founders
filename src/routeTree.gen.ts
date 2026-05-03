@@ -1041,6 +1041,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LandingPageRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/referral': {
+      id: '/referral'
+      path: '/referral'
+      fullPath: '/referral'
+      preLoaderRoute: typeof ReferralRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/blog': {
       id: '/blog'
       path: '/blog'
