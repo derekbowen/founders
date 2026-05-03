@@ -120,10 +120,10 @@ function CityBuildersPage() {
                     {typeof p.rating === "number" && (
                       <p className="text-xs text-muted-foreground">★ {p.rating} {p.rating_count ? `(${p.rating_count})` : ""}</p>
                     )}
-                    {p.business_type && <p className="mt-1 text-xs text-muted-foreground line-clamp-1">{p.business_type as string}</p>}
+                    {p.business_type ? <p className="mt-1 text-xs text-muted-foreground line-clamp-1">{p.business_type as string}</p> : null}
                   </div>
                 </div>
-                {p.address && <p className="text-xs text-muted-foreground line-clamp-2">{p.address as string}</p>}
+                {p.address ? <p className="text-xs text-muted-foreground line-clamp-2">{p.address as string}</p> : null}
               </Link>
             ))}
           </div>
