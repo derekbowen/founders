@@ -46,9 +46,11 @@ export function PublicPoolTemplate({ page }: { page: ContentPage }) {
           )}
 
           {body && (
-            <div className="prose prose-lg mt-10 max-w-none dark:prose-invert">
-              <AutoLinkedContent content={body} />
-            </div>
+            <AutoLinkedContent
+              text={body}
+              targets={[]}
+              className="prose prose-lg mt-10 max-w-none whitespace-pre-line text-foreground"
+            />
           )}
 
           <aside className="mt-12 rounded-2xl border border-border bg-muted/30 p-6">
