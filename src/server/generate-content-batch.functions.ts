@@ -391,10 +391,15 @@ export const generateContentBatch = createServerFn({ method: "POST" })
       }
       const body = gen.body_markdown ?? "";
       const words = body.split(/\s+/).filter(Boolean).length;
-      if (words < 2200) {
-        errors.push(`${plan.slug}: too short (${words} words, need 2,500+)`);
+
+      const isEvent = plan.source_type === "event_guide";
+      const isEs = plan.source_type === "hosting_es";
+      const minWords = isEvent ? 3500 : isEs ? 1600 : 2200;
+      if (words < minWords) {
+        errors.push(`${plan.slug}: too short (${words} words, need ${minWords}+)`);
         continue;
       }
+
       const requiredLinks = (plan.internal_links ?? "")
         .split(/\n|,/)
         .map((s) => s.trim())
@@ -406,14 +411,35 @@ export const generateContentBatch = createServerFn({ method: "POST" })
         );
         continue;
       }
-      const requiredSections: Array<[RegExp, string]> = [
-        [/##\s*How This Affects Pool Rental Hosts/i, "Section 5 (How This Affects Hosts)"],
-        [/##\s*Offset Your .+ Costs With Pool Rental Income/i, "Section 6 (Offset Costs)"],
-        [/##\s*Frequently Asked Questions/i, "Section 7 (FAQ)"],
-        [/##\s*Related Pool Owner Guides/i, "Section 8 (Related Guides)"],
-        [/##\s*Ready to Turn Your Pool Into Income\?/i, "Section 9 (Final CTA)"],
-        [/💰\s*\*\*Did you know\?\*\*/, "Section 4 (Mid-page Callout)"],
-      ];
+
+      let requiredSections: Array<[RegExp, string]> = [];
+      if (isEvent) {
+        requiredSections = [
+          [/##\s*Section\s*1\b.*Why\b/i, "Section 1 (Why City)"],
+          [/##\s*Section\s*3\b.*Planning Guide/i, "Section 3 (Planning Guide)"],
+          [/##\s*Section\s*5\b.*Neighborhoods/i, "Section 5 (Neighborhoods)"],
+          [/##\s*Section\s*9\b.*Do You Own/i, "Section 9 (Host Flip)"],
+          [/##\s*Section\s*10\b.*Frequently Asked/i, "Section 10 (20 FAQs)"],
+          [/\*\*20\.\*\*/, "20 numbered FAQs"],
+        ];
+      } else if (isEs) {
+        requiredSections = [
+          [/##\s*¿Por Qué Rentar Tu Piscina/i, "¿Por Qué Rentar?"],
+          [/##\s*Cuánto Puedes Ganar/i, "Cuánto Puedes Ganar"],
+          [/##\s*Preguntas Frecuentes/i, "Preguntas Frecuentes"],
+          [/##\s*¿Listo Para Empezar\?/i, "¿Listo Para Empezar?"],
+          [/\*\*15\.\*\*/, "15 numbered FAQs"],
+        ];
+      } else {
+        requiredSections = [
+          [/##\s*How This Affects Pool Rental Hosts/i, "Section 5 (How This Affects Hosts)"],
+          [/##\s*Offset Your .+ Costs With Pool Rental Income/i, "Section 6 (Offset Costs)"],
+          [/##\s*Frequently Asked Questions/i, "Section 7 (FAQ)"],
+          [/##\s*Related Pool Owner Guides/i, "Section 8 (Related Guides)"],
+          [/##\s*Ready to Turn Your Pool Into Income\?/i, "Section 9 (Final CTA)"],
+          [/💰\s*\*\*Did you know\?\*\*/, "Section 4 (Mid-page Callout)"],
+        ];
+      }
       const missingSections = requiredSections
         .filter(([re]) => !re.test(body))
         .map(([, label]) => label);
