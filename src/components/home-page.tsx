@@ -1,6 +1,7 @@
 import { SiteHeader, SiteFooter } from "@/components/site-layout";
 import { ListingCard } from "@/components/listing-card";
 import { PoolWaitlistForm } from "@/components/pool-waitlist-form";
+import { ErrorBoundary } from "@/components/error-boundary";
 import type { ListingSummary } from "@/server/sharetribe.functions";
 import type { HomeCategory, HomeCity, HomeData } from "@/server/home-data.functions";
 import { ACADEMY_HERO_MAP } from "@/lib/academy-images";
@@ -39,18 +40,31 @@ export const HOMEPAGE_FAQS = [
 export const HOMEPAGE_HERO_IMAGE = heroPool;
 
 export function HomePageContent({ data }: { data: HomeData | undefined | null }) {
-  const safe = data ?? {
+  return (
+    <ErrorBoundary>
+      <HomePageInner data={data} />
+    </ErrorBoundary>
+  );
+}
+
+function HomePageInner({ data }: { data: HomeData | undefined | null }) {
+  const safe: HomeData = (data && typeof data === "object" ? data : null) ?? {
     cities: [],
     cityCount: 0,
     categories: [],
     listings: [],
     nearby: { city: null, region: null, count: 0, nearestMiles: null },
   };
-  const cities = safe.cities ?? [];
-  const cityCount = safe.cityCount ?? cities.length;
-  const categories = safe.categories ?? [];
-  const listings = safe.listings ?? [];
-  const nearby = safe.nearby ?? { city: null, region: null, count: 0, nearestMiles: null };
+  const cities = Array.isArray(safe.cities) ? safe.cities : [];
+  const cityCount = typeof safe.cityCount === "number" ? safe.cityCount : cities.length;
+  const categories = Array.isArray(safe.categories) ? safe.categories : [];
+  const listings = Array.isArray(safe.listings) ? safe.listings : [];
+  const nearby = (safe.nearby && typeof safe.nearby === "object" ? safe.nearby : null) ?? {
+    city: null,
+    region: null,
+    count: 0,
+    nearestMiles: null,
+  };
   const hasNearbyPools =
     nearby.nearestMiles !== null && nearby.nearestMiles <= NEARBY_RADIUS_MILES;
   const showWaitlist =
