@@ -49,7 +49,7 @@ const lookupSchema = z.object({ slug: z.string().min(1) });
  * canonical slug. Caller is responsible for issuing the 301.
  */
 export const lookupContentPage = createServerFn({ method: "GET" })
-  .validator((data: unknown) => lookupSchema.parse(data))
+  .inputValidator((data: unknown) => lookupSchema.parse(data))
   .handler(async ({ data }): Promise<ContentPageLookupResult> => {
     const { slug } = data;
 
@@ -87,7 +87,7 @@ const hreflangSchema = z.object({ pageId: z.string().uuid() });
  * dispatcher to emit hreflang link tags pointing both ways.
  */
 export const getHreflangSibling = createServerFn({ method: "GET" })
-  .validator((data: unknown) => hreflangSchema.parse(data))
+  .inputValidator((data: unknown) => hreflangSchema.parse(data))
   .handler(async ({ data }) => {
     const { data: row } = await supabaseAdmin
       .from("content_pages")
