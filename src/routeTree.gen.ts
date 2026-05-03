@@ -34,6 +34,7 @@ import { Route as SitemapDefaultDotxmlRouteImport } from './routes/sitemap-defau
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as ProvidersRouteImport } from './routes/providers'
 import { Route as PoolsDirectorySitemapDotxmlRouteImport } from './routes/pools-directory-sitemap[.]xml'
+import { Route as LandingPageRouteImport } from './routes/landing-page'
 import { Route as BlogRouteImport } from './routes/blog'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AcademyRouteImport } from './routes/academy'
@@ -203,6 +204,11 @@ const PoolsDirectorySitemapDotxmlRoute =
     path: '/pools-directory-sitemap.xml',
     getParentRoute: () => rootRouteImport,
   } as any)
+const LandingPageRoute = LandingPageRouteImport.update({
+  id: '/landing-page',
+  path: '/landing-page',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BlogRoute = BlogRouteImport.update({
   id: '/blog',
   path: '/blog',
@@ -379,6 +385,7 @@ export interface FileRoutesByFullPath {
   '/academy': typeof AcademyRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
   '/blog': typeof BlogRouteWithChildren
+  '/landing-page': typeof LandingPageRoute
   '/pools-directory-sitemap.xml': typeof PoolsDirectorySitemapDotxmlRoute
   '/providers': typeof ProvidersRouteWithChildren
   '/robots.txt': typeof RobotsDottxtRoute
@@ -439,6 +446,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
   '/blog': typeof BlogRouteWithChildren
+  '/landing-page': typeof LandingPageRoute
   '/pools-directory-sitemap.xml': typeof PoolsDirectorySitemapDotxmlRoute
   '/providers': typeof ProvidersRouteWithChildren
   '/robots.txt': typeof RobotsDottxtRoute
@@ -501,6 +509,7 @@ export interface FileRoutesById {
   '/academy': typeof AcademyRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
   '/blog': typeof BlogRouteWithChildren
+  '/landing-page': typeof LandingPageRoute
   '/pools-directory-sitemap.xml': typeof PoolsDirectorySitemapDotxmlRoute
   '/providers': typeof ProvidersRouteWithChildren
   '/robots.txt': typeof RobotsDottxtRoute
@@ -564,6 +573,7 @@ export interface FileRouteTypes {
     | '/academy'
     | '/auth'
     | '/blog'
+    | '/landing-page'
     | '/pools-directory-sitemap.xml'
     | '/providers'
     | '/robots.txt'
@@ -624,6 +634,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/blog'
+    | '/landing-page'
     | '/pools-directory-sitemap.xml'
     | '/providers'
     | '/robots.txt'
@@ -685,6 +696,7 @@ export interface FileRouteTypes {
     | '/academy'
     | '/auth'
     | '/blog'
+    | '/landing-page'
     | '/pools-directory-sitemap.xml'
     | '/providers'
     | '/robots.txt'
@@ -747,6 +759,7 @@ export interface RootRouteChildren {
   AcademyRoute: typeof AcademyRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
   BlogRoute: typeof BlogRouteWithChildren
+  LandingPageRoute: typeof LandingPageRoute
   PoolsDirectorySitemapDotxmlRoute: typeof PoolsDirectorySitemapDotxmlRoute
   ProvidersRoute: typeof ProvidersRouteWithChildren
   RobotsDottxtRoute: typeof RobotsDottxtRoute
@@ -972,6 +985,13 @@ declare module '@tanstack/react-router' {
       path: '/pools-directory-sitemap.xml'
       fullPath: '/pools-directory-sitemap.xml'
       preLoaderRoute: typeof PoolsDirectorySitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/landing-page': {
+      id: '/landing-page'
+      path: '/landing-page'
+      fullPath: '/landing-page'
+      preLoaderRoute: typeof LandingPageRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/blog': {
@@ -1288,6 +1308,7 @@ const rootRouteChildren: RootRouteChildren = {
   AcademyRoute: AcademyRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
   BlogRoute: BlogRouteWithChildren,
+  LandingPageRoute: LandingPageRoute,
   PoolsDirectorySitemapDotxmlRoute: PoolsDirectorySitemapDotxmlRoute,
   ProvidersRoute: ProvidersRouteWithChildren,
   RobotsDottxtRoute: RobotsDottxtRoute,
