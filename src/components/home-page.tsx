@@ -41,11 +41,13 @@ export const HOMEPAGE_HERO_IMAGE = heroPool;
 export function HomePageContent({ data }: { data: HomeData | undefined | null }) {
   const safe = data ?? {
     cities: [],
+    cityCount: 0,
     categories: [],
     listings: [],
     nearby: { city: null, region: null, count: 0, nearestMiles: null },
   };
   const cities = safe.cities ?? [];
+  const cityCount = safe.cityCount ?? cities.length;
   const categories = safe.categories ?? [];
   const listings = safe.listings ?? [];
   const nearby = safe.nearby ?? { city: null, region: null, count: 0, nearestMiles: null };
