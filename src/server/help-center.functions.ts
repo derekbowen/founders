@@ -48,7 +48,7 @@ export const getHelpCategoryWithArticles = createServerFn({ method: "GET" })
   });
 
 export const getHelpArticle = createServerFn({ method: "GET" })
-  .inputValidator((d: unknown) => slugSchema.parse(d))
+  .inputValidator((d: unknown) => z.object({ slug: z.string().min(1).max(160).regex(/^[a-z0-9-]+$/) }).parse(d))
   .handler(async ({ data }) => {
     const { data: article } = await supabaseAdmin
       .from("help_articles")
