@@ -11,8 +11,10 @@ import {
 } from "@/server/content-pages.functions";
 import {
   getNearbyCitiesForPage,
+  cityForContentPage,
   type NearbyCity,
 } from "@/server/nearby-cities.functions";
+import { getCityBySlug, type CityRow } from "@/server/cities.functions";
 import { log404 } from "@/server/content-404-log.functions";
 import { SiteHeader, SiteFooter } from "@/components/site-layout";
 import {
