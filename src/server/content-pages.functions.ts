@@ -89,7 +89,7 @@ const hreflangSchema = z.object({ pageId: z.string().uuid() });
 export const getHreflangSibling = createServerFn({ method: "GET" })
   .inputValidator((data: unknown) => hreflangSchema.parse(data))
   .handler(async ({ data }) => {
-    const { data: row } = await supabaseAdmin
+    const { data: row } = await (supabaseAdmin as any)
       .from("content_pages")
       .select("slug, language")
       .eq("id", data.pageId)
