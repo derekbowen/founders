@@ -1,9 +1,12 @@
 import { SiteHeader, SiteFooter } from "@/components/site-layout";
 import { ListingCard } from "@/components/listing-card";
+import { PoolWaitlistForm } from "@/components/pool-waitlist-form";
 import type { ListingSummary } from "@/server/sharetribe.functions";
 import type { HomeCategory, HomeCity, HomeData } from "@/server/home-data.functions";
 import { ACADEMY_HERO_MAP } from "@/lib/academy-images";
 import heroPool from "@/assets/pool-hero-default.jpg";
+
+const NEARBY_RADIUS_MILES = 500;
 
 const FEATURED_OCCASIONS = [
   { slug: "bachelorette-pool-party-hosting-playbook", title: "Bachelorette", img: "academy/bachelorette.jpg" },
@@ -40,12 +43,17 @@ export function HomePageContent({ data }: { data: HomeData | undefined | null })
     cities: [],
     categories: [],
     listings: [],
-    nearby: { city: null, region: null, count: 0 },
+    nearby: { city: null, region: null, count: 0, nearestMiles: null },
   };
   const cities = safe.cities ?? [];
   const categories = safe.categories ?? [];
   const listings = safe.listings ?? [];
-  const nearby = safe.nearby ?? { city: null, region: null, count: 0 };
+  const nearby = safe.nearby ?? { city: null, region: null, count: 0, nearestMiles: null };
+  const hasNearbyPools =
+    nearby.nearestMiles !== null && nearby.nearestMiles <= NEARBY_RADIUS_MILES;
+  const showWaitlist =
+    nearby.city !== null &&
+    (nearby.nearestMiles === null || nearby.nearestMiles > NEARBY_RADIUS_MILES);
   const nearbyLabel = nearby.city
     ? `${nearby.city}${nearby.region ? `, ${nearby.region}` : ""}`
     : null;
@@ -147,30 +155,40 @@ export function HomePageContent({ data }: { data: HomeData | undefined | null })
           </div>
         </section>
 
-        {listings.length > 0 && (
-          <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-            <div className="flex flex-col items-center text-center">
-              <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                Pools near you
-              </h2>
-              <p className="mt-3 max-w-xl text-muted-foreground">
-                Real backyards from real hosts. Pick one and you could be poolside this weekend.
-              </p>
-            </div>
-            <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {listings.slice(0, 6).map((l: ListingSummary) => (
-                <ListingCard key={l.id} listing={l} />
-              ))}
-            </div>
-            <div className="mt-10 text-center">
-              <a
-                href="/s"
-                className="inline-flex items-center justify-center rounded-full bg-primary px-6 py-3 text-base font-semibold text-primary-foreground shadow-lg transition-transform hover:scale-105"
-              >
-                Find a pool near you →
-              </a>
-            </div>
-          </section>
+        {showWaitlist ? (
+          <PoolWaitlistForm
+            nearestMiles={nearby.nearestMiles}
+            city={nearby.city}
+            region={nearby.region}
+          />
+        ) : (
+          listings.length > 0 && (
+            <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+              <div className="flex flex-col items-center text-center">
+                <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+                  {hasNearbyPools && nearbyLabel
+                    ? `Pools near ${nearbyLabel}`
+                    : "Pools near you"}
+                </h2>
+                <p className="mt-3 max-w-xl text-muted-foreground">
+                  Real backyards from real hosts. Pick one and you could be poolside this weekend.
+                </p>
+              </div>
+              <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {listings.slice(0, 6).map((l: ListingSummary) => (
+                  <ListingCard key={l.id} listing={l} />
+                ))}
+              </div>
+              <div className="mt-10 text-center">
+                <a
+                  href={searchHref}
+                  className="inline-flex items-center justify-center rounded-full bg-primary px-6 py-3 text-base font-semibold text-primary-foreground shadow-lg transition-transform hover:scale-105"
+                >
+                  Find a pool near you →
+                </a>
+              </div>
+            </section>
+          )
         )}
 
         <section className="bg-primary py-16 text-primary-foreground sm:py-20">

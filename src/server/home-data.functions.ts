@@ -24,6 +24,8 @@ export type HomeData = {
     city: string | null;
     region: string | null;
     count: number;
+    /** Distance in miles to the nearest pool from the visitor location. */
+    nearestMiles: number | null;
   };
 };
 
@@ -33,8 +35,25 @@ const EMPTY_HOME_DATA: HomeData = {
   cities: [],
   categories: [],
   listings: [],
-  nearby: { city: null, region: null, count: 0 },
+  nearby: { city: null, region: null, count: 0, nearestMiles: null },
 };
+
+function haversineMiles(
+  lat1: number,
+  lng1: number,
+  lat2: number,
+  lng2: number,
+): number {
+  const R = 3958.7613; // Earth radius in miles
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+}
+
 
 export const getHomeData = createServerFn({ method: "GET" }).handler(async (): Promise<HomeData> => {
   try {
@@ -88,9 +107,21 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(async (): P
       ),
       safe(searchListings({ perPage: 6 }), "searchListings (featured)", emptyListingResult),
       origin
-        ? safe(searchListings({ perPage: 1, origin }), "searchListings (nearby)", emptyListingResult)
+        ? safe(searchListings({ perPage: 5, origin }), "searchListings (nearby)", emptyListingResult)
         : Promise.resolve(emptyListingResult),
     ]);
+
+    let nearestMiles: number | null = null;
+    if (cf.latitude && cf.longitude && nearbyResult.listings.length > 0) {
+      const lat = Number(cf.latitude);
+      const lng = Number(cf.longitude);
+      for (const l of nearbyResult.listings) {
+        if (l.geolocation) {
+          const d = haversineMiles(lat, lng, l.geolocation.lat, l.geolocation.lng);
+          if (nearestMiles === null || d < nearestMiles) nearestMiles = d;
+        }
+      }
+    }
 
     return {
       cities: (cities.data ?? []) as HomeCity[],
@@ -100,6 +131,7 @@ export const getHomeData = createServerFn({ method: "GET" }).handler(async (): P
         city: visitorCity,
         region: visitorRegion,
         count: origin ? nearbyResult.total : 0,
+        nearestMiles,
       },
     };
   } catch (err) {
