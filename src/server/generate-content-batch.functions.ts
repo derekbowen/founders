@@ -37,7 +37,7 @@ const PER_PAGE_TOOL = {
               body_markdown: {
                 type: "string",
                 description:
-                  "FULL article in markdown, 1100-1700 words. Use ## and ### headings. Real paragraphs (not bullet stubs). Cite specific neighborhoods, ordinances, season patterns, dollar ranges. Include the requested internal links as markdown links. Include a UNIQUE-TO-THIS-PAGE section reflecting the uniqueness_angle. End with ## Frequently asked questions (5 ### questions) and a final CTA paragraph.",
+                  "FULL article in markdown, 2,500–3,500 words, following the 9-section VA template exactly (H1, Intro, Main Educational Content with 4–6 H2s + at least one markdown table + one numbered process, Mid-Page Earnings Callout blockquote, '## How This Affects Pool Rental Hosts', '## Offset Your [TOPIC] Costs With Pool Rental Income', '## Frequently Asked Questions' with 5–7 ### Q: questions, '## Related Pool Owner Guides' with the required internal links, and the exact Final CTA block). Topic-specific only — never generic.",
               },
             },
             required: ["plan_slug", "body_markdown"],
