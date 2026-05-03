@@ -846,6 +846,42 @@ export type Database = {
         }
         Relationships: []
       }
+      pool_waitlist: {
+        Row: {
+          city: string | null
+          created_at: string
+          email: string
+          id: string
+          latitude: number | null
+          longitude: number | null
+          nearest_miles: number | null
+          region: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          city?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          nearest_miles?: number | null
+          region?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          city?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          nearest_miles?: number | null
+          region?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
