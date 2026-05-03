@@ -66,7 +66,7 @@ export const Route = createFileRoute("/landing-page")({
       title: "Pool Rental Near Me — Rent a Private Pool by the Hour",
       description:
         "Find and book private pool rentals near you. Heated pools, hot tubs, and luxury backyards. Hourly bookings with $2M liability insurance included.",
-      path: "/",
+      path: "/landing-page",
       image: heroPool,
     });
     const org = {
