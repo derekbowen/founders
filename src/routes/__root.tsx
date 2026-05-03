@@ -2,6 +2,7 @@ import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/r
 
 import appCss from "../styles.css?url";
 import { SiteHeader, SiteFooter } from "@/components/site-layout";
+import { HydrationDebug } from "@/components/hydration-debug";
 import {
   buildMeta,
   ldJsonScript,
@@ -90,5 +91,10 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
-  return <Outlet />;
+  return (
+    <>
+      <HydrationDebug />
+      <Outlet />
+    </>
+  );
 }
