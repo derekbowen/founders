@@ -37,12 +37,10 @@ export function SiteHeader() {
         </Link>
         <nav className="hidden items-center gap-6 md:flex">
           <Link to="/" className="text-sm font-medium text-muted-foreground hover:text-foreground" activeOptions={{ exact: true }} activeProps={{ className: "text-foreground" }}>Home</Link>
-          <Link to="/category/$slug" params={{ slug: "heated-pools" }} className="text-sm font-medium text-muted-foreground hover:text-foreground">Categories</Link>
-          <Link to="/blog" className="text-sm font-medium text-muted-foreground hover:text-foreground">Blog</Link>
-          <Link to="/host-tools" className="text-sm font-medium text-muted-foreground hover:text-foreground">Host Tools</Link>
-          <Link to="/pool-builders" className="text-sm font-medium text-muted-foreground hover:text-foreground">Pool Builders</Link>
-          <Link to="/help-center" className="text-sm font-medium text-muted-foreground hover:text-foreground">Help</Link>
           <a href="https://www.poolrentalnearme.com/public-pools" className="text-sm font-medium text-muted-foreground hover:text-foreground">Public Pools</a>
+          <a href="https://www.poolrentalnearme.com/amenities" className="text-sm font-medium text-muted-foreground hover:text-foreground">Amenities</a>
+          <a href={rel("/p/how-it-works")} className="text-sm font-medium text-muted-foreground hover:text-foreground">How It Works</a>
+          <a href={rel("/s")} className="text-sm font-medium text-muted-foreground hover:text-foreground">Search</a>
         </nav>
         <a href={rel("/signup")} className="inline-flex h-9 items-center justify-center rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary-glow">
           List Your Pool
@@ -57,7 +55,6 @@ const EXPLORE = [
   { label: "How It Works", href: "/p/how-it-works" },
   { label: "Start a Business", href: "/p/start-a-pool-rental-business" },
   { label: "Swimply Alternative", href: "/p/swimply-alternative" },
-  { label: "Help Center", href: "/help-center" },
   { label: "Sign a Waiver", href: "/p/waiver" },
   { label: "Store", href: "/p/store" },
   { label: "Public Pools", href: "https://www.poolrentalnearme.com/public-pools" },
@@ -69,7 +66,6 @@ const HOSTS = [
   { label: "Find Locations Near You", href: "/p/locations" },
   { label: "Earnings Calculator", href: "/p/earnings-calculator" },
   { label: "Host Pro Tools", href: "/p/host-pro-tools" },
-  { label: "Learning Academy", href: "/academy", internal: true },
   { label: "Host Connect", href: "/p/host-connect" },
   { label: "HOA Defense Kit", href: "/p/hoa-defense-kit" },
   { label: "Host Make More $$$", href: "/p/make-more-money" },
@@ -77,7 +73,6 @@ const HOSTS = [
 
 const COMPANY = [
   { label: "About", href: "/p/about" },
-  { label: "Blog", href: "/blog", internal: true },
   { label: "Careers", href: "/p/careers" },
   { label: "Investors", href: "/p/investors" },
   { label: "Terms", href: "/terms-of-service" },
@@ -159,9 +154,9 @@ export function SiteFooter() {
             <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
               {POPULAR_MARKETS.map((m) => (
                 <li key={m.slug}>
-                  <Link to="/pool-rental/$city" params={{ city: m.slug }} className="hover:text-primary">
+                  <a href={rel(`/s?address=${encodeURIComponent(m.name)}`)} className="hover:text-primary">
                     {m.name}
-                  </Link>
+                  </a>
                 </li>
               ))}
               <li>
