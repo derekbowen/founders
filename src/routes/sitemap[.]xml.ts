@@ -56,7 +56,7 @@ export const Route = createFileRoute("/sitemap.xml")({
             .filter((g) => g.basePath === group.basePath)
             .map((g) => g.templateType);
 
-          const { count, error } = await supabaseAdmin
+          const { count, error } = await (supabaseAdmin as any)
             .from("content_pages")
             .select("*", { count: "exact", head: true })
             .eq("is_published", true)
@@ -65,7 +65,7 @@ export const Route = createFileRoute("/sitemap.xml")({
           if (error || !count) continue;
 
           // Latest lastmod for the group
-          const { data: latest } = await supabaseAdmin
+          const { data: latest } = await (supabaseAdmin as any)
             .from("content_pages")
             .select("updated_at")
             .eq("is_published", true)
