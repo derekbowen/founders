@@ -219,16 +219,15 @@ function HomePage() {
               <div className="lg:col-span-8">
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {FEATURED_OCCASIONS.map((o) => (
-                    <Link
+                    <a
                       key={o.slug}
-                      to="/academy/$slug"
-                      params={{ slug: o.slug }}
+                      href={`/s?keywords=${encodeURIComponent(o.title)}`}
                       className="group relative overflow-hidden rounded-2xl bg-white text-foreground shadow-md transition-all hover:-translate-y-0.5 hover:shadow-xl"
                     >
                       <div className="aspect-[4/3] overflow-hidden">
                         <img
                           src={ACADEMY_HERO_MAP[o.img]}
-                          alt={`${o.title} pool rental playbook`}
+                          alt={`${o.title} pool rental`}
                           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                           loading="lazy"
                         />
@@ -237,16 +236,16 @@ function HomePage() {
                         <span className="text-sm font-semibold">{o.title}</span>
                         <span className="text-primary" aria-hidden>→</span>
                       </div>
-                    </Link>
+                    </a>
                   ))}
                 </div>
                 <div className="mt-8 flex justify-center lg:justify-start">
-                  <Link
-                    to="/academy"
+                  <a
+                    href="/s"
                     className="inline-flex items-center justify-center rounded-full bg-white px-6 py-3 text-base font-semibold text-primary shadow-lg transition-transform hover:scale-105"
                   >
-                    Browse all occasion playbooks →
-                  </Link>
+                    Browse all pools →
+                  </a>
                 </div>
               </div>
             </div>
