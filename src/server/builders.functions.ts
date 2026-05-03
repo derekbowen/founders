@@ -47,7 +47,7 @@ export const listAllBuilders = createServerFn({ method: "GET" }).handler(
 );
 
 export const getBuildersByState = createServerFn({ method: "GET" })
-  .inputValidator((d: unknown) => stateSlugSchema.parse(d))
+  .inputValidator((d: unknown) => z.object({ state: z.string().regex(/^[a-z]{2}$/) }).parse(d))
   .handler(async ({ data }) => {
     const code = data.state.toUpperCase();
     const { data: providers, error } = await supabaseAdmin
