@@ -8,6 +8,7 @@ import {
   SITE_NAME,
   SITE_URL,
 } from "@/lib/seo";
+import heroImage from "@/assets/how-it-works-hero.jpg";
 
 /**
  * Dedicated /p/how-it-works route. Hand-authored, SEO-optimized landing page
