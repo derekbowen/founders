@@ -220,11 +220,11 @@ function buildHreflangLinks(_p: ContentPage): Array<{ lang: string; href: string
 }
 
 function ContentPageDispatcher() {
-  const { page, nearbyCities } = Route.useLoaderData();
+  const { page, nearbyCities, city } = Route.useLoaderData();
 
   switch (page.template_type) {
     case "host_acq_city":
-      return <HostAcqCityTemplate page={page} nearbyCities={nearbyCities} />;
+      return <HostAcqCityTemplate page={page} nearbyCities={nearbyCities} city={city} />;
     case "public_pool":
       return <PublicPoolTemplate page={page} />;
     case "public_pool_city":
