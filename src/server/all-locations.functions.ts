@@ -105,8 +105,6 @@ const STATIC_GROUP: DirectoryGroup = {
     { href: "/academy", label: "Host Academy" },
     { href: "/blog", label: "Blog" },
     { href: "/help", label: "Help Center" },
-    { href: "/pool-builders", label: "Pool Builder Directory" },
-    { href: "/providers", label: "Service Provider Directory" },
   ],
 };
 
