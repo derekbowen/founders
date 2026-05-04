@@ -336,13 +336,11 @@ async function processGeneration(
   apiKey: string,
   dryRun: boolean,
 ) {
-  const generated: GeneratedPage[] = [];
   const errors: string[] = [];
 
-  for (const row of planRows) {
-    const result = await generateOne(row, model, apiKey);
-    if (result) generated.push(result);
-  }
+  const generated = (await Promise.all(
+    planRows.map((row) => generateOne(row, model, apiKey)),
+  )).filter((page): page is GeneratedPage => Boolean(page));
 
   const bySlug = new Map(generated.map((g) => [g.plan_slug, g]));
   const okPages: Array<{ plan: PlanRow; body: string }> = [];
