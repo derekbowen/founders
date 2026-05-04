@@ -80,6 +80,92 @@ function GenerateContentPageInner() {
   const pollTimerRef = React.useRef<number | null>(null);
   const stopRef = React.useRef(false);
 
+  type LogEntry = {
+    id: number;
+    at: string;
+    action: "preflight" | "start" | "status";
+    endpoint: string;
+    durationMs: number;
+    ok: boolean;
+    httpStatus?: number;
+    summary: string;
+    response?: any;
+    error?: string;
+  };
+  const [log, setLog] = React.useState<LogEntry[]>([]);
+  const logIdRef = React.useRef(0);
+  const ENDPOINT = `${import.meta.env.VITE_SUPABASE_URL ?? ""}/functions/v1/generate-content-batch`;
+
+  const appendLog = (entry: Omit<LogEntry, "id" | "at">) => {
+    setLog((prev) =>
+      [
+        {
+          ...entry,
+          id: ++logIdRef.current,
+          at: new Date().toISOString(),
+        },
+        ...prev,
+      ].slice(0, 50),
+    );
+  };
+
+  const callEdge = async (
+    action: "preflight" | "start" | "status",
+    extra?: { slugs?: string[] },
+  ) => {
+    const started = performance.now();
+    try {
+      const res: any = await generateContentBatch({
+        data: {
+          action,
+          count,
+          tier: tier || undefined,
+          stateCode: stateCode.trim() || undefined,
+          warmOnly,
+          model,
+          dryRun,
+          slugs: extra?.slugs,
+        } as any,
+      });
+      const durationMs = Math.round(performance.now() - started);
+      const summary =
+        action === "preflight"
+          ? res?.ok
+            ? "Setup verified"
+            : `Preflight failed: ${res?.aiError ?? "see details"}`
+          : action === "status"
+            ? `Status: ${res?.pendingSlugs?.length ?? 0} pending, ${res?.inserted ?? 0} inserted`
+            : res?.queued
+              ? `Queued ${res?.attempted ?? 0} page(s) for background generation`
+              : `Returned ${res?.inserted ?? 0}/${res?.attempted ?? 0} inserted`;
+      appendLog({
+        action,
+        endpoint: ENDPOINT,
+        durationMs,
+        ok: Boolean(res?.ok ?? res?.queued),
+        httpStatus: 200,
+        summary,
+        response: res,
+      });
+      return res;
+    } catch (e: any) {
+      const durationMs = Math.round(performance.now() - started);
+      const message = e?.message ?? String(e);
+      const statusMatch = message.match(/(\b[45]\d{2}\b)/);
+      appendLog({
+        action,
+        endpoint: ENDPOINT,
+        durationMs,
+        ok: false,
+        httpStatus: statusMatch ? Number(statusMatch[1]) : undefined,
+        summary: `Failure: ${message.slice(0, 200)}`,
+        error: message,
+      });
+      throw e;
+    }
+  };
+
+
   React.useEffect(() => {
     return () => {
       if (pollTimerRef.current) window.clearTimeout(pollTimerRef.current);
@@ -87,18 +173,7 @@ function GenerateContentPageInner() {
   }, []);
 
   const runOnce = async (action: "start" | "status" = "start", slugs?: string[]) => {
-    return await generateContentBatch({
-      data: {
-        action,
-        count,
-        tier: tier || undefined,
-        stateCode: stateCode.trim() || undefined,
-        warmOnly,
-        model,
-        dryRun,
-        slugs,
-      } as any,
-    });
+    return await callEdge(action, { slugs });
   };
 
   const scheduleStatusPoll = (slugs: string[]) => {
@@ -124,7 +199,7 @@ function GenerateContentPageInner() {
     setPreflight({ status: "checking", details: null });
     setError(null);
     try {
-      const res: any = await generateContentBatch({ data: { action: "preflight" } as any });
+      const res: any = await callEdge("preflight");
       setPreflight({ status: res?.ok ? "ok" : "failed", details: res });
       return Boolean(res?.ok);
     } catch (e: any) {
@@ -451,6 +526,75 @@ function GenerateContentPageInner() {
             </ul>
           </div>
         )}
+
+        <div className="mt-6 rounded-lg border border-border bg-card p-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold">Run log</h2>
+            <div className="flex items-center gap-3 text-xs text-muted-foreground">
+              <span>{log.length} entr{log.length === 1 ? "y" : "ies"}</span>
+              <button
+                onClick={() => setLog([])}
+                disabled={log.length === 0}
+                className="rounded-md border border-input px-2 py-1 disabled:opacity-50"
+              >
+                Clear
+              </button>
+            </div>
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground break-all">
+            Endpoint: <code>{ENDPOINT}</code>
+          </p>
+          {log.length === 0 ? (
+            <p className="mt-4 text-sm text-muted-foreground">
+              No calls yet. Run the setup check or start a generation to see entries here.
+            </p>
+          ) : (
+            <ul className="mt-4 space-y-3">
+              {log.map((e) => (
+                <li
+                  key={e.id}
+                  className={`rounded-md border p-3 text-sm ${
+                    e.ok
+                      ? "border-border bg-background"
+                      : "border-destructive/40 bg-destructive/5"
+                  }`}
+                >
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span
+                      className={`rounded px-2 py-0.5 text-xs font-mono ${
+                        e.ok
+                          ? "bg-green-500/10 text-green-700"
+                          : "bg-destructive/10 text-destructive"
+                      }`}
+                    >
+                      {e.ok ? "OK" : "FAIL"}
+                    </span>
+                    <span className="rounded bg-muted px-2 py-0.5 text-xs font-mono uppercase">
+                      {e.action}
+                    </span>
+                    {typeof e.httpStatus === "number" && (
+                      <span className="rounded bg-muted px-2 py-0.5 text-xs font-mono">
+                        HTTP {e.httpStatus}
+                      </span>
+                    )}
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(e.at).toLocaleTimeString()} · {e.durationMs}ms
+                    </span>
+                  </div>
+                  <p className="mt-2">{e.summary}</p>
+                  <details className="mt-2">
+                    <summary className="cursor-pointer text-xs text-muted-foreground">
+                      {e.error ? "Error details" : "Response payload"}
+                    </summary>
+                    <pre className="mt-2 max-h-64 overflow-auto rounded bg-muted/50 p-2 text-xs">
+{e.error ? e.error : JSON.stringify(e.response ?? null, null, 2)}
+                    </pre>
+                  </details>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
 
         {result && (
           <div className="mt-6 rounded-lg border border-border bg-card p-6">
