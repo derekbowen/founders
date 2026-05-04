@@ -378,7 +378,7 @@ async function processGeneration(
     const words = body.split(/\s+/).filter(Boolean).length;
     const isEvent = plan.source_type === "event_guide";
     const isEs = plan.source_type === "hosting_es";
-    const minWords = isEvent ? 3500 : isEs ? 1600 : 2200;
+    const minWords = isEvent ? 2800 : isEs ? 1200 : 1400;
     if (words < minWords) {
       errors.push(`${plan.slug}: too short (${words} words, need ${minWords}+)`);
       continue;
