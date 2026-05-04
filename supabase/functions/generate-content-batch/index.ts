@@ -240,7 +240,7 @@ function parseInput(value: unknown): Required<Input> {
     : "";
   const tier = typeof input.tier === "string" ? input.tier : "";
   return {
-    action: input.action === "status" ? "status" : "start",
+    action: input.action === "status" ? "status" : input.action === "preflight" ? "preflight" : "start",
     count,
     tier,
     stateCode,
