@@ -19,6 +19,7 @@
  * Default for public reads (`integGet`) uses the public-read client.
  * Use `integrationGet` / `integrationPost` for Integration API calls.
  */
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 const MARKETPLACE_API_BASE = "https://flex-api.sharetribe.com";
 const INTEGRATION_API_BASE = "https://flex-integ-api.sharetribe.com";
@@ -408,7 +409,6 @@ async function searchSyncedListings(opts: SearchOptions): Promise<{
   totalPages: number;
 } | null> {
   try {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const page = opts.page ?? 1;
     const perPage = opts.perPage ?? 24;
     const from = (page - 1) * perPage;
