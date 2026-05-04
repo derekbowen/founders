@@ -22,10 +22,8 @@ Deno.serve(async (req) => {
   try {
     const url = new URL(req.url);
     const token = req.headers.get("x-driver-token") ?? url.searchParams.get("token") ?? "";
-    const expected = Deno.env.get("DRIVE_TOKEN");
-    if (!expected) {
-      return json({ error: "DRIVE_TOKEN env var is not set on the function" }, 500);
-    }
+    // Hardcoded driver token — rotate by editing this constant and redeploying.
+    const expected = "6e85780dcbe7b1f7a7fbd8ce2d425a496bc675bb5ccf55f7";
     if (token !== expected) {
       return json({ error: "Unauthorized" }, 401);
     }
