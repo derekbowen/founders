@@ -309,7 +309,6 @@ async function generateOne(plan: PlanRow, model: string, apiKey: string): Promis
           { role: "system", content: system },
           { role: "user", content: user },
         ],
-        response_format: { type: "json_object" },
         max_tokens: plan.source_type === "event_guide" ? 12000 : 8500,
       }),
     });
@@ -323,12 +322,10 @@ async function generateOne(plan: PlanRow, model: string, apiKey: string): Promis
 
     const payload = await resp.json();
     const message = payload?.choices?.[0]?.message;
-    const raw = message?.content ?? message?.tool_calls?.[0]?.function?.arguments;
+    const raw = message?.content;
     if (!raw || typeof raw !== "string") throw new Error("AI returned an empty response");
-    const parsed = extractJson(raw);
-    const page = parsed.pages?.[0];
-    if (!page?.body_markdown) throw new Error("AI returned JSON without body_markdown");
-    return { plan_slug: plan.slug, body_markdown: page.body_markdown };
+    const body = raw.trim().replace(/^```markdown\s*/i, "").replace(/^```\s*/i, "").replace(/```$/i, "").trim();
+    return { plan_slug: plan.slug, body_markdown: body };
   } catch (e) {
     console.error(`[generate-content-batch:${plan.slug}] ${errorMessage(e)}`);
     return null;
