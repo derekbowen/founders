@@ -80,6 +80,92 @@ function GenerateContentPageInner() {
   const pollTimerRef = React.useRef<number | null>(null);
   const stopRef = React.useRef(false);
 
+  type LogEntry = {
+    id: number;
+    at: string;
+    action: "preflight" | "start" | "status";
+    endpoint: string;
+    durationMs: number;
+    ok: boolean;
+    httpStatus?: number;
+    summary: string;
+    response?: any;
+    error?: string;
+  };
+  const [log, setLog] = React.useState<LogEntry[]>([]);
+  const logIdRef = React.useRef(0);
+  const ENDPOINT = `${import.meta.env.VITE_SUPABASE_URL ?? ""}/functions/v1/generate-content-batch`;
+
+  const appendLog = (entry: Omit<LogEntry, "id" | "at">) => {
+    setLog((prev) =>
+      [
+        {
+          ...entry,
+          id: ++logIdRef.current,
+          at: new Date().toISOString(),
+        },
+        ...prev,
+      ].slice(0, 50),
+    );
+  };
+
+  const callEdge = async (
+    action: "preflight" | "start" | "status",
+    extra?: { slugs?: string[] },
+  ) => {
+    const started = performance.now();
+    try {
+      const res: any = await generateContentBatch({
+        data: {
+          action,
+          count,
+          tier: tier || undefined,
+          stateCode: stateCode.trim() || undefined,
+          warmOnly,
+          model,
+          dryRun,
+          slugs: extra?.slugs,
+        } as any,
+      });
+      const durationMs = Math.round(performance.now() - started);
+      const summary =
+        action === "preflight"
+          ? res?.ok
+            ? "Setup verified"
+            : `Preflight failed: ${res?.aiError ?? "see details"}`
+          : action === "status"
+            ? `Status: ${res?.pendingSlugs?.length ?? 0} pending, ${res?.inserted ?? 0} inserted`
+            : res?.queued
+              ? `Queued ${res?.attempted ?? 0} page(s) for background generation`
+              : `Returned ${res?.inserted ?? 0}/${res?.attempted ?? 0} inserted`;
+      appendLog({
+        action,
+        endpoint: ENDPOINT,
+        durationMs,
+        ok: Boolean(res?.ok ?? res?.queued),
+        httpStatus: 200,
+        summary,
+        response: res,
+      });
+      return res;
+    } catch (e: any) {
+      const durationMs = Math.round(performance.now() - started);
+      const message = e?.message ?? String(e);
+      const statusMatch = message.match(/(\b[45]\d{2}\b)/);
+      appendLog({
+        action,
+        endpoint: ENDPOINT,
+        durationMs,
+        ok: false,
+        httpStatus: statusMatch ? Number(statusMatch[1]) : undefined,
+        summary: `Failure: ${message.slice(0, 200)}`,
+        error: message,
+      });
+      throw e;
+    }
+  };
+
+
   React.useEffect(() => {
     return () => {
       if (pollTimerRef.current) window.clearTimeout(pollTimerRef.current);
