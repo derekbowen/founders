@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { getCategoryMeta, getTierMeta, I18N, type Lang } from "@/lib/academy";
+import { resolveAcademyHero } from "@/lib/academy-images";
 
 export interface CourseCardCourse {
   slug: string;
@@ -26,6 +27,7 @@ export function CourseCard({
   const t = I18N[lang];
   const cat = getCategoryMeta(course.category, lang);
   const tier = getTierMeta(course.tier);
+  const heroUrl = resolveAcademyHero(course.cover_image_url);
   return (
     <article
       className={`group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card transition hover:border-primary/40 hover:shadow-lg ${
@@ -34,9 +36,9 @@ export function CourseCard({
     >
       <Link to="/academy/$slug" params={{ slug: course.slug }} className="block">
         <div className="aspect-[16/10] overflow-hidden bg-muted">
-          {course.cover_image_url ? (
+          {heroUrl ? (
             <img
-              src={course.cover_image_url}
+              src={heroUrl}
               alt={course.title}
               loading="lazy"
               className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
