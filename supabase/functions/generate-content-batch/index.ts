@@ -47,12 +47,14 @@ type PlanRow = {
 };
 
 type Input = {
+  action?: "start" | "status";
   count?: number;
   tier?: string;
   stateCode?: string;
   warmOnly?: boolean;
   model?: string;
   dryRun?: boolean;
+  slugs?: string[];
 };
 
 const SYSTEM_VA = `You are an expert SEO content writer and pool care specialist writing for Pool Rental Near Me (poolrentalnearme.com) — a marketplace where homeowners rent out private pools by the hour to earn passive income ($3,000–$15,000/year).
@@ -238,12 +240,14 @@ function parseInput(value: unknown): Required<Input> {
     : "";
   const tier = typeof input.tier === "string" ? input.tier : "";
   return {
+    action: input.action === "status" ? "status" : "start",
     count,
     tier,
     stateCode,
     warmOnly: Boolean(input.warmOnly),
-    model: typeof input.model === "string" && input.model ? input.model : "google/gemini-2.5-pro",
+    model: typeof input.model === "string" && input.model ? input.model : "google/gemini-3-flash-preview",
     dryRun: Boolean(input.dryRun),
+    slugs: Array.isArray(input.slugs) ? input.slugs.filter((s) => typeof s === "string" && s) : [],
   };
 }
 
@@ -259,7 +263,7 @@ function errorMessage(e: unknown): string {
 async function generateOne(plan: PlanRow, model: string, apiKey: string): Promise<GeneratedPage | null> {
   const { system, user } = buildPrompt(plan);
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 145_000);
+  const timeout = setTimeout(() => controller.abort(), 115_000);
   try {
     const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
