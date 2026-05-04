@@ -29,6 +29,8 @@ type FunctionInvoker = {
   };
 };
 
+export type GenerateContentBatchResult = Record<string, unknown>;
+
 async function getFunctionErrorMessage(error: FunctionInvokeResult["error"]) {
   if (!error) return "Unknown generation error";
   const response = error.context;
@@ -49,7 +51,7 @@ async function getFunctionErrorMessage(error: FunctionInvokeResult["error"]) {
 export const generateContentBatch = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => InputSchema.parse(data))
-  .handler(async ({ context, data }): Promise<any> => {
+  .handler(async ({ context, data }): Promise<GenerateContentBatchResult> => {
     const { supabase } = context as { supabase: FunctionInvoker };
     const { data: result, error } = await supabase.functions.invoke("generate-content-batch", {
       body: data,
@@ -59,5 +61,5 @@ export const generateContentBatch = createServerFn({ method: "POST" })
       throw new Error(await getFunctionErrorMessage(error));
     }
 
-    return result as any;
+    return (result ?? {}) as GenerateContentBatchResult;
   });
