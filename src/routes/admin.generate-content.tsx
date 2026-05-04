@@ -56,6 +56,24 @@ function GenerateContentPage() {
 }
 
 function GenerateContentPageInner() {
+  type PageSummary = { slug: string; url_path?: string; title?: string | null };
+  type GenerateResponse = {
+    ok?: boolean;
+    queued?: boolean;
+    inserted?: number;
+    attempted?: number;
+    pendingSlugs?: string[];
+    validationErrors?: string[];
+    pages?: PageSummary[];
+    edgeFunction?: string;
+    adminAuth?: string;
+    lovableApiKey?: string;
+    aiGateway?: string;
+    aiError?: string | null;
+    pendingPlanRows?: number;
+    error?: string;
+  };
+  const getErrorMessage = (e: unknown) => e instanceof Error ? e.message : String(e);
   const [count, setCount] = React.useState(10);
   const [tier, setTier] = React.useState<string>("T1 (200k+)");
   const [stateCode, setStateCode] = React.useState("");
@@ -65,17 +83,17 @@ function GenerateContentPageInner() {
   const [dryRun, setDryRun] = React.useState(false);
   const [autoLoop, setAutoLoop] = React.useState(true);
   const [maxBatches, setMaxBatches] = React.useState(10);
-  const [result, setResult] = React.useState<any>(null);
+  const [result, setResult] = React.useState<GenerateResponse | null>(null);
   const [error, setError] = React.useState<string | null>(null);
   const [preflight, setPreflight] = React.useState<{
     status: "idle" | "checking" | "ok" | "failed";
-    details: any;
+    details: GenerateResponse | null;
   }>({ status: "idle", details: null });
   const [progress, setProgress] = React.useState<{
     batch: number;
     inserted: number;
     failed: number;
-    pages: Array<{ slug: string; title: string }>;
+    pages: PageSummary[];
   }>({ batch: 0, inserted: 0, failed: 0, pages: [] });
   const pollTimerRef = React.useRef<number | null>(null);
   const stopRef = React.useRef(false);
@@ -85,7 +103,7 @@ function GenerateContentPageInner() {
     maxBatches: number;
     totalInserted: number;
     totalFailed: number;
-    pages: Array<{ slug: string; title: string }>;
+    pages: PageSummary[];
   }>({ active: false, nextBatch: 1, maxBatches: 0, totalInserted: 0, totalFailed: 0, pages: [] });
 
   type LogEntry = {
@@ -97,7 +115,7 @@ function GenerateContentPageInner() {
     ok: boolean;
     httpStatus?: number;
     summary: string;
-    response?: any;
+    response?: unknown;
     error?: string;
   };
   const [log, setLog] = React.useState<LogEntry[]>([]);
