@@ -192,7 +192,7 @@ function GenerateContentPageInner() {
         throw e;
       }
     },
-    [appendLog, count, dryRun, model, stateCode, tier, warmOnly],
+    [ENDPOINT, appendLog, count, dryRun, model, stateCode, tier, warmOnly],
   );
   React.useEffect(() => {
     return () => {
