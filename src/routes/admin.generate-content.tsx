@@ -191,8 +191,6 @@ function GenerateContentPageInner() {
       throw e;
     }
   }, [appendLog, count, dryRun, model, stateCode, tier, warmOnly]);
-
-
   React.useEffect(() => {
     return () => {
       if (pollTimerRef.current) window.clearTimeout(pollTimerRef.current);
@@ -203,7 +201,7 @@ function GenerateContentPageInner() {
     return await callEdge(action, { slugs });
   };
 
-  const finishAutoBatch = async (status: any) => {
+  const finishAutoBatch = async (status: GenerateResponse) => {
     const runState = autoRunRef.current;
     const inserted = status?.inserted ?? 0;
     const attempted = status?.attempted ?? 0;
@@ -225,7 +223,7 @@ function GenerateContentPageInner() {
       return;
     }
 
-    const res: any = await runOnce("start");
+    const res = await runOnce("start");
     setResult(res);
     runState.nextBatch += 1;
     if (res?.queued && res?.pendingSlugs?.length) {
@@ -239,7 +237,7 @@ function GenerateContentPageInner() {
     if (pollTimerRef.current) window.clearTimeout(pollTimerRef.current);
     pollTimerRef.current = window.setTimeout(async () => {
       try {
-        const status: any = await runOnce("status", slugs);
+        const status = await runOnce("status", slugs);
         setResult(status);
         const pending = status?.pendingSlugs ?? [];
         if (pending.length > 0 && !stopRef.current) {
@@ -249,8 +247,8 @@ function GenerateContentPageInner() {
         } else {
           setBusy(false);
         }
-      } catch (e: any) {
-        setError(e?.message ?? String(e));
+      } catch (e: unknown) {
+        setError(getErrorMessage(e));
         setBusy(false);
       }
     }, 5000);
@@ -260,18 +258,18 @@ function GenerateContentPageInner() {
     setPreflight({ status: "checking", details: null });
     setError(null);
     try {
-      const res: any = await callEdge("preflight");
+      const res = await callEdge("preflight");
       setPreflight({ status: res?.ok ? "ok" : "failed", details: res });
       return Boolean(res?.ok);
-    } catch (e: any) {
+    } catch (e: unknown) {
       setPreflight({
         status: "failed",
-        details: { error: e?.message ?? String(e) },
+        details: { error: getErrorMessage(e) },
       });
-      setError(e?.message ?? String(e));
+      setError(getErrorMessage(e));
       return false;
     }
-  }, []);
+  }, [callEdge]);
 
   React.useEffect(() => {
     runPreflight();
@@ -306,7 +304,7 @@ function GenerateContentPageInner() {
           return;
         }
       } else {
-        const res: any = await runOnce();
+        const res = await runOnce();
         setResult(res);
         autoRunRef.current.nextBatch = 2;
         if (res?.queued && res?.pendingSlugs?.length) {
@@ -317,8 +315,8 @@ function GenerateContentPageInner() {
         keepsPolling = true;
         await finishAutoBatch(res);
       }
-    } catch (e: any) {
-      setError(e?.message ?? String(e));
+    } catch (e: unknown) {
+      setError(getErrorMessage(e));
     } finally {
       if (!keepsPolling) setBusy(false);
     }
