@@ -14,7 +14,23 @@ export const getCity = createServerFn({ method: "GET" })
       .eq("is_published", true)
       .maybeSingle();
     if (error) console.error("getCity:", error);
-    return { city: city ?? null };
+    if (city) return { city };
+
+    const fallback = data.slug.match(/^(.+)-([a-z]{2})$/);
+    if (!fallback) return { city: null };
+
+    const cityName = fallback[1].replace(/-/g, " ");
+    const stateCode = fallback[2].toUpperCase();
+    const { data: fallbackCity, error: fallbackError } = await supabaseAdmin
+      .from("cities")
+      .select("*")
+      .ilike("name", cityName)
+      .eq("state_code", stateCode)
+      .eq("is_published", true)
+      .limit(1)
+      .maybeSingle();
+    if (fallbackError) console.error("getCity fallback:", fallbackError);
+    return { city: fallbackCity ?? null };
   });
 
 export const getCategory = createServerFn({ method: "GET" })
