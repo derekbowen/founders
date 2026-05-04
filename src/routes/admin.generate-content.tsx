@@ -56,7 +56,7 @@ function GenerateContentPage() {
 }
 
 function GenerateContentPageInner() {
-  const [count, setCount] = React.useState(1);
+  const [count, setCount] = React.useState(10);
   const [tier, setTier] = React.useState<string>("T1 (200k+)");
   const [stateCode, setStateCode] = React.useState("");
   const [warmOnly, setWarmOnly] = React.useState(false);
@@ -79,6 +79,14 @@ function GenerateContentPageInner() {
   }>({ batch: 0, inserted: 0, failed: 0, pages: [] });
   const pollTimerRef = React.useRef<number | null>(null);
   const stopRef = React.useRef(false);
+  const autoRunRef = React.useRef<{
+    active: boolean;
+    nextBatch: number;
+    maxBatches: number;
+    totalInserted: number;
+    totalFailed: number;
+    pages: Array<{ slug: string; title: string }>;
+  }>({ active: false, nextBatch: 1, maxBatches: 0, totalInserted: 0, totalFailed: 0, pages: [] });
 
   type LogEntry = {
     id: number;
@@ -176,6 +184,38 @@ function GenerateContentPageInner() {
     return await callEdge(action, { slugs });
   };
 
+  const finishAutoBatch = async (status: any) => {
+    const runState = autoRunRef.current;
+    const inserted = status?.inserted ?? 0;
+    const attempted = status?.attempted ?? 0;
+    const failed = Math.max(0, attempted - inserted);
+    const nextPages = [...runState.pages, ...(status?.pages ?? [])].slice(-100);
+    runState.totalInserted += inserted;
+    runState.totalFailed += failed;
+    runState.pages = nextPages;
+    setProgress({
+      batch: Math.max(0, runState.nextBatch - 1),
+      inserted: runState.totalInserted,
+      failed: runState.totalFailed,
+      pages: nextPages,
+    });
+
+    if (stopRef.current || runState.nextBatch > runState.maxBatches || attempted === 0) {
+      runState.active = false;
+      setBusy(false);
+      return;
+    }
+
+    const res: any = await runOnce("start");
+    setResult(res);
+    runState.nextBatch += 1;
+    if (res?.queued && res?.pendingSlugs?.length) {
+      scheduleStatusPoll(res.pendingSlugs);
+      return;
+    }
+    await finishAutoBatch(res);
+  };
+
   const scheduleStatusPoll = (slugs: string[]) => {
     if (pollTimerRef.current) window.clearTimeout(pollTimerRef.current);
     pollTimerRef.current = window.setTimeout(async () => {
@@ -185,6 +225,8 @@ function GenerateContentPageInner() {
         const pending = status?.pendingSlugs ?? [];
         if (pending.length > 0 && !stopRef.current) {
           scheduleStatusPoll(pending);
+        } else if (autoRunRef.current.active) {
+          await finishAutoBatch(status);
         } else {
           setBusy(false);
         }
