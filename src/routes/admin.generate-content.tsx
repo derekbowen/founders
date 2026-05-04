@@ -122,7 +122,7 @@ function GenerateContentPageInner() {
   const logIdRef = React.useRef(0);
   const ENDPOINT = `${import.meta.env.VITE_SUPABASE_URL ?? ""}/functions/v1/generate-content-batch`;
 
-  const appendLog = (entry: Omit<LogEntry, "id" | "at">) => {
+  const appendLog = React.useCallback((entry: Omit<LogEntry, "id" | "at">) => {
     setLog((prev) =>
       [
         {
@@ -133,15 +133,15 @@ function GenerateContentPageInner() {
         ...prev,
       ].slice(0, 50),
     );
-  };
+  }, []);
 
-  const callEdge = async (
+  const callEdge = React.useCallback(async (
     action: "preflight" | "start" | "status",
     extra?: { slugs?: string[] },
-  ) => {
+  ): Promise<GenerateResponse> => {
     const started = performance.now();
     try {
-      const res: any = await generateContentBatch({
+      const res = await generateContentBatch({
         data: {
           action,
           count,
@@ -151,32 +151,33 @@ function GenerateContentPageInner() {
           model,
           dryRun,
           slugs: extra?.slugs,
-        } as any,
+        },
       });
+      const response = res as GenerateResponse;
       const durationMs = Math.round(performance.now() - started);
       const summary =
         action === "preflight"
-          ? res?.ok
+          ? response.ok
             ? "Setup verified"
-            : `Preflight failed: ${res?.aiError ?? "see details"}`
+            : `Preflight failed: ${response.aiError ?? "see details"}`
           : action === "status"
-            ? `Status: ${res?.pendingSlugs?.length ?? 0} pending, ${res?.inserted ?? 0} inserted`
-            : res?.queued
-              ? `Queued ${res?.attempted ?? 0} page(s) for background generation`
-              : `Returned ${res?.inserted ?? 0}/${res?.attempted ?? 0} inserted`;
+            ? `Status: ${response.pendingSlugs?.length ?? 0} pending, ${response.inserted ?? 0} inserted`
+            : response.queued
+              ? `Queued ${response.attempted ?? 0} page(s) for background generation`
+              : `Returned ${response.inserted ?? 0}/${response.attempted ?? 0} inserted`;
       appendLog({
         action,
         endpoint: ENDPOINT,
         durationMs,
-        ok: Boolean(res?.ok ?? res?.queued),
+        ok: Boolean(response.ok ?? response.queued),
         httpStatus: 200,
         summary,
-        response: res,
+        response,
       });
-      return res;
-    } catch (e: any) {
+      return response;
+    } catch (e: unknown) {
       const durationMs = Math.round(performance.now() - started);
-      const message = e?.message ?? String(e);
+      const message = getErrorMessage(e);
       const statusMatch = message.match(/(\b[45]\d{2}\b)/);
       appendLog({
         action,
@@ -189,7 +190,7 @@ function GenerateContentPageInner() {
       });
       throw e;
     }
-  };
+  }, [appendLog, count, dryRun, model, stateCode, tier, warmOnly]);
 
 
   React.useEffect(() => {
