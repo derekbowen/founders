@@ -60,7 +60,7 @@ function GenerateContentPageInner() {
   const [tier, setTier] = React.useState<string>("T1 (200k+)");
   const [stateCode, setStateCode] = React.useState("");
   const [warmOnly, setWarmOnly] = React.useState(false);
-  const [model, setModel] = React.useState("google/gemini-2.5-pro");
+  const [model, setModel] = React.useState("google/gemini-3-flash-preview");
   const [busy, setBusy] = React.useState(false);
   const [dryRun, setDryRun] = React.useState(false);
   const [autoLoop, setAutoLoop] = React.useState(false);
@@ -73,19 +73,47 @@ function GenerateContentPageInner() {
     failed: number;
     pages: Array<{ slug: string; title: string }>;
   }>({ batch: 0, inserted: 0, failed: 0, pages: [] });
+  const pollTimerRef = React.useRef<number | null>(null);
   const stopRef = React.useRef(false);
 
-  const runOnce = async () => {
+  React.useEffect(() => {
+    return () => {
+      if (pollTimerRef.current) window.clearTimeout(pollTimerRef.current);
+    };
+  }, []);
+
+  const runOnce = async (action: "start" | "status" = "start", slugs?: string[]) => {
     return await generateContentBatch({
       data: {
+        action,
         count,
         tier: tier || undefined,
         stateCode: stateCode.trim() || undefined,
         warmOnly,
         model,
         dryRun,
+        slugs,
       } as any,
     });
+  };
+
+  const scheduleStatusPoll = (slugs: string[]) => {
+    if (pollTimerRef.current) window.clearTimeout(pollTimerRef.current);
+    pollTimerRef.current = window.setTimeout(async () => {
+      try {
+        const status: any = await runOnce("status", slugs);
+        setResult(status);
+        const pending = status?.pendingSlugs ?? [];
+        if (pending.length > 0 && !stopRef.current) {
+          scheduleStatusPoll(pending);
+        } else {
+          setBusy(false);
+        }
+      } catch (e: any) {
+        setError(e?.message ?? String(e));
+        setBusy(false);
+      }
+    }, 5000);
   };
 
   const run = async () => {
@@ -98,6 +126,10 @@ function GenerateContentPageInner() {
       if (!autoLoop) {
         const res = await runOnce();
         setResult(res);
+        if (res?.queued && res?.pendingSlugs?.length) {
+          scheduleStatusPoll(res.pendingSlugs);
+          return;
+        }
       } else {
         let totalInserted = 0;
         let totalFailed = 0;
@@ -108,6 +140,7 @@ function GenerateContentPageInner() {
           totalInserted += res?.inserted ?? 0;
           totalFailed += (res?.attempted ?? 0) - (res?.inserted ?? 0);
           if (res?.pages) allPages.push(...res.pages);
+          if (res?.queued && res?.pendingSlugs?.length) break;
           setProgress({
             batch: i,
             inserted: totalInserted,
@@ -120,7 +153,7 @@ function GenerateContentPageInner() {
     } catch (e: any) {
       setError(e?.message ?? String(e));
     } finally {
-      setBusy(false);
+      if (!result?.queued) setBusy(false);
     }
   };
 
