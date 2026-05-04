@@ -29,7 +29,7 @@ export function PoolWaitlistForm({ nearestMiles, city, region }: Props) {
     }
     setStatus("loading");
     try {
-      await join({ data: { email: trimmed, nearestMiles } });
+      await join({ data: { email: trimmed, nearestMiles, city, region } });
       setStatus("success");
     } catch (err) {
       console.error(err);

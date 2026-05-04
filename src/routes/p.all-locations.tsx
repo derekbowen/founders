@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { getAllLocations } from "@/server/all-locations.functions";
+import { getAllLocations, type DirectoryGroup, type DirectoryLink } from "@/server/all-locations.functions";
 import { SiteHeader, SiteFooter } from "@/components/site-layout";
 import { buildMeta } from "@/lib/seo";
 
@@ -55,7 +55,7 @@ function AllLocationsPage() {
               aria-label="Jump to section"
               className="mt-8 flex flex-wrap gap-2"
             >
-              {data.groups.map((g) => (
+              {data.groups.map((g: DirectoryGroup) => (
                 <a
                   key={`top-${g.id}`}
                   href={`#${g.id}`}
@@ -73,7 +73,7 @@ function AllLocationsPage() {
 
         {/* Groups */}
         <div className="mx-auto max-w-6xl px-4 py-12">
-          {data.groups.map((group) => (
+          {data.groups.map((group: DirectoryGroup) => (
             <section
               key={group.id}
               id={group.id}
@@ -94,7 +94,7 @@ function AllLocationsPage() {
               </div>
 
               <ul className="grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                {group.links.map((link) => (
+                {group.links.map((link: DirectoryLink) => (
                   <li key={link.href} className="leading-snug">
                     <Link
                       to={link.href as never}
@@ -131,7 +131,7 @@ function AllLocationsPage() {
           >
             <h2 className="text-lg font-semibold">Browse all sections</h2>
             <nav className="mt-4 flex flex-wrap gap-2">
-              {data.groups.map((g) => (
+              {data.groups.map((g: DirectoryGroup) => (
                 <a
                   key={`bot-${g.id}`}
                   href={`#${g.id}`}

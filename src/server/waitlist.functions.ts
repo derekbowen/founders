@@ -6,6 +6,8 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 const schema = z.object({
   email: z.string().trim().email().max(255),
   nearestMiles: z.number().nullable().optional(),
+  city: z.string().trim().min(1).max(120).nullable().optional(),
+  region: z.string().trim().min(1).max(20).nullable().optional(),
 });
 
 export const joinPoolWaitlist = createServerFn({ method: "POST" })
@@ -21,8 +23,8 @@ export const joinPoolWaitlist = createServerFn({ method: "POST" })
         cf?: { city?: string; region?: string; latitude?: string; longitude?: string };
       };
       const cf = req.cf ?? {};
-      city = cf.city ?? null;
-      region = cf.region ?? null;
+      city = data.city ?? cf.city ?? null;
+      region = data.region ?? cf.region ?? null;
       latitude = cf.latitude ? Number(cf.latitude) : null;
       longitude = cf.longitude ? Number(cf.longitude) : null;
       userAgent = getRequestHeader("user-agent") ?? null;
