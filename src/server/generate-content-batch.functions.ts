@@ -359,15 +359,16 @@ export const generateContentBatch = createServerFn({ method: "POST" })
     // Concurrency limiter — 4 in-flight at a time
     const CONC = 4;
     const generated: GeneratedPage[] = [];
+    const rowsArr = planRows as PlanRow[];
     let cursor = 0;
     async function worker() {
-      while (cursor < planRows.length) {
+      while (cursor < rowsArr.length) {
         const idx = cursor++;
-        const result = await generateOne(planRows[idx] as PlanRow);
+        const result = await generateOne(rowsArr[idx]);
         if (result) generated.push(result);
       }
     }
-    await Promise.all(Array.from({ length: Math.min(CONC, planRows.length) }, worker));
+    await Promise.all(Array.from({ length: Math.min(CONC, rowsArr.length) }, worker));
 
     const bySlug = new Map(generated.map((g) => [g.plan_slug, g]));
 
