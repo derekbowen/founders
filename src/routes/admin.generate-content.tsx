@@ -56,7 +56,7 @@ function GenerateContentPage() {
 }
 
 function GenerateContentPageInner() {
-  const [count, setCount] = React.useState(10);
+  const [count, setCount] = React.useState(1);
   const [tier, setTier] = React.useState<string>("T1 (200k+)");
   const [stateCode, setStateCode] = React.useState("");
   const [warmOnly, setWarmOnly] = React.useState(false);
@@ -147,9 +147,9 @@ function GenerateContentPageInner() {
               <input
                 type="number"
                 min={1}
-                max={25}
+                max={5}
                 value={count}
-                onChange={(e) => setCount(Number(e.target.value) || 1)}
+                onChange={(e) => setCount(Math.min(5, Math.max(1, Number(e.target.value) || 1)))}
                 className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
               />
             </div>
