@@ -122,11 +122,13 @@ function GenerateContentPageInner() {
     setResult(null);
     setProgress({ batch: 0, inserted: 0, failed: 0, pages: [] });
     stopRef.current = false;
+    let keepsPolling = false;
     try {
       if (!autoLoop) {
         const res = await runOnce();
         setResult(res);
         if (res?.queued && res?.pendingSlugs?.length) {
+          keepsPolling = true;
           scheduleStatusPoll(res.pendingSlugs);
           return;
         }
@@ -140,7 +142,11 @@ function GenerateContentPageInner() {
           totalInserted += res?.inserted ?? 0;
           totalFailed += (res?.attempted ?? 0) - (res?.inserted ?? 0);
           if (res?.pages) allPages.push(...res.pages);
-          if (res?.queued && res?.pendingSlugs?.length) break;
+          if (res?.queued && res?.pendingSlugs?.length) {
+            keepsPolling = true;
+            scheduleStatusPoll(res.pendingSlugs);
+            break;
+          }
           setProgress({
             batch: i,
             inserted: totalInserted,
@@ -153,7 +159,7 @@ function GenerateContentPageInner() {
     } catch (e: any) {
       setError(e?.message ?? String(e));
     } finally {
-      if (!result?.queued) setBusy(false);
+      if (!keepsPolling) setBusy(false);
     }
   };
 
