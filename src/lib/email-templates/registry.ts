@@ -10,7 +10,9 @@ export interface TemplateEntry {
 }
 
 import { template as poolWaitlistConfirmation } from './pool-waitlist-confirmation'
+import { template as internalLeadNotification } from './internal-lead-notification'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'pool-waitlist-confirmation': poolWaitlistConfirmation,
+  'internal-lead-notification': internalLeadNotification,
 }
