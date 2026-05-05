@@ -44,7 +44,7 @@ export function SiteHeader() {
         <nav className="hidden items-center gap-6 md:flex">
           <Link to="/" className="text-sm font-medium text-muted-foreground hover:text-foreground" activeOptions={{ exact: true }} activeProps={{ className: "text-foreground" }}>Home</Link>
           <a href="https://www.poolrentalnearme.com/public-pools" className="text-sm font-medium text-muted-foreground hover:text-foreground">Public Pools</a>
-          <a href="https://www.poolrentalnearme.com/amenities" className="text-sm font-medium text-muted-foreground hover:text-foreground">Amenities</a>
+          <Link to="/directory" className="text-sm font-medium text-muted-foreground hover:text-foreground" activeProps={{ className: "text-foreground" }}>Pool Pros</Link>
           <a href={rel("/p/how-it-works")} className="text-sm font-medium text-muted-foreground hover:text-foreground">How It Works</a>
           <a href="https://www.poolrentalnearme.com/s" className="text-sm font-medium text-muted-foreground hover:text-foreground">Search</a>
         </nav>
@@ -58,6 +58,8 @@ export function SiteHeader() {
 
 const EXPLORE = [
   { label: "Search Listings", href: marketplace("/s") },
+  { label: "Pool Pros Directory", href: "/directory" },
+  { label: "List Your Business", href: "/directory/list" },
   { label: "How It Works", href: "/p/how-it-works" },
   { label: "Start a Business", href: "/p/hosting" },
   { label: "Pool Rental Near Me vs Swimply", href: "/p/swimply-alternative-vs-pool-rental-near-me" },
