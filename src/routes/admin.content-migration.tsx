@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   nextPendingPage,
   scrapeContentPage,
+  scrapeProgress,
 } from "@/server/content-scrape.functions";
 import { checkAdminRole } from "@/server/admin-auth.functions";
 import { SiteHeader, SiteFooter } from "@/components/site-layout";
@@ -24,6 +25,21 @@ function AdminContentMigration() {
   const [scraped, setScraped] = React.useState<any>(null);
   const [busy, setBusy] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const [progress, setProgress] = React.useState<{
+    pending: number;
+    scraped: number;
+    total: number;
+  } | null>(null);
+  const [autoRun, setAutoRun] = React.useState(false);
+
+  const loadProgress = React.useCallback(async () => {
+    try {
+      const p = await scrapeProgress({ data: { template_type: templateType } });
+      setProgress(p);
+    } catch {
+      /* ignore */
+    }
+  }, [templateType]);
 
   const loadNext = React.useCallback(async () => {
     setError(null);
@@ -43,16 +59,17 @@ function AdminContentMigration() {
 
   React.useEffect(() => {
     void loadNext();
-  }, [loadNext]);
+    void loadProgress();
+  }, [loadNext, loadProgress]);
 
-  const runScrape = async () => {
+  const runScrape = React.useCallback(async () => {
     if (!next?.id) return;
     setError(null);
     setBusy(true);
     try {
       const res = await scrapeContentPage({ data: { id: next.id } });
       setScraped(res.page);
-      // Auto-advance to the next pending row
+      void loadProgress();
       try {
         const nextRes = await nextPendingPage({
           data: { template_type: templateType },
@@ -63,10 +80,21 @@ function AdminContentMigration() {
       }
     } catch (e: any) {
       setError(e?.message ?? String(e));
+      setAutoRun(false);
     } finally {
       setBusy(false);
     }
-  };
+  }, [next?.id, templateType, loadProgress]);
+
+  // Auto-run loop: when enabled, keep scraping until no pending rows remain.
+  React.useEffect(() => {
+    if (!autoRun || busy) return;
+    if (!next?.id) {
+      setAutoRun(false);
+      return;
+    }
+    void runScrape();
+  }, [autoRun, busy, next?.id, runScrape]);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -97,7 +125,50 @@ function AdminContentMigration() {
           >
             Reload next
           </button>
+          <button
+            onClick={() => setAutoRun((v) => !v)}
+            disabled={!next?.id && !autoRun}
+            className={`rounded-full px-4 py-1.5 text-sm font-semibold ${
+              autoRun
+                ? "bg-destructive text-destructive-foreground"
+                : "bg-primary text-primary-foreground"
+            }`}
+          >
+            {autoRun ? "Stop auto-run" : "Auto-run all"}
+          </button>
         </div>
+
+        {progress && (
+          <div className="mt-6">
+            <div className="flex items-center justify-between text-sm">
+              <span className="font-medium">
+                Progress: {progress.scraped} / {progress.total}
+              </span>
+              <span className="text-muted-foreground">
+                {progress.pending} pending
+                {progress.total > 0 &&
+                  ` · ${Math.round((progress.scraped / progress.total) * 100)}%`}
+              </span>
+            </div>
+            <div className="mt-2 h-3 w-full overflow-hidden rounded-full bg-muted">
+              <div
+                className={`h-full bg-primary transition-all duration-500 ${
+                  autoRun ? "animate-pulse" : ""
+                }`}
+                style={{
+                  width: `${
+                    progress.total > 0
+                      ? Math.min(
+                          100,
+                          (progress.scraped / progress.total) * 100,
+                        )
+                      : 0
+                  }%`,
+                }}
+              />
+            </div>
+          </div>
+        )}
 
         {error && (
           <div className="mt-4 rounded border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
