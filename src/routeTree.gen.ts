@@ -26,6 +26,7 @@ import { Route as SitemapPagesSpanishDotxmlRouteImport } from './routes/sitemap-
 import { Route as SitemapPagesMoneyDotxmlRouteImport } from './routes/sitemap-pages-money[.]xml'
 import { Route as SitemapPagesHostAcquisitionDotxmlRouteImport } from './routes/sitemap-pages-host-acquisition[.]xml'
 import { Route as SitemapPagesEventGuidesDotxmlRouteImport } from './routes/sitemap-pages-event-guides[.]xml'
+import { Route as SitemapPagesComparisonsDotxmlRouteImport } from './routes/sitemap-pages-comparisons[.]xml'
 import { Route as SitemapPagesCitiesDotxmlRouteImport } from './routes/sitemap-pages-cities[.]xml'
 import { Route as SitemapPagesArticlesDotxmlRouteImport } from './routes/sitemap-pages-articles[.]xml'
 import { Route as SitemapPagesAdvocacyDotxmlRouteImport } from './routes/sitemap-pages-advocacy[.]xml'
@@ -182,6 +183,12 @@ const SitemapPagesEventGuidesDotxmlRoute =
   SitemapPagesEventGuidesDotxmlRouteImport.update({
     id: '/sitemap-pages-event-guides.xml',
     path: '/sitemap-pages-event-guides.xml',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const SitemapPagesComparisonsDotxmlRoute =
+  SitemapPagesComparisonsDotxmlRouteImport.update({
+    id: '/sitemap-pages-comparisons.xml',
+    path: '/sitemap-pages-comparisons.xml',
     getParentRoute: () => rootRouteImport,
   } as any)
 const SitemapPagesCitiesDotxmlRoute =
@@ -553,6 +560,7 @@ export interface FileRoutesByFullPath {
   '/sitemap-pages-advocacy.xml': typeof SitemapPagesAdvocacyDotxmlRoute
   '/sitemap-pages-articles.xml': typeof SitemapPagesArticlesDotxmlRoute
   '/sitemap-pages-cities.xml': typeof SitemapPagesCitiesDotxmlRoute
+  '/sitemap-pages-comparisons.xml': typeof SitemapPagesComparisonsDotxmlRoute
   '/sitemap-pages-event-guides.xml': typeof SitemapPagesEventGuidesDotxmlRoute
   '/sitemap-pages-host-acquisition.xml': typeof SitemapPagesHostAcquisitionDotxmlRoute
   '/sitemap-pages-money.xml': typeof SitemapPagesMoneyDotxmlRoute
@@ -638,6 +646,7 @@ export interface FileRoutesByTo {
   '/sitemap-pages-advocacy.xml': typeof SitemapPagesAdvocacyDotxmlRoute
   '/sitemap-pages-articles.xml': typeof SitemapPagesArticlesDotxmlRoute
   '/sitemap-pages-cities.xml': typeof SitemapPagesCitiesDotxmlRoute
+  '/sitemap-pages-comparisons.xml': typeof SitemapPagesComparisonsDotxmlRoute
   '/sitemap-pages-event-guides.xml': typeof SitemapPagesEventGuidesDotxmlRoute
   '/sitemap-pages-host-acquisition.xml': typeof SitemapPagesHostAcquisitionDotxmlRoute
   '/sitemap-pages-money.xml': typeof SitemapPagesMoneyDotxmlRoute
@@ -725,6 +734,7 @@ export interface FileRoutesById {
   '/sitemap-pages-advocacy.xml': typeof SitemapPagesAdvocacyDotxmlRoute
   '/sitemap-pages-articles.xml': typeof SitemapPagesArticlesDotxmlRoute
   '/sitemap-pages-cities.xml': typeof SitemapPagesCitiesDotxmlRoute
+  '/sitemap-pages-comparisons.xml': typeof SitemapPagesComparisonsDotxmlRoute
   '/sitemap-pages-event-guides.xml': typeof SitemapPagesEventGuidesDotxmlRoute
   '/sitemap-pages-host-acquisition.xml': typeof SitemapPagesHostAcquisitionDotxmlRoute
   '/sitemap-pages-money.xml': typeof SitemapPagesMoneyDotxmlRoute
@@ -813,6 +823,7 @@ export interface FileRouteTypes {
     | '/sitemap-pages-advocacy.xml'
     | '/sitemap-pages-articles.xml'
     | '/sitemap-pages-cities.xml'
+    | '/sitemap-pages-comparisons.xml'
     | '/sitemap-pages-event-guides.xml'
     | '/sitemap-pages-host-acquisition.xml'
     | '/sitemap-pages-money.xml'
@@ -898,6 +909,7 @@ export interface FileRouteTypes {
     | '/sitemap-pages-advocacy.xml'
     | '/sitemap-pages-articles.xml'
     | '/sitemap-pages-cities.xml'
+    | '/sitemap-pages-comparisons.xml'
     | '/sitemap-pages-event-guides.xml'
     | '/sitemap-pages-host-acquisition.xml'
     | '/sitemap-pages-money.xml'
@@ -984,6 +996,7 @@ export interface FileRouteTypes {
     | '/sitemap-pages-advocacy.xml'
     | '/sitemap-pages-articles.xml'
     | '/sitemap-pages-cities.xml'
+    | '/sitemap-pages-comparisons.xml'
     | '/sitemap-pages-event-guides.xml'
     | '/sitemap-pages-host-acquisition.xml'
     | '/sitemap-pages-money.xml'
@@ -1071,6 +1084,7 @@ export interface RootRouteChildren {
   SitemapPagesAdvocacyDotxmlRoute: typeof SitemapPagesAdvocacyDotxmlRoute
   SitemapPagesArticlesDotxmlRoute: typeof SitemapPagesArticlesDotxmlRoute
   SitemapPagesCitiesDotxmlRoute: typeof SitemapPagesCitiesDotxmlRoute
+  SitemapPagesComparisonsDotxmlRoute: typeof SitemapPagesComparisonsDotxmlRoute
   SitemapPagesEventGuidesDotxmlRoute: typeof SitemapPagesEventGuidesDotxmlRoute
   SitemapPagesHostAcquisitionDotxmlRoute: typeof SitemapPagesHostAcquisitionDotxmlRoute
   SitemapPagesMoneyDotxmlRoute: typeof SitemapPagesMoneyDotxmlRoute
@@ -1252,6 +1266,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap-pages-event-guides.xml'
       fullPath: '/sitemap-pages-event-guides.xml'
       preLoaderRoute: typeof SitemapPagesEventGuidesDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap-pages-comparisons.xml': {
+      id: '/sitemap-pages-comparisons.xml'
+      path: '/sitemap-pages-comparisons.xml'
+      fullPath: '/sitemap-pages-comparisons.xml'
+      preLoaderRoute: typeof SitemapPagesComparisonsDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap-pages-cities.xml': {
@@ -1812,6 +1833,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapPagesAdvocacyDotxmlRoute: SitemapPagesAdvocacyDotxmlRoute,
   SitemapPagesArticlesDotxmlRoute: SitemapPagesArticlesDotxmlRoute,
   SitemapPagesCitiesDotxmlRoute: SitemapPagesCitiesDotxmlRoute,
+  SitemapPagesComparisonsDotxmlRoute: SitemapPagesComparisonsDotxmlRoute,
   SitemapPagesEventGuidesDotxmlRoute: SitemapPagesEventGuidesDotxmlRoute,
   SitemapPagesHostAcquisitionDotxmlRoute:
     SitemapPagesHostAcquisitionDotxmlRoute,
