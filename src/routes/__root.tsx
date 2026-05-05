@@ -1,5 +1,5 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts, useRouterState, redirect } from "@tanstack/react-router";
-import { getRequest } from "@tanstack/react-start/server";
+import { createIsomorphicFn } from "@tanstack/react-start";
 
 import appCss from "../styles.css?url";
 
