@@ -69,29 +69,13 @@ function NotFoundComponent() {
 }
 
 export const Route = createRootRoute({
-  beforeLoad: () => {
-    // Server-only: redirect any non-canonical host (published lovable.app URL,
-    // EC2 IP, etc.) to the production domain so users never see infra URLs.
+  beforeLoad: async () => {
+    // Server-only via createServerFn: redirect non-canonical hosts to the
+    // production domain so the address bar never shows infra URLs.
     if (typeof window !== "undefined") return;
-    try {
-      const req = getRequest();
-      const url = new URL(req.url);
-      const host = url.hostname.toLowerCase();
-      const isCanonical = host === PROD_HOST || host === `www.${PROD_HOST}`;
-      const isLocal = host === "localhost" || host === "127.0.0.1" || host.endsWith(".local");
-      // Allow Lovable in-editor preview hosts so the preview keeps working.
-      const isPreview =
-        host.endsWith(".lovableproject.com") ||
-        host.includes("id-preview--") ||
-        host.includes("lovable.dev");
-      if (!isCanonical && !isLocal && !isPreview) {
-        throw redirect({
-          href: `${CANONICAL_ORIGIN}${url.pathname}${url.search}`,
-          statusCode: 301,
-        });
-      }
-    } catch (err) {
-      if (err && typeof err === "object" && "isRedirect" in err) throw err;
+    const { redirectTo } = await checkCanonicalHost();
+    if (redirectTo) {
+      throw redirect({ href: redirectTo, statusCode: 301 });
     }
   },
   head: () => {
