@@ -82,11 +82,13 @@ import { Route as AdminDirectoryRouteImport } from './routes/admin.directory'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminContentMigrationRouteImport } from './routes/admin.content-migration'
 import { Route as AdminClickReportRouteImport } from './routes/admin.click-report'
+import { Route as AdminClaimsRouteImport } from './routes/admin.claims'
 import { Route as AdminCitiesHeroesRouteImport } from './routes/admin.cities-heroes'
 import { Route as AdminBlogRouteImport } from './routes/admin.blog'
 import { Route as AccountLearningRouteImport } from './routes/account.learning'
 import { Route as AcademySlugRouteImport } from './routes/academy.$slug'
 import { Route as HelpCenterCategoryIndexRouteImport } from './routes/help-center.$category.index'
+import { Route as ProvidersSlugClaimRouteImport } from './routes/providers.$slug.claim'
 import { Route as PoolBuildersStateCityRouteImport } from './routes/pool-builders.$state.$city'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as LSlugIdRouteImport } from './routes/l.$slug.$id'
@@ -483,6 +485,11 @@ const AdminClickReportRoute = AdminClickReportRouteImport.update({
   path: '/admin/click-report',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminClaimsRoute = AdminClaimsRouteImport.update({
+  id: '/admin/claims',
+  path: '/admin/claims',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminCitiesHeroesRoute = AdminCitiesHeroesRouteImport.update({
   id: '/admin/cities-heroes',
   path: '/admin/cities-heroes',
@@ -507,6 +514,11 @@ const HelpCenterCategoryIndexRoute = HelpCenterCategoryIndexRouteImport.update({
   id: '/help-center/$category/',
   path: '/help-center/$category/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ProvidersSlugClaimRoute = ProvidersSlugClaimRouteImport.update({
+  id: '/claim',
+  path: '/claim',
+  getParentRoute: () => ProvidersSlugRoute,
 } as any)
 const PoolBuildersStateCityRoute = PoolBuildersStateCityRouteImport.update({
   id: '/$city',
@@ -627,6 +639,7 @@ export interface FileRoutesByFullPath {
   '/account/learning': typeof AccountLearningRoute
   '/admin/blog': typeof AdminBlogRoute
   '/admin/cities-heroes': typeof AdminCitiesHeroesRoute
+  '/admin/claims': typeof AdminClaimsRoute
   '/admin/click-report': typeof AdminClickReportRoute
   '/admin/content-migration': typeof AdminContentMigrationRoute
   '/admin/dashboard': typeof AdminDashboardRoute
@@ -657,7 +670,7 @@ export interface FileRoutesByFullPath {
   '/pool-builders/$state': typeof PoolBuildersStateRouteWithChildren
   '/pool-rental-laws/$city': typeof PoolRentalLawsCityRoute
   '/pool-rental/$city': typeof PoolRentalCityRoute
-  '/providers/$slug': typeof ProvidersSlugRoute
+  '/providers/$slug': typeof ProvidersSlugRouteWithChildren
   '/verify/$uid': typeof VerifyUidRoute
   '/academy/': typeof AcademyIndexRoute
   '/help-center/': typeof HelpCenterIndexRoute
@@ -671,6 +684,7 @@ export interface FileRoutesByFullPath {
   '/l/$slug/$id': typeof LSlugIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/pool-builders/$state/$city': typeof PoolBuildersStateCityRoute
+  '/providers/$slug/claim': typeof ProvidersSlugClaimRoute
   '/help-center/$category/': typeof HelpCenterCategoryIndexRoute
   '/api/certificates/$uid/pdf': typeof ApiCertificatesUidPdfRoute
   '/api/public/hooks/sync-listings': typeof ApiPublicHooksSyncListingsRoute
@@ -720,6 +734,7 @@ export interface FileRoutesByTo {
   '/account/learning': typeof AccountLearningRoute
   '/admin/blog': typeof AdminBlogRoute
   '/admin/cities-heroes': typeof AdminCitiesHeroesRoute
+  '/admin/claims': typeof AdminClaimsRoute
   '/admin/click-report': typeof AdminClickReportRoute
   '/admin/content-migration': typeof AdminContentMigrationRoute
   '/admin/dashboard': typeof AdminDashboardRoute
@@ -750,7 +765,7 @@ export interface FileRoutesByTo {
   '/pool-builders/$state': typeof PoolBuildersStateRouteWithChildren
   '/pool-rental-laws/$city': typeof PoolRentalLawsCityRoute
   '/pool-rental/$city': typeof PoolRentalCityRoute
-  '/providers/$slug': typeof ProvidersSlugRoute
+  '/providers/$slug': typeof ProvidersSlugRouteWithChildren
   '/verify/$uid': typeof VerifyUidRoute
   '/academy': typeof AcademyIndexRoute
   '/help-center': typeof HelpCenterIndexRoute
@@ -764,6 +779,7 @@ export interface FileRoutesByTo {
   '/l/$slug/$id': typeof LSlugIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/pool-builders/$state/$city': typeof PoolBuildersStateCityRoute
+  '/providers/$slug/claim': typeof ProvidersSlugClaimRoute
   '/help-center/$category': typeof HelpCenterCategoryIndexRoute
   '/api/certificates/$uid/pdf': typeof ApiCertificatesUidPdfRoute
   '/api/public/hooks/sync-listings': typeof ApiPublicHooksSyncListingsRoute
@@ -815,6 +831,7 @@ export interface FileRoutesById {
   '/account/learning': typeof AccountLearningRoute
   '/admin/blog': typeof AdminBlogRoute
   '/admin/cities-heroes': typeof AdminCitiesHeroesRoute
+  '/admin/claims': typeof AdminClaimsRoute
   '/admin/click-report': typeof AdminClickReportRoute
   '/admin/content-migration': typeof AdminContentMigrationRoute
   '/admin/dashboard': typeof AdminDashboardRoute
@@ -845,7 +862,7 @@ export interface FileRoutesById {
   '/pool-builders/$state': typeof PoolBuildersStateRouteWithChildren
   '/pool-rental-laws/$city': typeof PoolRentalLawsCityRoute
   '/pool-rental/$city': typeof PoolRentalCityRoute
-  '/providers/$slug': typeof ProvidersSlugRoute
+  '/providers/$slug': typeof ProvidersSlugRouteWithChildren
   '/verify/$uid': typeof VerifyUidRoute
   '/academy/': typeof AcademyIndexRoute
   '/help-center/': typeof HelpCenterIndexRoute
@@ -859,6 +876,7 @@ export interface FileRoutesById {
   '/l/$slug/$id': typeof LSlugIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/pool-builders/$state/$city': typeof PoolBuildersStateCityRoute
+  '/providers/$slug/claim': typeof ProvidersSlugClaimRoute
   '/help-center/$category/': typeof HelpCenterCategoryIndexRoute
   '/api/certificates/$uid/pdf': typeof ApiCertificatesUidPdfRoute
   '/api/public/hooks/sync-listings': typeof ApiPublicHooksSyncListingsRoute
@@ -911,6 +929,7 @@ export interface FileRouteTypes {
     | '/account/learning'
     | '/admin/blog'
     | '/admin/cities-heroes'
+    | '/admin/claims'
     | '/admin/click-report'
     | '/admin/content-migration'
     | '/admin/dashboard'
@@ -955,6 +974,7 @@ export interface FileRouteTypes {
     | '/l/$slug/$id'
     | '/lovable/email/suppression'
     | '/pool-builders/$state/$city'
+    | '/providers/$slug/claim'
     | '/help-center/$category/'
     | '/api/certificates/$uid/pdf'
     | '/api/public/hooks/sync-listings'
@@ -1004,6 +1024,7 @@ export interface FileRouteTypes {
     | '/account/learning'
     | '/admin/blog'
     | '/admin/cities-heroes'
+    | '/admin/claims'
     | '/admin/click-report'
     | '/admin/content-migration'
     | '/admin/dashboard'
@@ -1048,6 +1069,7 @@ export interface FileRouteTypes {
     | '/l/$slug/$id'
     | '/lovable/email/suppression'
     | '/pool-builders/$state/$city'
+    | '/providers/$slug/claim'
     | '/help-center/$category'
     | '/api/certificates/$uid/pdf'
     | '/api/public/hooks/sync-listings'
@@ -1098,6 +1120,7 @@ export interface FileRouteTypes {
     | '/account/learning'
     | '/admin/blog'
     | '/admin/cities-heroes'
+    | '/admin/claims'
     | '/admin/click-report'
     | '/admin/content-migration'
     | '/admin/dashboard'
@@ -1142,6 +1165,7 @@ export interface FileRouteTypes {
     | '/l/$slug/$id'
     | '/lovable/email/suppression'
     | '/pool-builders/$state/$city'
+    | '/providers/$slug/claim'
     | '/help-center/$category/'
     | '/api/certificates/$uid/pdf'
     | '/api/public/hooks/sync-listings'
@@ -1192,6 +1216,7 @@ export interface RootRouteChildren {
   AccountLearningRoute: typeof AccountLearningRoute
   AdminBlogRoute: typeof AdminBlogRoute
   AdminCitiesHeroesRoute: typeof AdminCitiesHeroesRoute
+  AdminClaimsRoute: typeof AdminClaimsRoute
   AdminClickReportRoute: typeof AdminClickReportRoute
   AdminContentMigrationRoute: typeof AdminContentMigrationRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
@@ -1748,6 +1773,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminClickReportRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/claims': {
+      id: '/admin/claims'
+      path: '/admin/claims'
+      fullPath: '/admin/claims'
+      preLoaderRoute: typeof AdminClaimsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/cities-heroes': {
       id: '/admin/cities-heroes'
       path: '/admin/cities-heroes'
@@ -1782,6 +1814,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/help-center/$category/'
       preLoaderRoute: typeof HelpCenterCategoryIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/providers/$slug/claim': {
+      id: '/providers/$slug/claim'
+      path: '/claim'
+      fullPath: '/providers/$slug/claim'
+      preLoaderRoute: typeof ProvidersSlugClaimRouteImport
+      parentRoute: typeof ProvidersSlugRoute
     }
     '/pool-builders/$state/$city': {
       id: '/pool-builders/$state/$city'
@@ -1956,12 +1995,24 @@ const DirectoryRouteWithChildren = DirectoryRoute._addFileChildren(
   DirectoryRouteChildren,
 )
 
+interface ProvidersSlugRouteChildren {
+  ProvidersSlugClaimRoute: typeof ProvidersSlugClaimRoute
+}
+
+const ProvidersSlugRouteChildren: ProvidersSlugRouteChildren = {
+  ProvidersSlugClaimRoute: ProvidersSlugClaimRoute,
+}
+
+const ProvidersSlugRouteWithChildren = ProvidersSlugRoute._addFileChildren(
+  ProvidersSlugRouteChildren,
+)
+
 interface ProvidersRouteChildren {
-  ProvidersSlugRoute: typeof ProvidersSlugRoute
+  ProvidersSlugRoute: typeof ProvidersSlugRouteWithChildren
 }
 
 const ProvidersRouteChildren: ProvidersRouteChildren = {
-  ProvidersSlugRoute: ProvidersSlugRoute,
+  ProvidersSlugRoute: ProvidersSlugRouteWithChildren,
 }
 
 const ProvidersRouteWithChildren = ProvidersRoute._addFileChildren(
@@ -2033,6 +2084,7 @@ const rootRouteChildren: RootRouteChildren = {
   AccountLearningRoute: AccountLearningRoute,
   AdminBlogRoute: AdminBlogRoute,
   AdminCitiesHeroesRoute: AdminCitiesHeroesRoute,
+  AdminClaimsRoute: AdminClaimsRoute,
   AdminClickReportRoute: AdminClickReportRoute,
   AdminContentMigrationRoute: AdminContentMigrationRoute,
   AdminDashboardRoute: AdminDashboardRoute,
