@@ -25,6 +25,21 @@ function AdminContentMigration() {
   const [scraped, setScraped] = React.useState<any>(null);
   const [busy, setBusy] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const [progress, setProgress] = React.useState<{
+    pending: number;
+    scraped: number;
+    total: number;
+  } | null>(null);
+  const [autoRun, setAutoRun] = React.useState(false);
+
+  const loadProgress = React.useCallback(async () => {
+    try {
+      const p = await scrapeProgress({ data: { template_type: templateType } });
+      setProgress(p);
+    } catch {
+      /* ignore */
+    }
+  }, [templateType]);
 
   const loadNext = React.useCallback(async () => {
     setError(null);
