@@ -22,6 +22,29 @@ export type DashboardStats = {
   waitlist: { total: number; last7d: number };
   leads: { total: number; new: number };
   missing404s: { total: number; unresolved: number };
+  quality: {
+    siteIssues: {
+      missing_meta_published: number;
+      missing_schema_published: number;
+      no_links_published: number;
+      title_is_slug_published: number;
+      thin_published_total: number;
+      empty_published_total: number;
+    };
+    byTemplate: Array<{
+      template_type: string | null;
+      total: number;
+      published: number;
+      pending: number;
+      published_empty: number;
+      published_thin: number;
+      published_medium: number;
+      published_healthy: number;
+      avg_words_published: number | null;
+      oldest_pending: string | null;
+      published_last_7d: number;
+    }>;
+  };
   generatedAt: string;
 };
 
