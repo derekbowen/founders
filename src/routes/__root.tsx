@@ -39,15 +39,6 @@ function NotFoundComponent() {
 }
 
 export const Route = createRootRoute({
-  beforeLoad: async () => {
-    // Server-only via createServerFn: redirect non-canonical hosts to the
-    // production domain so the address bar never shows infra URLs.
-    if (typeof window !== "undefined") return;
-    const { redirectTo } = await checkCanonicalHost();
-    if (redirectTo) {
-      throw redirect({ href: redirectTo, statusCode: 301 });
-    }
-  },
   head: () => {
     const meta = buildMeta({
       title: "Pool Rental Near Me - Starting at $25 hour - Rent a pool now",
