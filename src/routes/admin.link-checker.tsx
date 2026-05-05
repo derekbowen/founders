@@ -166,6 +166,50 @@ function LinkChecker() {
   };
   const pct = progress.total ? Math.round((progress.done / progress.total) * 100) : 0;
 
+  // === Summary report ===
+  const report = React.useMemo(() => {
+    if (!rows.length) return null;
+    // Top broken targets (group by href)
+    const byTarget = new Map<string, { href: string; count: number; pages: Set<string>; reason: BrokenLink["reason"]; suggestion: string | null }>();
+    for (const r of rows) {
+      const e = byTarget.get(r.href) || { href: r.href, count: 0, pages: new Set<string>(), reason: r.reason, suggestion: r.suggestion?.href || null };
+      e.count++; e.pages.add(r.page_url);
+      if (!e.suggestion && r.suggestion?.href) e.suggestion = r.suggestion.href;
+      byTarget.set(r.href, e);
+    }
+    const targets = Array.from(byTarget.values()).map((t) => ({ ...t, pageCount: t.pages.size }));
+    const topTargets = [...targets].sort((a, b) => b.count - a.count).slice(0, 10);
+    // Fastest fixes by impact: has a suggestion and high count
+    const fastestFixes = targets
+      .filter((t) => t.suggestion)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 8);
+    // Affected pages count
+    const affectedPages = new Set(rows.map((r) => r.page_url)).size;
+    return { topTargets, fastestFixes, affectedPages, withSuggestions: rows.filter((r) => r.suggestion?.href).length };
+  }, [rows]);
+
+  async function fixAllOf(href: string, newHref: string) {
+    const items = rows.filter((r) => r.href === href).map((r) => ({ pageId: r.page_id, href: r.href, newHref }));
+    if (!items.length) return;
+    if (!confirm(`Replace ${items.length} occurrence${items.length === 1 ? "" : "s"} of ${href} → ${newHref}?`)) return;
+    setBulkRunning(true);
+    try {
+      const res = await bulkFixBrokenLinks({ data: { action: "replace", items } });
+      setState((prev) => {
+        const next = { ...prev };
+        for (const it of items) next[`${it.pageId}::${it.href}`] = { status: "fixed", msg: `→ ${newHref}` };
+        return next;
+      });
+      setBulkResult(`Updated ${res.pagesUpdated} page${res.pagesUpdated === 1 ? "" : "s"} · fixed ${res.linksFixed} link${res.linksFixed === 1 ? "" : "s"}.`);
+    } catch (e: any) {
+      setBulkResult(`Failed: ${e?.message || "unknown"}`);
+    } finally {
+      setBulkRunning(false);
+    }
+  }
+
+
   return (
     <AdminLayout title="Link checker">
       <div className="flex flex-wrap items-center justify-between gap-3">
