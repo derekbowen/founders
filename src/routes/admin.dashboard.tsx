@@ -239,6 +239,7 @@ function AdminDashboard() {
               <AdminLink to="/admin/cities-heroes" label="City heroes" />
               <AdminLink to="/admin/click-report" label="Click report" />
               <AdminLink to="/admin/directory" label="Directory moderation" />
+              <AdminLink to="/admin/claims" label="Listing claims" />
             </section>
           </>
         )}
