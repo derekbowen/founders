@@ -2,7 +2,7 @@ import * as React from "react";
 import { createFileRoute, redirect, Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { checkAdminRole } from "@/server/admin-auth.functions";
-import { adminListPendingProviders, adminUpdateProvider, adminGenerateProviderContent } from "@/server/directory.functions";
+import { adminListPendingProviders, adminUpdateProvider, adminGenerateProviderContent, adminBulkGenerateProviderContent } from "@/server/directory.functions";
 import { SiteHeader, SiteFooter } from "@/components/site-layout";
 
 export const Route = createFileRoute("/admin/directory")({
@@ -128,6 +128,22 @@ function AdminDirectory() {
           ))}
           <Link to="/admin/scrape-import" className="rounded-full border border-border bg-card px-3 py-1 text-xs font-semibold hover:bg-secondary">+ Scrape URL</Link>
           <Link to="/admin/gsc-import" className="rounded-full border border-border bg-card px-3 py-1 text-xs font-semibold hover:bg-secondary">↑ Import GSC</Link>
+          <button
+            onClick={async () => {
+              if (!confirm("Generate AI long-form content for up to 10 published providers missing it?")) return;
+              setBusy("bulk-ai");
+              try {
+                const r = await adminBulkGenerateProviderContent({ data: { limit: 10, onlyMissing: true } });
+                alert(`Done: ${r.succeeded}/${r.attempted} succeeded`);
+                await load();
+              } catch (e: any) { alert(e?.message || "Bulk AI failed"); }
+              finally { setBusy(null); }
+            }}
+            disabled={busy === "bulk-ai"}
+            className="rounded-full bg-primary text-primary-foreground px-3 py-1 text-xs font-semibold disabled:opacity-50"
+          >
+            {busy === "bulk-ai" ? "Generating…" : "✨ Bulk Gen AI (10)"}
+          </button>
           <button onClick={load} className="ml-auto rounded-full bg-card border border-border px-3 py-1 text-xs">Refresh</button>
         </div>
 
