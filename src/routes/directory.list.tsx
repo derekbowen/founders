@@ -4,7 +4,9 @@ import { z } from "zod";
 import { listServiceCategories, submitProviderListing } from "@/server/directory.functions";
 import { SiteHeader, SiteFooter } from "@/components/site-layout";
 import { buildMeta } from "@/lib/seo";
-import { US_STATES } from "@/lib/states";
+import { STATE_NAMES } from "@/lib/states";
+
+const US_STATES = Object.entries(STATE_NAMES).map(([code, name]) => ({ code, name })).sort((a, b) => a.name.localeCompare(b.name));
 
 const search = z.object({ category: z.string().optional() });
 
