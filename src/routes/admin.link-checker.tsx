@@ -3,7 +3,7 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { checkAdminRole } from "@/server/admin-auth.functions";
 import { AdminLayout } from "@/components/admin-layout";
-import { scanBrokenLinks, fixBrokenLink, type BrokenLink } from "@/server/link-checker.functions";
+import { scanBrokenLinks, fixBrokenLink, bulkFixBrokenLinks, type BrokenLink } from "@/server/link-checker.functions";
 
 export const Route = createFileRoute("/admin/link-checker")({
   beforeLoad: async () => {
@@ -65,6 +65,52 @@ function LinkChecker() {
     }
   }
 
+  const [bulkRunning, setBulkRunning] = React.useState(false);
+  const [bulkResult, setBulkResult] = React.useState<string | null>(null);
+
+  async function applyBulk(action: "replace" | "unlink" | "remove") {
+    setBulkResult(null);
+    const targets = filtered;
+    if (!targets.length) return;
+    if (action === "replace") {
+      const missingSuggestion = targets.filter((b) => !((editHref[key(b)] ?? b.suggestion?.href) || "").trim());
+      if (missingSuggestion.length === targets.length) {
+        setBulkResult("No suggestions/edits available to replace with. Use Unlink or Remove instead.");
+        return;
+      }
+    }
+    const verb = action === "replace" ? "replace" : action;
+    if (!confirm(`Apply "${verb}" to ${targets.length} link${targets.length === 1 ? "" : "s"}?${action === "replace" ? " Only links with a suggested or edited URL will be changed." : ""}`)) return;
+
+    setBulkRunning(true);
+    try {
+      const items = targets
+        .map((b) => {
+          const newHref = (editHref[key(b)] ?? b.suggestion?.href ?? "").trim();
+          if (action === "replace" && !newHref) return null;
+          return { pageId: b.page_id, href: b.href, newHref: action === "replace" ? newHref : undefined };
+        })
+        .filter(Boolean) as Array<{ pageId: string; href: string; newHref?: string }>;
+
+      const res = await bulkFixBrokenLinks({ data: { action, items } });
+      // mark each affected row in local state
+      setState((prev) => {
+        const next = { ...prev };
+        for (const it of items) {
+          const k = `${it.pageId}::${it.href}`;
+          next[k] = { status: "fixed", msg: action === "replace" ? `→ ${it.newHref}` : action };
+        }
+        return next;
+      });
+      setBulkResult(`Updated ${res.pagesUpdated} page${res.pagesUpdated === 1 ? "" : "s"} · fixed ${res.linksFixed} link${res.linksFixed === 1 ? "" : "s"}${res.linksSkipped ? ` · skipped ${res.linksSkipped}` : ""}${res.errors.length ? ` · ${res.errors.length} errors` : ""}.`);
+    } catch (e: any) {
+      setBulkResult(`Bulk fix failed: ${e?.message || "unknown error"}`);
+    } finally {
+      setBulkRunning(false);
+    }
+  }
+
+
   const filtered = rows.filter((r) => filter === "all" || r.reason === filter);
   const counts = {
     all: rows.length,
@@ -122,6 +168,36 @@ function LinkChecker() {
               {label} ({counts[id as keyof typeof counts]})
             </button>
           ))}
+        </div>
+      )}
+
+      {filtered.length > 0 && (
+        <div className="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-border bg-card p-3">
+          <span className="text-sm font-medium">Bulk action on {filtered.length} filtered link{filtered.length === 1 ? "" : "s"}:</span>
+          <button
+            onClick={() => applyBulk("replace")}
+            disabled={bulkRunning}
+            className="rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground disabled:opacity-50"
+            title="Replaces each link with its suggested or edited URL. Links without a target are skipped."
+          >
+            ⚡ Replace all (using suggestions)
+          </button>
+          <button
+            onClick={() => applyBulk("unlink")}
+            disabled={bulkRunning}
+            className="rounded-md border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted disabled:opacity-50"
+          >
+            Unlink all
+          </button>
+          <button
+            onClick={() => applyBulk("remove")}
+            disabled={bulkRunning}
+            className="rounded-md border border-red-500 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-500/10 disabled:opacity-50"
+          >
+            Remove all
+          </button>
+          {bulkRunning && <span className="text-xs text-muted-foreground">Working…</span>}
+          {bulkResult && <span className="ml-auto text-xs text-muted-foreground">{bulkResult}</span>}
         </div>
       )}
 

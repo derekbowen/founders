@@ -223,3 +223,69 @@ export const fixBrokenLink = createServerFn({ method: "POST" })
     if (error) return { ok: false, error: error.message };
     return { ok: true, replaced };
   });
+
+export const bulkFixBrokenLinks = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      action: z.enum(["replace", "unlink", "remove"]),
+      items: z.array(z.object({
+        pageId: z.string().uuid(),
+        href: z.string().min(1).max(2000),
+        newHref: z.string().min(1).max(2000).optional(),
+      })).min(1).max(2000),
+    }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin((context as any).userId);
+    const sb = supabaseAdmin as any;
+
+    // Group items by page so we update each page once
+    const byPage = new Map<string, Array<{ href: string; newHref?: string }>>();
+    for (const it of data.items) {
+      if (data.action === "replace" && !it.newHref) continue;
+      const arr = byPage.get(it.pageId) || [];
+      arr.push({ href: it.href, newHref: it.newHref });
+      byPage.set(it.pageId, arr);
+    }
+
+    let pagesUpdated = 0;
+    let linksFixed = 0;
+    let linksSkipped = 0;
+    const errors: Array<{ pageId: string; error: string }> = [];
+
+    const pageIds = Array.from(byPage.keys());
+    // Fetch page bodies in chunks
+    for (let i = 0; i < pageIds.length; i += 100) {
+      const chunk = pageIds.slice(i, i + 100);
+      const { data: pages } = await sb.from("content_pages").select("id, body_markdown").in("id", chunk);
+      for (const p of (pages || []) as Array<{ id: string; body_markdown: string | null }>) {
+        const items = byPage.get(p.id) || [];
+        let body = p.body_markdown || "";
+        if (!body) { linksSkipped += items.length; continue; }
+        let pageReplaced = 0;
+        for (const it of items) {
+          const esc = it.href.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+          const re = new RegExp(`\\[([^\\]]+)\\]\\(${esc}(?:\\s+"[^"]*")?\\)`, "g");
+          let hits = 0;
+          if (data.action === "replace") {
+            body = body.replace(re, (_, label) => { hits++; return `[${label}](${it.newHref})`; });
+          } else if (data.action === "unlink") {
+            body = body.replace(re, (_, label) => { hits++; return label; });
+          } else {
+            body = body.replace(re, () => { hits++; return ""; });
+          }
+          if (hits) pageReplaced += hits; else linksSkipped++;
+        }
+        if (pageReplaced > 0) {
+          const { error } = await sb.from("content_pages").update({
+            body_markdown: body, updated_at: new Date().toISOString(),
+          }).eq("id", p.id);
+          if (error) errors.push({ pageId: p.id, error: error.message });
+          else { pagesUpdated++; linksFixed += pageReplaced; }
+        }
+      }
+    }
+
+    return { ok: true, pagesUpdated, linksFixed, linksSkipped, errors };
+  });
