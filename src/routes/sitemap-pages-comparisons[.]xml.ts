@@ -31,8 +31,6 @@ export const Route = createFileRoute("/sitemap-pages-comparisons.xml")({
         const urls: SitemapUrl[] = PILLARS.map((p) => ({
           loc: `${SITE_URL}${p}`,
           lastmod: now,
-          changefreq: "monthly",
-          priority: 0.7,
         }));
 
         const { data, error } = await supabaseAdmin
@@ -49,8 +47,6 @@ export const Route = createFileRoute("/sitemap-pages-comparisons.xml")({
               urls.push({
                 loc: `${SITE_URL}/p/${prefix}${row.slug}`,
                 lastmod,
-                changefreq: "monthly",
-                priority: 0.6,
               });
             }
           }
