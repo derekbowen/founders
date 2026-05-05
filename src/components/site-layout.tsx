@@ -18,6 +18,9 @@ function rel(path: string): string {
   return path.startsWith("/") ? `${base}${path}` : `${base}/${path}`;
 }
 
+const MARKETPLACE_ORIGIN = "https://www.poolrentalnearme.com";
+const marketplace = (path: string): string => `${MARKETPLACE_ORIGIN}${path.startsWith("/") ? path : `/${path}`}`;
+
 export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
@@ -45,7 +48,7 @@ export function SiteHeader() {
           <a href={rel("/p/how-it-works")} className="text-sm font-medium text-muted-foreground hover:text-foreground">How It Works</a>
           <a href="https://www.poolrentalnearme.com/s" className="text-sm font-medium text-muted-foreground hover:text-foreground">Search</a>
         </nav>
-        <a href={rel("/l/draft/00000000-0000-0000-0000-000000000000/new/details")} className="inline-flex h-9 items-center justify-center rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary-glow">
+        <a href={marketplace("/l/draft/00000000-0000-0000-0000-000000000000/new/details")} className="inline-flex h-9 items-center justify-center rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary-glow">
           List Your Pool
         </a>
       </div>
@@ -54,7 +57,7 @@ export function SiteHeader() {
 }
 
 const EXPLORE = [
-  { label: "Search Listings", href: "/s" },
+  { label: "Search Listings", href: marketplace("/s") },
   { label: "How It Works", href: "/p/how-it-works" },
   { label: "Start a Business", href: "/p/hosting" },
   { label: "Pool Rental Near Me vs Swimply", href: "/p/swimply-alternative-vs-pool-rental-near-me" },
@@ -65,7 +68,7 @@ const EXPLORE = [
 ];
 
 const HOSTS = [
-  { label: "List Your Pool for Free", href: "/l/draft/00000000-0000-0000-0000-000000000000/new/details" },
+  { label: "List Your Pool for Free", href: marketplace("/l/draft/00000000-0000-0000-0000-000000000000/new/details") },
   { label: "How Hosting Works", href: "/p/hosting" },
   { label: "Find Locations Near You", href: "/p/all-locations" },
   { label: "Earnings Calculator", href: "/p/earnings-calculator" },
@@ -158,7 +161,7 @@ export function SiteFooter() {
             <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
               {POPULAR_MARKETS.map((m) => (
                 <li key={m.slug}>
-                  <a href={rel(`/s?address=${encodeURIComponent(m.name)}`)} className="hover:text-primary">
+                  <a href={marketplace(`/s?address=${encodeURIComponent(m.name)}`)} className="hover:text-primary">
                     {m.name}
                   </a>
                 </li>
