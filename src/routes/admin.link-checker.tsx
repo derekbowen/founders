@@ -3,7 +3,7 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { checkAdminRole } from "@/server/admin-auth.functions";
 import { AdminLayout } from "@/components/admin-layout";
-import { scanBrokenLinks, fixBrokenLink, type BrokenLink } from "@/server/link-checker.functions";
+import { scanBrokenLinks, fixBrokenLink, bulkFixBrokenLinks, type BrokenLink } from "@/server/link-checker.functions";
 
 export const Route = createFileRoute("/admin/link-checker")({
   beforeLoad: async () => {
