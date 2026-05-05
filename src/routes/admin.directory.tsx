@@ -86,6 +86,36 @@ function AdminDirectory() {
     finally { setBusy(null); }
   }
 
+  const runBulk = React.useCallback(async (
+    targets: { id: string; name: string; city?: string | null; state_code?: string | null }[],
+  ) => {
+    setBulkRunning(true);
+    setBulkResults([]);
+    setBulkDone(0);
+    setBulkCurrent("");
+    setBulkTotal(targets.length);
+    bulkAbort.current.stop = false;
+    try {
+      for (const p of targets) {
+        if (bulkAbort.current.stop) break;
+        setBulkCurrent(`${p.name}${p.city ? ` — ${p.city}, ${p.state_code}` : ""}`);
+        const t0 = Date.now();
+        try {
+          await adminGenerateProviderContent({ data: { id: p.id } });
+          setBulkResults((prev) => [...prev, { id: p.id, name: p.name, ok: true, ms: Date.now() - t0 }]);
+        } catch (e: any) {
+          setBulkResults((prev) => [...prev, { id: p.id, name: p.name, ok: false, error: e?.message || "Failed", ms: Date.now() - t0 }]);
+        }
+        setBulkDone((n) => n + 1);
+        await new Promise((r) => setTimeout(r, 600));
+      }
+      setBulkCurrent("");
+      await load();
+    } finally {
+      setBulkRunning(false);
+    }
+  }, [load]);
+
   const now = Date.now();
   const visible = React.useMemo(() => {
     let list = rows;
