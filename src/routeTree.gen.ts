@@ -79,6 +79,7 @@ import { Route as AdminQuickPageRouteImport } from './routes/admin.quick-page'
 import { Route as AdminPlanRequestsRouteImport } from './routes/admin.plan-requests'
 import { Route as AdminMissingPagesRouteImport } from './routes/admin.missing-pages'
 import { Route as AdminLearningRouteImport } from './routes/admin.learning'
+import { Route as AdminGscImportRouteImport } from './routes/admin.gsc-import'
 import { Route as AdminGenerateContentRouteImport } from './routes/admin.generate-content'
 import { Route as AdminDirectoryRouteImport } from './routes/admin.directory'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
@@ -473,6 +474,11 @@ const AdminLearningRoute = AdminLearningRouteImport.update({
   path: '/admin/learning',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminGscImportRoute = AdminGscImportRouteImport.update({
+  id: '/admin/gsc-import',
+  path: '/admin/gsc-import',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminGenerateContentRoute = AdminGenerateContentRouteImport.update({
   id: '/admin/generate-content',
   path: '/admin/generate-content',
@@ -663,6 +669,7 @@ export interface FileRoutesByFullPath {
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/directory': typeof AdminDirectoryRoute
   '/admin/generate-content': typeof AdminGenerateContentRoute
+  '/admin/gsc-import': typeof AdminGscImportRoute
   '/admin/learning': typeof AdminLearningRouteWithChildren
   '/admin/missing-pages': typeof AdminMissingPagesRoute
   '/admin/plan-requests': typeof AdminPlanRequestsRoute
@@ -761,6 +768,7 @@ export interface FileRoutesByTo {
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/directory': typeof AdminDirectoryRoute
   '/admin/generate-content': typeof AdminGenerateContentRoute
+  '/admin/gsc-import': typeof AdminGscImportRoute
   '/admin/learning': typeof AdminLearningRouteWithChildren
   '/admin/missing-pages': typeof AdminMissingPagesRoute
   '/admin/plan-requests': typeof AdminPlanRequestsRoute
@@ -861,6 +869,7 @@ export interface FileRoutesById {
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/directory': typeof AdminDirectoryRoute
   '/admin/generate-content': typeof AdminGenerateContentRoute
+  '/admin/gsc-import': typeof AdminGscImportRoute
   '/admin/learning': typeof AdminLearningRouteWithChildren
   '/admin/missing-pages': typeof AdminMissingPagesRoute
   '/admin/plan-requests': typeof AdminPlanRequestsRoute
@@ -962,6 +971,7 @@ export interface FileRouteTypes {
     | '/admin/dashboard'
     | '/admin/directory'
     | '/admin/generate-content'
+    | '/admin/gsc-import'
     | '/admin/learning'
     | '/admin/missing-pages'
     | '/admin/plan-requests'
@@ -1060,6 +1070,7 @@ export interface FileRouteTypes {
     | '/admin/dashboard'
     | '/admin/directory'
     | '/admin/generate-content'
+    | '/admin/gsc-import'
     | '/admin/learning'
     | '/admin/missing-pages'
     | '/admin/plan-requests'
@@ -1159,6 +1170,7 @@ export interface FileRouteTypes {
     | '/admin/dashboard'
     | '/admin/directory'
     | '/admin/generate-content'
+    | '/admin/gsc-import'
     | '/admin/learning'
     | '/admin/missing-pages'
     | '/admin/plan-requests'
@@ -1258,6 +1270,7 @@ export interface RootRouteChildren {
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminDirectoryRoute: typeof AdminDirectoryRoute
   AdminGenerateContentRoute: typeof AdminGenerateContentRoute
+  AdminGscImportRoute: typeof AdminGscImportRoute
   AdminLearningRoute: typeof AdminLearningRouteWithChildren
   AdminMissingPagesRoute: typeof AdminMissingPagesRoute
   AdminPlanRequestsRoute: typeof AdminPlanRequestsRoute
@@ -1790,6 +1803,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLearningRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/gsc-import': {
+      id: '/admin/gsc-import'
+      path: '/admin/gsc-import'
+      fullPath: '/admin/gsc-import'
+      preLoaderRoute: typeof AdminGscImportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/generate-content': {
       id: '/admin/generate-content'
       path: '/admin/generate-content'
@@ -2151,6 +2171,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminDashboardRoute: AdminDashboardRoute,
   AdminDirectoryRoute: AdminDirectoryRoute,
   AdminGenerateContentRoute: AdminGenerateContentRoute,
+  AdminGscImportRoute: AdminGscImportRoute,
   AdminLearningRoute: AdminLearningRouteWithChildren,
   AdminMissingPagesRoute: AdminMissingPagesRoute,
   AdminPlanRequestsRoute: AdminPlanRequestsRoute,
