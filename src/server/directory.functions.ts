@@ -475,3 +475,145 @@ export const adminReviewProviderClaim = createServerFn({ method: "POST" })
 
     return { ok: true };
   });
+
+// ============= Provider Plan / Payment Requests =============
+
+const SubmitPlanInput = z.object({
+  provider_slug: z.string().min(1).max(120),
+  requester_name: z.string().min(2).max(120),
+  requester_email: z.string().email().max(160),
+  requester_phone: z.string().max(40).optional().or(z.literal("")),
+  requested_plan: z.enum(["paid", "featured"]),
+  payment_method: z.string().max(80).optional().or(z.literal("")),
+  payment_reference: z.string().max(200).optional().or(z.literal("")),
+  amount_usd: z.number().nonnegative().optional(),
+  notes: z.string().max(2000).optional().or(z.literal("")),
+  source_path: z.string().max(300).optional().or(z.literal("")),
+});
+
+export const submitProviderPlanRequest = createServerFn({ method: "POST" })
+  .inputValidator((d) => SubmitPlanInput.parse(d))
+  .handler(async ({ data }) => {
+    const { data: prov } = await supabaseAdmin
+      .from("providers")
+      .select("id, slug")
+      .eq("slug", data.provider_slug)
+      .maybeSingle();
+    if (!prov) throw new Error("Listing not found");
+
+    const { error } = await supabaseAdmin.from("provider_plan_requests" as any).insert({
+      provider_id: prov.id,
+      provider_slug: prov.slug,
+      requester_name: data.requester_name.trim(),
+      requester_email: data.requester_email,
+      requester_phone: data.requester_phone || null,
+      requested_plan: data.requested_plan,
+      payment_method: data.payment_method || null,
+      payment_reference: data.payment_reference || null,
+      amount_usd: data.amount_usd ?? (data.requested_plan === "featured" ? 25 : 5),
+      notes: data.notes || null,
+      source_path: data.source_path || null,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const getProviderStatus = createServerFn({ method: "GET" })
+  .inputValidator((d) => z.object({ slug: z.string().min(1).max(120), email: z.string().email().max(160).optional() }).parse(d))
+  .handler(async ({ data }) => {
+    const { data: prov } = await supabaseAdmin
+      .from("providers")
+      .select("id, slug, name, city, state_code, primary_category, is_published, is_featured, plan, claim_status, submission_status, listing_paid_until, featured_until, claimed_at")
+      .eq("slug", data.slug)
+      .maybeSingle();
+    if (!prov) return { provider: null, claims: [], plan_requests: [] };
+
+    const filterEmail = data.email?.toLowerCase();
+    const [{ data: claims }, { data: reqs }] = await Promise.all([
+      supabaseAdmin
+        .from("provider_claims")
+        .select("id, status, claimer_name, claimer_email, created_at, reviewed_at, admin_notes")
+        .eq("provider_id", prov.id)
+        .order("created_at", { ascending: false })
+        .limit(20),
+      (supabaseAdmin as any)
+        .from("provider_plan_requests")
+        .select("id, status, requested_plan, amount_usd, payment_method, payment_reference, requester_email, created_at, reviewed_at, admin_notes")
+        .eq("provider_id", prov.id)
+        .order("created_at", { ascending: false })
+        .limit(20),
+    ]);
+    const filterFn = (r: any) => !filterEmail || (r.claimer_email || r.requester_email || "").toLowerCase() === filterEmail;
+    return {
+      provider: prov,
+      claims: ((claims as any[]) ?? []).filter(filterFn),
+      plan_requests: ((reqs as any[]) ?? []).filter(filterFn),
+    };
+  });
+
+export const adminListPlanRequests = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { userId } = context as { userId: string };
+    await requireAdmin(userId);
+    const { data } = await (supabaseAdmin as any)
+      .from("provider_plan_requests")
+      .select("*")
+      .order("status", { ascending: true })
+      .order("created_at", { ascending: false })
+      .limit(200);
+    return { requests: data ?? [] };
+  });
+
+export const adminReviewPlanRequest = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z.object({
+      id: z.string().uuid(),
+      action: z.enum(["approve", "reject", "delete"]),
+      admin_notes: z.string().max(2000).optional(),
+    }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { userId } = context as { userId: string };
+    await requireAdmin(userId);
+    const sb = supabaseAdmin as any;
+
+    const { data: req } = await sb.from("provider_plan_requests").select("*").eq("id", data.id).maybeSingle();
+    if (!req) throw new Error("Request not found");
+
+    if (data.action === "delete") {
+      const { error } = await sb.from("provider_plan_requests").delete().eq("id", data.id);
+      if (error) throw new Error(error.message);
+      return { ok: true };
+    }
+
+    const newStatus = data.action === "approve" ? "approved" : "rejected";
+    const { error: updErr } = await sb.from("provider_plan_requests")
+      .update({
+        status: newStatus,
+        admin_notes: data.admin_notes ?? null,
+        reviewed_at: new Date().toISOString(),
+        reviewed_by: userId,
+      })
+      .eq("id", data.id);
+    if (updErr) throw new Error(updErr.message);
+
+    if (data.action === "approve") {
+      const inOneYear = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
+      const patch: Record<string, unknown> = {
+        is_published: true,
+        listing_paid_until: inOneYear,
+        plan: req.requested_plan,
+      };
+      if (req.requested_plan === "featured") {
+        patch.is_featured = true;
+        patch.featured_until = inOneYear;
+      }
+      const { error: provErr } = await (supabaseAdmin.from("providers") as any)
+        .update(patch)
+        .eq("id", req.provider_id);
+      if (provErr) throw new Error(provErr.message);
+    }
+    return { ok: true };
+  });

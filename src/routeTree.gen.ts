@@ -75,6 +75,7 @@ import { Route as CategorySlugRouteImport } from './routes/category.$slug'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth.reset-password'
 import { Route as AdminQuickPageRouteImport } from './routes/admin.quick-page'
+import { Route as AdminPlanRequestsRouteImport } from './routes/admin.plan-requests'
 import { Route as AdminMissingPagesRouteImport } from './routes/admin.missing-pages'
 import { Route as AdminLearningRouteImport } from './routes/admin.learning'
 import { Route as AdminGenerateContentRouteImport } from './routes/admin.generate-content'
@@ -88,6 +89,7 @@ import { Route as AdminBlogRouteImport } from './routes/admin.blog'
 import { Route as AccountLearningRouteImport } from './routes/account.learning'
 import { Route as AcademySlugRouteImport } from './routes/academy.$slug'
 import { Route as HelpCenterCategoryIndexRouteImport } from './routes/help-center.$category.index'
+import { Route as ProvidersSlugManageRouteImport } from './routes/providers.$slug.manage'
 import { Route as ProvidersSlugClaimRouteImport } from './routes/providers.$slug.claim'
 import { Route as PoolBuildersStateCityRouteImport } from './routes/pool-builders.$state.$city'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
@@ -450,6 +452,11 @@ const AdminQuickPageRoute = AdminQuickPageRouteImport.update({
   path: '/admin/quick-page',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminPlanRequestsRoute = AdminPlanRequestsRouteImport.update({
+  id: '/admin/plan-requests',
+  path: '/admin/plan-requests',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminMissingPagesRoute = AdminMissingPagesRouteImport.update({
   id: '/admin/missing-pages',
   path: '/admin/missing-pages',
@@ -514,6 +521,11 @@ const HelpCenterCategoryIndexRoute = HelpCenterCategoryIndexRouteImport.update({
   id: '/help-center/$category/',
   path: '/help-center/$category/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ProvidersSlugManageRoute = ProvidersSlugManageRouteImport.update({
+  id: '/manage',
+  path: '/manage',
+  getParentRoute: () => ProvidersSlugRoute,
 } as any)
 const ProvidersSlugClaimRoute = ProvidersSlugClaimRouteImport.update({
   id: '/claim',
@@ -647,6 +659,7 @@ export interface FileRoutesByFullPath {
   '/admin/generate-content': typeof AdminGenerateContentRoute
   '/admin/learning': typeof AdminLearningRouteWithChildren
   '/admin/missing-pages': typeof AdminMissingPagesRoute
+  '/admin/plan-requests': typeof AdminPlanRequestsRoute
   '/admin/quick-page': typeof AdminQuickPageRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/blog/$slug': typeof BlogSlugRoute
@@ -685,6 +698,7 @@ export interface FileRoutesByFullPath {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/pool-builders/$state/$city': typeof PoolBuildersStateCityRoute
   '/providers/$slug/claim': typeof ProvidersSlugClaimRoute
+  '/providers/$slug/manage': typeof ProvidersSlugManageRoute
   '/help-center/$category/': typeof HelpCenterCategoryIndexRoute
   '/api/certificates/$uid/pdf': typeof ApiCertificatesUidPdfRoute
   '/api/public/hooks/sync-listings': typeof ApiPublicHooksSyncListingsRoute
@@ -742,6 +756,7 @@ export interface FileRoutesByTo {
   '/admin/generate-content': typeof AdminGenerateContentRoute
   '/admin/learning': typeof AdminLearningRouteWithChildren
   '/admin/missing-pages': typeof AdminMissingPagesRoute
+  '/admin/plan-requests': typeof AdminPlanRequestsRoute
   '/admin/quick-page': typeof AdminQuickPageRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/blog/$slug': typeof BlogSlugRoute
@@ -780,6 +795,7 @@ export interface FileRoutesByTo {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/pool-builders/$state/$city': typeof PoolBuildersStateCityRoute
   '/providers/$slug/claim': typeof ProvidersSlugClaimRoute
+  '/providers/$slug/manage': typeof ProvidersSlugManageRoute
   '/help-center/$category': typeof HelpCenterCategoryIndexRoute
   '/api/certificates/$uid/pdf': typeof ApiCertificatesUidPdfRoute
   '/api/public/hooks/sync-listings': typeof ApiPublicHooksSyncListingsRoute
@@ -839,6 +855,7 @@ export interface FileRoutesById {
   '/admin/generate-content': typeof AdminGenerateContentRoute
   '/admin/learning': typeof AdminLearningRouteWithChildren
   '/admin/missing-pages': typeof AdminMissingPagesRoute
+  '/admin/plan-requests': typeof AdminPlanRequestsRoute
   '/admin/quick-page': typeof AdminQuickPageRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/blog/$slug': typeof BlogSlugRoute
@@ -877,6 +894,7 @@ export interface FileRoutesById {
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/pool-builders/$state/$city': typeof PoolBuildersStateCityRoute
   '/providers/$slug/claim': typeof ProvidersSlugClaimRoute
+  '/providers/$slug/manage': typeof ProvidersSlugManageRoute
   '/help-center/$category/': typeof HelpCenterCategoryIndexRoute
   '/api/certificates/$uid/pdf': typeof ApiCertificatesUidPdfRoute
   '/api/public/hooks/sync-listings': typeof ApiPublicHooksSyncListingsRoute
@@ -937,6 +955,7 @@ export interface FileRouteTypes {
     | '/admin/generate-content'
     | '/admin/learning'
     | '/admin/missing-pages'
+    | '/admin/plan-requests'
     | '/admin/quick-page'
     | '/auth/reset-password'
     | '/blog/$slug'
@@ -975,6 +994,7 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/pool-builders/$state/$city'
     | '/providers/$slug/claim'
+    | '/providers/$slug/manage'
     | '/help-center/$category/'
     | '/api/certificates/$uid/pdf'
     | '/api/public/hooks/sync-listings'
@@ -1032,6 +1052,7 @@ export interface FileRouteTypes {
     | '/admin/generate-content'
     | '/admin/learning'
     | '/admin/missing-pages'
+    | '/admin/plan-requests'
     | '/admin/quick-page'
     | '/auth/reset-password'
     | '/blog/$slug'
@@ -1070,6 +1091,7 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/pool-builders/$state/$city'
     | '/providers/$slug/claim'
+    | '/providers/$slug/manage'
     | '/help-center/$category'
     | '/api/certificates/$uid/pdf'
     | '/api/public/hooks/sync-listings'
@@ -1128,6 +1150,7 @@ export interface FileRouteTypes {
     | '/admin/generate-content'
     | '/admin/learning'
     | '/admin/missing-pages'
+    | '/admin/plan-requests'
     | '/admin/quick-page'
     | '/auth/reset-password'
     | '/blog/$slug'
@@ -1166,6 +1189,7 @@ export interface FileRouteTypes {
     | '/lovable/email/suppression'
     | '/pool-builders/$state/$city'
     | '/providers/$slug/claim'
+    | '/providers/$slug/manage'
     | '/help-center/$category/'
     | '/api/certificates/$uid/pdf'
     | '/api/public/hooks/sync-listings'
@@ -1224,6 +1248,7 @@ export interface RootRouteChildren {
   AdminGenerateContentRoute: typeof AdminGenerateContentRoute
   AdminLearningRoute: typeof AdminLearningRouteWithChildren
   AdminMissingPagesRoute: typeof AdminMissingPagesRoute
+  AdminPlanRequestsRoute: typeof AdminPlanRequestsRoute
   AdminQuickPageRoute: typeof AdminQuickPageRoute
   CategorySlugRoute: typeof CategorySlugRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
@@ -1724,6 +1749,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminQuickPageRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/plan-requests': {
+      id: '/admin/plan-requests'
+      path: '/admin/plan-requests'
+      fullPath: '/admin/plan-requests'
+      preLoaderRoute: typeof AdminPlanRequestsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/missing-pages': {
       id: '/admin/missing-pages'
       path: '/admin/missing-pages'
@@ -1814,6 +1846,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/help-center/$category/'
       preLoaderRoute: typeof HelpCenterCategoryIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/providers/$slug/manage': {
+      id: '/providers/$slug/manage'
+      path: '/manage'
+      fullPath: '/providers/$slug/manage'
+      preLoaderRoute: typeof ProvidersSlugManageRouteImport
+      parentRoute: typeof ProvidersSlugRoute
     }
     '/providers/$slug/claim': {
       id: '/providers/$slug/claim'
@@ -1997,10 +2036,12 @@ const DirectoryRouteWithChildren = DirectoryRoute._addFileChildren(
 
 interface ProvidersSlugRouteChildren {
   ProvidersSlugClaimRoute: typeof ProvidersSlugClaimRoute
+  ProvidersSlugManageRoute: typeof ProvidersSlugManageRoute
 }
 
 const ProvidersSlugRouteChildren: ProvidersSlugRouteChildren = {
   ProvidersSlugClaimRoute: ProvidersSlugClaimRoute,
+  ProvidersSlugManageRoute: ProvidersSlugManageRoute,
 }
 
 const ProvidersSlugRouteWithChildren = ProvidersSlugRoute._addFileChildren(
@@ -2092,6 +2133,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminGenerateContentRoute: AdminGenerateContentRoute,
   AdminLearningRoute: AdminLearningRouteWithChildren,
   AdminMissingPagesRoute: AdminMissingPagesRoute,
+  AdminPlanRequestsRoute: AdminPlanRequestsRoute,
   AdminQuickPageRoute: AdminQuickPageRoute,
   CategorySlugRoute: CategorySlugRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
