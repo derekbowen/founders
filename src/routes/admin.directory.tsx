@@ -167,7 +167,9 @@ function AdminDirectory() {
             <option value="paid_until">Paid until (latest)</option>
             <option value="featured_until">Featured until (latest)</option>
           </select>
-          <span className="text-xs text-muted-foreground">{visible.length} shown</span>
+          <span className="text-xs text-muted-foreground">
+            {total > 0 ? `${(page-1)*pageSize + 1}–${Math.min(page*pageSize, total)} of ${total}` : "0"}
+          </span>
         </div>
 
 
