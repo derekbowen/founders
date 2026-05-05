@@ -419,7 +419,7 @@ function HomePageInner({ data }: { data: HomeData | undefined | null }) {
                 </p>
                 <div className="mt-6 hidden lg:block">
                   <a
-                    href="/s"
+                    href="https://www.poolrentalnearme.com/s"
                     className="inline-flex items-center justify-center rounded-full bg-white px-6 py-3 text-base font-semibold text-primary shadow-lg transition-transform hover:scale-105"
                   >
                     Browse all pools →
