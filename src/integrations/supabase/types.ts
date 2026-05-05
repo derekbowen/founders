@@ -1710,6 +1710,13 @@ export type Database = {
       }
     }
     Functions: {
+      count_providers_by_category: {
+        Args: never
+        Returns: {
+          n: number
+          primary_category: string
+        }[]
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
