@@ -10,6 +10,7 @@ import { MagicLinkEmail } from '@/lib/email-templates/magic-link'
 import { RecoveryEmail } from '@/lib/email-templates/recovery'
 import { EmailChangeEmail } from '@/lib/email-templates/email-change'
 import { ReauthenticationEmail } from '@/lib/email-templates/reauthentication'
+import { loadEmailBranding } from '@/server/email-branding.functions'
 
 const EMAIL_SUBJECTS: Record<string, string> = {
   signup: 'Confirm your email',
@@ -131,9 +132,20 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
           )
         }
 
+        // Load branding from DB (falls back to defaults)
+        const brandingRow = await loadEmailBranding()
+        const branding = {
+          siteName: brandingRow.site_name,
+          senderName: brandingRow.sender_name,
+          logoUrl: brandingRow.logo_url,
+          primaryColor: brandingRow.primary_color,
+          primaryTextColor: brandingRow.primary_text_color,
+          footerText: brandingRow.footer_text,
+        }
+
         // Build template props from payload.data (HookData structure)
         const templateProps = {
-          siteName: SITE_NAME,
+          siteName: branding.siteName,
           siteUrl: `https://${ROOT_DOMAIN}`,
           recipient: payload.data.email,
           confirmationUrl: payload.data.url,
@@ -141,6 +153,7 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
           email: payload.data.email,
           oldEmail: payload.data.old_email,
           newEmail: payload.data.new_email,
+          branding,
         }
 
         // Render React Email to HTML and plain text
@@ -177,7 +190,7 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
             run_id,
             message_id: messageId,
             to: payload.data.email,
-            from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
+            from: `${branding.senderName} <noreply@${FROM_DOMAIN}>`,
             sender_domain: SENDER_DOMAIN,
             subject: EMAIL_SUBJECTS[emailType] || 'Notification',
             html,

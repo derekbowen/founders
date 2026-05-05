@@ -7,6 +7,7 @@ import { MagicLinkEmail } from '@/lib/email-templates/magic-link'
 import { RecoveryEmail } from '@/lib/email-templates/recovery'
 import { EmailChangeEmail } from '@/lib/email-templates/email-change'
 import { ReauthenticationEmail } from '@/lib/email-templates/reauthentication'
+import { loadEmailBranding } from '@/server/email-branding.functions'
 
 const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
   signup: SignupEmail,
@@ -99,7 +100,16 @@ export const Route = createFileRoute("/lovable/email/auth/preview")({
           )
         }
 
-        const sampleData = SAMPLE_DATA[type] || {}
+        const brandingRow = await loadEmailBranding()
+        const branding = {
+          siteName: brandingRow.site_name,
+          senderName: brandingRow.sender_name,
+          logoUrl: brandingRow.logo_url,
+          primaryColor: brandingRow.primary_color,
+          primaryTextColor: brandingRow.primary_text_color,
+          footerText: brandingRow.footer_text,
+        }
+        const sampleData = { ...(SAMPLE_DATA[type] || {}), siteName: branding.siteName, branding }
         const html = await render(React.createElement(EmailTemplate, sampleData))
 
         return new Response(html, {

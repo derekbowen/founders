@@ -638,6 +638,42 @@ export type Database = {
         }
         Relationships: []
       }
+      email_branding: {
+        Row: {
+          created_at: string
+          footer_text: string | null
+          id: number
+          logo_url: string | null
+          primary_color: string
+          primary_text_color: string
+          sender_name: string
+          site_name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          footer_text?: string | null
+          id?: number
+          logo_url?: string | null
+          primary_color?: string
+          primary_text_color?: string
+          sender_name?: string
+          site_name?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          footer_text?: string | null
+          id?: number
+          logo_url?: string | null
+          primary_color?: string
+          primary_text_color?: string
+          sender_name?: string
+          site_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       email_send_log: {
         Row: {
           created_at: string
