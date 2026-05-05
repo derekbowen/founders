@@ -111,6 +111,7 @@ import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/l
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as DirectoryCategoryStateCityRouteImport } from './routes/directory.$category.$state.$city'
 import { Route as ApiPublicHooksSyncListingsRouteImport } from './routes/api/public/hooks.sync-listings'
+import { Route as ApiPublicHooksSeoFixWorkerRouteImport } from './routes/api/public/hooks/seo-fix-worker'
 import { Route as ApiCertificatesUidPdfRouteImport } from './routes/api/certificates.$uid.pdf'
 
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
@@ -645,6 +646,12 @@ const ApiPublicHooksSyncListingsRoute =
     path: '/api/public/hooks/sync-listings',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksSeoFixWorkerRoute =
+  ApiPublicHooksSeoFixWorkerRouteImport.update({
+    id: '/api/public/hooks/seo-fix-worker',
+    path: '/api/public/hooks/seo-fix-worker',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiCertificatesUidPdfRoute = ApiCertificatesUidPdfRouteImport.update({
   id: '/api/certificates/$uid/pdf',
   path: '/api/certificates/$uid/pdf',
@@ -750,6 +757,7 @@ export interface FileRoutesByFullPath {
   '/providers/$slug/manage': typeof ProvidersSlugManageRoute
   '/help-center/$category/': typeof HelpCenterCategoryIndexRoute
   '/api/certificates/$uid/pdf': typeof ApiCertificatesUidPdfRoute
+  '/api/public/hooks/seo-fix-worker': typeof ApiPublicHooksSeoFixWorkerRoute
   '/api/public/hooks/sync-listings': typeof ApiPublicHooksSyncListingsRoute
   '/directory/$category/$state/$city': typeof DirectoryCategoryStateCityRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -854,6 +862,7 @@ export interface FileRoutesByTo {
   '/providers/$slug/manage': typeof ProvidersSlugManageRoute
   '/help-center/$category': typeof HelpCenterCategoryIndexRoute
   '/api/certificates/$uid/pdf': typeof ApiCertificatesUidPdfRoute
+  '/api/public/hooks/seo-fix-worker': typeof ApiPublicHooksSeoFixWorkerRoute
   '/api/public/hooks/sync-listings': typeof ApiPublicHooksSyncListingsRoute
   '/directory/$category/$state/$city': typeof DirectoryCategoryStateCityRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -960,6 +969,7 @@ export interface FileRoutesById {
   '/providers/$slug/manage': typeof ProvidersSlugManageRoute
   '/help-center/$category/': typeof HelpCenterCategoryIndexRoute
   '/api/certificates/$uid/pdf': typeof ApiCertificatesUidPdfRoute
+  '/api/public/hooks/seo-fix-worker': typeof ApiPublicHooksSeoFixWorkerRoute
   '/api/public/hooks/sync-listings': typeof ApiPublicHooksSyncListingsRoute
   '/directory/$category/$state/$city': typeof DirectoryCategoryStateCityRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
@@ -1067,6 +1077,7 @@ export interface FileRouteTypes {
     | '/providers/$slug/manage'
     | '/help-center/$category/'
     | '/api/certificates/$uid/pdf'
+    | '/api/public/hooks/seo-fix-worker'
     | '/api/public/hooks/sync-listings'
     | '/directory/$category/$state/$city'
     | '/lovable/email/queue/process'
@@ -1171,6 +1182,7 @@ export interface FileRouteTypes {
     | '/providers/$slug/manage'
     | '/help-center/$category'
     | '/api/certificates/$uid/pdf'
+    | '/api/public/hooks/seo-fix-worker'
     | '/api/public/hooks/sync-listings'
     | '/directory/$category/$state/$city'
     | '/lovable/email/queue/process'
@@ -1276,6 +1288,7 @@ export interface FileRouteTypes {
     | '/providers/$slug/manage'
     | '/help-center/$category/'
     | '/api/certificates/$uid/pdf'
+    | '/api/public/hooks/seo-fix-worker'
     | '/api/public/hooks/sync-listings'
     | '/directory/$category/$state/$city'
     | '/lovable/email/queue/process'
@@ -1370,6 +1383,7 @@ export interface RootRouteChildren {
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   HelpCenterCategoryIndexRoute: typeof HelpCenterCategoryIndexRoute
   ApiCertificatesUidPdfRoute: typeof ApiCertificatesUidPdfRoute
+  ApiPublicHooksSeoFixWorkerRoute: typeof ApiPublicHooksSeoFixWorkerRoute
   ApiPublicHooksSyncListingsRoute: typeof ApiPublicHooksSyncListingsRoute
   LovableEmailQueueProcessRoute: typeof LovableEmailQueueProcessRoute
   LovableEmailTransactionalPreviewRoute: typeof LovableEmailTransactionalPreviewRoute
@@ -2092,6 +2106,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksSyncListingsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/seo-fix-worker': {
+      id: '/api/public/hooks/seo-fix-worker'
+      path: '/api/public/hooks/seo-fix-worker'
+      fullPath: '/api/public/hooks/seo-fix-worker'
+      preLoaderRoute: typeof ApiPublicHooksSeoFixWorkerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/certificates/$uid/pdf': {
       id: '/api/certificates/$uid/pdf'
       path: '/api/certificates/$uid/pdf'
@@ -2314,6 +2335,7 @@ const rootRouteChildren: RootRouteChildren = {
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   HelpCenterCategoryIndexRoute: HelpCenterCategoryIndexRoute,
   ApiCertificatesUidPdfRoute: ApiCertificatesUidPdfRoute,
+  ApiPublicHooksSeoFixWorkerRoute: ApiPublicHooksSeoFixWorkerRoute,
   ApiPublicHooksSyncListingsRoute: ApiPublicHooksSyncListingsRoute,
   LovableEmailQueueProcessRoute: LovableEmailQueueProcessRoute,
   LovableEmailTransactionalPreviewRoute: LovableEmailTransactionalPreviewRoute,
