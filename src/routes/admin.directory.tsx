@@ -46,6 +46,8 @@ function fmtRelative(d: any) {
   return `${-days}d ago`;
 }
 
+type BulkResult = { id: string; name: string; ok: boolean; error?: string; ms: number };
+
 function AdminDirectory() {
   const [rows, setRows] = React.useState<any[]>([]);
   const [total, setTotal] = React.useState(0);
@@ -56,6 +58,12 @@ function AdminDirectory() {
   const [planFilter, setPlanFilter] = React.useState<PlanFilter>("all");
   const [sort, setSort] = React.useState<SortKey>("newest");
   const [search, setSearch] = React.useState("");
+  const [bulkRunning, setBulkRunning] = React.useState(false);
+  const [bulkTotal, setBulkTotal] = React.useState(0);
+  const [bulkDone, setBulkDone] = React.useState(0);
+  const [bulkCurrent, setBulkCurrent] = React.useState<string>("");
+  const [bulkResults, setBulkResults] = React.useState<BulkResult[]>([]);
+  const bulkAbort = React.useRef<{ stop: boolean }>({ stop: false });
   const pageSize = 50;
 
   const load = React.useCallback(async () => {
