@@ -80,3 +80,55 @@ export const updateEmailBranding = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+const TEMPLATES: Record<string, React.ComponentType<any>> = {
+  signup: SignupEmail,
+  invite: InviteEmail,
+  magiclink: MagicLinkEmail,
+  recovery: RecoveryEmail,
+  email_change: EmailChangeEmail,
+  reauthentication: ReauthenticationEmail,
+};
+
+const SAMPLE_URL = "https://example.com";
+const SAMPLE_EMAIL = "user@example.test";
+
+function sampleProps(type: string) {
+  switch (type) {
+    case "signup":
+      return { siteUrl: SAMPLE_URL, recipient: SAMPLE_EMAIL, confirmationUrl: SAMPLE_URL };
+    case "invite":
+      return { siteUrl: SAMPLE_URL, confirmationUrl: SAMPLE_URL };
+    case "magiclink":
+    case "recovery":
+      return { confirmationUrl: SAMPLE_URL };
+    case "email_change":
+      return { oldEmail: SAMPLE_EMAIL, email: SAMPLE_EMAIL, newEmail: "new@example.test", confirmationUrl: SAMPLE_URL };
+    case "reauthentication":
+      return { token: "123456" };
+    default:
+      return {};
+  }
+}
+
+export const previewAuthEmail = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data) => z.object({ type: z.string() }).parse(data))
+  .handler(async ({ context, data }) => {
+    const { userId } = context as { userId: string };
+    await assertAdmin(userId);
+    const Template = TEMPLATES[data.type];
+    if (!Template) throw new Error(`Unknown email type: ${data.type}`);
+    const row = await loadEmailBranding();
+    const branding = {
+      siteName: row.site_name,
+      senderName: row.sender_name,
+      logoUrl: row.logo_url,
+      primaryColor: row.primary_color,
+      primaryTextColor: row.primary_text_color,
+      footerText: row.footer_text,
+    };
+    const props = { ...sampleProps(data.type), siteName: branding.siteName, branding };
+    const html = await render(React.createElement(Template, props));
+    return { html };
+  });
