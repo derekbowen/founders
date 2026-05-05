@@ -73,12 +73,17 @@ function LinkChecker() {
     (fPageIdsRaw.trim() ? 1 : 0) +
     (fOnlyMissing ? 1 : 0);
 
+  const [scanCompletedAt, setScanCompletedAt] = React.useState<Date | null>(null);
+  const [scanDurationMs, setScanDurationMs] = React.useState<number | null>(null);
+
   async function startScan() {
     setRows([]); setState({}); setEditHref({}); setScanning(true); abortRef.current = false;
+    setScanCompletedAt(null); setScanDurationMs(null);
     let offset = 0;
     const batchSize = 200;
     const filters = buildScanFilters();
     if (fOnlyMissing) setFilter("missing_p_page");
+    const startedAt = Date.now();
     try {
       while (!abortRef.current) {
         const r = await scanBrokenLinks({ data: { offset, batchSize, ...filters } });
@@ -89,6 +94,8 @@ function LinkChecker() {
       }
     } finally {
       setScanning(false);
+      setScanCompletedAt(new Date());
+      setScanDurationMs(Date.now() - startedAt);
     }
   }
 
@@ -158,6 +165,50 @@ function LinkChecker() {
     malformed: rows.filter((r) => r.reason === "malformed").length,
   };
   const pct = progress.total ? Math.round((progress.done / progress.total) * 100) : 0;
+
+  // === Summary report ===
+  const report = React.useMemo(() => {
+    if (!rows.length) return null;
+    // Top broken targets (group by href)
+    const byTarget = new Map<string, { href: string; count: number; pages: Set<string>; reason: BrokenLink["reason"]; suggestion: string | null }>();
+    for (const r of rows) {
+      const e = byTarget.get(r.href) || { href: r.href, count: 0, pages: new Set<string>(), reason: r.reason, suggestion: r.suggestion?.href || null };
+      e.count++; e.pages.add(r.page_url);
+      if (!e.suggestion && r.suggestion?.href) e.suggestion = r.suggestion.href;
+      byTarget.set(r.href, e);
+    }
+    const targets = Array.from(byTarget.values()).map((t) => ({ ...t, pageCount: t.pages.size }));
+    const topTargets = [...targets].sort((a, b) => b.count - a.count).slice(0, 10);
+    // Fastest fixes by impact: has a suggestion and high count
+    const fastestFixes = targets
+      .filter((t) => t.suggestion)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 8);
+    // Affected pages count
+    const affectedPages = new Set(rows.map((r) => r.page_url)).size;
+    return { topTargets, fastestFixes, affectedPages, withSuggestions: rows.filter((r) => r.suggestion?.href).length };
+  }, [rows]);
+
+  async function fixAllOf(href: string, newHref: string) {
+    const items = rows.filter((r) => r.href === href).map((r) => ({ pageId: r.page_id, href: r.href, newHref }));
+    if (!items.length) return;
+    if (!confirm(`Replace ${items.length} occurrence${items.length === 1 ? "" : "s"} of ${href} → ${newHref}?`)) return;
+    setBulkRunning(true);
+    try {
+      const res = await bulkFixBrokenLinks({ data: { action: "replace", items } });
+      setState((prev) => {
+        const next = { ...prev };
+        for (const it of items) next[`${it.pageId}::${it.href}`] = { status: "fixed", msg: `→ ${newHref}` };
+        return next;
+      });
+      setBulkResult(`Updated ${res.pagesUpdated} page${res.pagesUpdated === 1 ? "" : "s"} · fixed ${res.linksFixed} link${res.linksFixed === 1 ? "" : "s"}.`);
+    } catch (e: any) {
+      setBulkResult(`Failed: ${e?.message || "unknown"}`);
+    } finally {
+      setBulkRunning(false);
+    }
+  }
+
 
   return (
     <AdminLayout title="Link checker">
@@ -262,6 +313,74 @@ function LinkChecker() {
           </div>
           <div className="mt-1 h-2 overflow-hidden rounded-full bg-muted">
             <div className="h-full bg-primary transition-all" style={{ width: `${pct}%` }} />
+          </div>
+        </div>
+      )}
+
+      {!scanning && report && (
+        <div className="mt-6 rounded-lg border border-border bg-card p-4">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h2 className="text-lg font-semibold">Scan summary</h2>
+            <span className="text-xs text-muted-foreground">
+              {scanCompletedAt ? scanCompletedAt.toLocaleString() : ""}
+              {scanDurationMs != null ? ` · ${(scanDurationMs / 1000).toFixed(1)}s` : ""}
+            </span>
+          </div>
+
+          <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-5">
+            {[
+              ["Pages scanned", progress.done.toLocaleString()],
+              ["Broken links", rows.length.toLocaleString()],
+              ["Affected pages", report.affectedPages.toLocaleString()],
+              ["With suggestion", report.withSuggestions.toLocaleString()],
+              ["Missing /p/", counts.missing_p_page.toLocaleString()],
+            ].map(([label, val]) => (
+              <div key={label} className="rounded-md border border-border bg-background p-3">
+                <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</div>
+                <div className="mt-1 text-xl font-semibold">{val}</div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-5 grid gap-4 lg:grid-cols-2">
+            <div>
+              <h3 className="text-sm font-semibold">Top broken targets</h3>
+              <p className="text-xs text-muted-foreground">Links broken in the most places.</p>
+              <ol className="mt-2 space-y-1.5">
+                {report.topTargets.length === 0 && <li className="text-xs text-muted-foreground">None.</li>}
+                {report.topTargets.map((t) => (
+                  <li key={t.href} className="flex items-center justify-between gap-2 rounded border border-border bg-background px-2 py-1.5">
+                    <code className="truncate text-xs" title={t.href}>{t.href}</code>
+                    <span className="shrink-0 text-xs text-muted-foreground">
+                      {t.count}× · {t.pageCount} page{t.pageCount === 1 ? "" : "s"}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold">Fastest fixes by impact</h3>
+              <p className="text-xs text-muted-foreground">Targets with a suggested replacement, ordered by occurrences fixed.</p>
+              <ol className="mt-2 space-y-1.5">
+                {report.fastestFixes.length === 0 && <li className="text-xs text-muted-foreground">No suggestions available yet.</li>}
+                {report.fastestFixes.map((t) => (
+                  <li key={t.href} className="rounded border border-border bg-background px-2 py-1.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <code className="truncate text-xs" title={t.href}>{t.href}</code>
+                      <span className="shrink-0 text-xs text-muted-foreground">{t.count}× · {t.pageCount} pg</span>
+                    </div>
+                    <div className="mt-1 flex items-center justify-between gap-2">
+                      <div className="truncate text-[11px] text-muted-foreground">→ <code>{t.suggestion}</code></div>
+                      <button
+                        disabled={bulkRunning}
+                        onClick={() => fixAllOf(t.href, t.suggestion!)}
+                        className="shrink-0 rounded bg-primary px-2 py-0.5 text-[11px] font-semibold text-primary-foreground disabled:opacity-50"
+                      >Fix all</button>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </div>
           </div>
         </div>
       )}
