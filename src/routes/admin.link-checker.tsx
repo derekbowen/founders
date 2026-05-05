@@ -65,6 +65,50 @@ function LinkChecker() {
     }
   }
 
+  const [bulkRunning, setBulkRunning] = React.useState(false);
+  const [bulkResult, setBulkResult] = React.useState<string | null>(null);
+
+  async function applyBulk(action: "replace" | "unlink" | "remove") {
+    setBulkResult(null);
+    const targets = filtered;
+    if (!targets.length) return;
+    if (action === "replace") {
+      const missingSuggestion = targets.filter((b) => !(editHref[key(b)] ?? b.suggestion?.href || "").trim());
+      if (missingSuggestion.length === targets.length) {
+        setBulkResult("No suggestions/edits available to replace with. Use Unlink or Remove instead.");
+        return;
+      }
+    }
+    const verb = action === "replace" ? "replace" : action;
+    if (!confirm(`Apply "${verb}" to ${targets.length} link${targets.length === 1 ? "" : "s"}?${action === "replace" ? " Only links with a suggested or edited URL will be changed." : ""}`)) return;
+
+    setBulkRunning(true);
+    try {
+      const items = targets
+        .map((b) => {
+          const newHref = (editHref[key(b)] ?? b.suggestion?.href ?? "").trim();
+          if (action === "replace" && !newHref) return null;
+          return { pageId: b.page_id, href: b.href, newHref: action === "replace" ? newHref : undefined };
+        })
+        .filter(Boolean) as Array<{ pageId: string; href: string; newHref?: string }>;
+
+      const res = await bulkFixBrokenLinks({ data: { action, items } });
+      // mark each affected row in local state
+      setState((prev) => {
+        const next = { ...prev };
+        for (const it of items) {
+          const k = `${it.pageId}::${it.href}`;
+          next[k] = { status: "fixed", msg: action === "replace" ? `→ ${it.newHref}` : action };
+        }
+        return next;
+      });
+      setBulkResult(`Updated ${res.pagesUpdated} page${res.pagesUpdated === 1 ? "" : "s"} · fixed ${res.linksFixed} link${res.linksFixed === 1 ? "" : "s"}${res.linksSkipped ? ` · skipped ${res.linksSkipped}` : ""}${res.errors.length ? ` · ${res.errors.length} errors` : ""}.`);
+    } catch (e: any) {
+      setBulkResult(`Bulk fix failed: ${e?.message || "unknown error"}`);
+    } finally {
+      setBulkRunning(false);
+    }
+
   const filtered = rows.filter((r) => filter === "all" || r.reason === filter);
   const counts = {
     all: rows.length,
