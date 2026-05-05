@@ -1146,6 +1146,83 @@ export type Database = {
         }
         Relationships: []
       }
+      provider_claims: {
+        Row: {
+          admin_notes: string | null
+          business_email: string | null
+          business_phone: string | null
+          business_website: string | null
+          claimer_email: string
+          claimer_name: string
+          claimer_phone: string | null
+          claimer_role: string | null
+          created_at: string
+          id: string
+          proposed_updates: Json
+          provider_id: string
+          provider_slug: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          source_path: string | null
+          status: string
+          updated_at: string
+          user_agent: string | null
+          verification_notes: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          business_email?: string | null
+          business_phone?: string | null
+          business_website?: string | null
+          claimer_email: string
+          claimer_name: string
+          claimer_phone?: string | null
+          claimer_role?: string | null
+          created_at?: string
+          id?: string
+          proposed_updates?: Json
+          provider_id: string
+          provider_slug: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source_path?: string | null
+          status?: string
+          updated_at?: string
+          user_agent?: string | null
+          verification_notes?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          business_email?: string | null
+          business_phone?: string | null
+          business_website?: string | null
+          claimer_email?: string
+          claimer_name?: string
+          claimer_phone?: string | null
+          claimer_role?: string | null
+          created_at?: string
+          id?: string
+          proposed_updates?: Json
+          provider_id?: string
+          provider_slug?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source_path?: string | null
+          status?: string
+          updated_at?: string
+          user_agent?: string | null
+          verification_notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_claims_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       provider_leads: {
         Row: {
           city: string | null
