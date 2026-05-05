@@ -93,9 +93,38 @@ function AdminDashboard() {
               </div>
             </section>
 
+            {/* Critical issues banner (Phase 1) */}
+            {(() => {
+              const i = stats.quality?.siteIssues;
+              if (!i) return null;
+              const lines: Array<{ key: string; label: string; n: number }> = [
+                { key: "thin", label: "thin (<500w)", n: i.thin_published_total },
+                { key: "empty", label: "empty body", n: i.empty_published_total },
+                { key: "meta", label: "missing meta description", n: i.missing_meta_published },
+                { key: "schema", label: "missing JSON-LD schema", n: i.missing_schema_published },
+                { key: "links", label: "no internal links", n: i.no_links_published },
+                { key: "title", label: "title is just slug", n: i.title_is_slug_published },
+              ].filter((x) => x.n > 0);
+              if (lines.length === 0) return null;
+              return (
+                <section className="mt-8 rounded-xl border border-red-500/40 bg-red-500/5 p-4">
+                  <h2 className="text-base font-semibold text-red-700 dark:text-red-300">Critical issues — published pages</h2>
+                  <ul className="mt-2 grid grid-cols-1 gap-1 text-sm sm:grid-cols-2">
+                    {lines.map((l) => (
+                      <li key={l.key} className="flex items-baseline gap-2">
+                        <span className="inline-flex min-w-[3rem] justify-end rounded bg-red-500/15 px-2 py-0.5 text-xs font-bold text-red-700 dark:text-red-300">{l.n.toLocaleString()}</span>
+                        <span className="text-muted-foreground">{l.label}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              );
+            })()}
+
             {/* By template */}
             <section className="mt-8">
               <h2 className="text-xl font-semibold">By template type</h2>
+              <p className="text-xs text-muted-foreground">Quality buckets count published pages only. Thin = &lt;500 words, Medium = 500–999, Healthy = 1000+.</p>
               <div className="mt-3 overflow-x-auto rounded-xl border border-border">
                 <table className="w-full text-sm">
                   <thead className="bg-muted/50 text-left text-xs uppercase">
@@ -104,17 +133,42 @@ function AdminDashboard() {
                       <th className="px-3 py-2 text-right">Total</th>
                       <th className="px-3 py-2 text-right">Published</th>
                       <th className="px-3 py-2 text-right">% done</th>
+                      <th className="px-3 py-2 text-right">Thin</th>
+                      <th className="px-3 py-2 text-right">Medium</th>
+                      <th className="px-3 py-2 text-right">Healthy</th>
+                      <th className="px-3 py-2 text-right">Avg words</th>
                     </tr>
                   </thead>
                   <tbody>
                     {stats.byTemplate.map((t) => {
                       const p = Math.round((t.published / Math.max(t.total, 1)) * 100);
+                      const q = stats.quality?.byTemplate.find((x) => (x.template_type || "(none)") === (t.template_type || "(none)"));
+                      const thin = q?.published_thin ?? 0;
+                      const medium = q?.published_medium ?? 0;
+                      const healthy = q?.published_healthy ?? 0;
+                      const avg = q?.avg_words_published ?? null;
                       return (
                         <tr key={t.template_type || "(none)"} className="border-t border-border">
                           <td className="px-3 py-2 font-mono text-xs">{t.template_type || "(none)"}</td>
                           <td className="px-3 py-2 text-right">{t.total.toLocaleString()}</td>
                           <td className="px-3 py-2 text-right">{t.published.toLocaleString()}</td>
                           <td className="px-3 py-2 text-right">{p}%</td>
+                          <td className="px-3 py-2 text-right">
+                            {thin > 0 ? (
+                              <span className="rounded bg-red-500/15 px-1.5 py-0.5 text-xs font-bold text-red-700 dark:text-red-300">{thin}</span>
+                            ) : <span className="text-muted-foreground">0</span>}
+                          </td>
+                          <td className="px-3 py-2 text-right">
+                            {medium > 0 ? (
+                              <span className="rounded bg-yellow-500/15 px-1.5 py-0.5 text-xs font-bold text-yellow-700 dark:text-yellow-300">{medium}</span>
+                            ) : <span className="text-muted-foreground">0</span>}
+                          </td>
+                          <td className="px-3 py-2 text-right">
+                            {healthy > 0 ? (
+                              <span className="rounded bg-green-500/15 px-1.5 py-0.5 text-xs font-bold text-green-700 dark:text-green-300">{healthy}</span>
+                            ) : <span className="text-muted-foreground">0</span>}
+                          </td>
+                          <td className="px-3 py-2 text-right text-muted-foreground">{avg == null ? "—" : avg.toLocaleString()}</td>
                         </tr>
                       );
                     })}
