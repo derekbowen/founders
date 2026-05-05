@@ -355,7 +355,7 @@ export const submitProviderClaim = createServerFn({ method: "POST" })
       business_phone: data.business_phone || null,
       business_website: data.business_website || null,
       verification_notes: data.verification_notes || null,
-      proposed_updates: proposed,
+      proposed_updates: proposed as any,
       source_path: data.source_path || null,
     });
     if (error) throw new Error(error.message);
