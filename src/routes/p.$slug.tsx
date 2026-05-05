@@ -98,6 +98,10 @@ export const Route = createFileRoute("/p/$slug")({
     if (!loaderData?.page) return {};
     const p = loaderData.page;
     const path = `/p/${params.slug}`;
+    // Canonical always points at the page's stored url_path (which uses the
+    // canonical slug), so legacy/case/duplicate slug variants all collapse to
+    // a single canonical URL — even before the 301 redirect fires.
+    const canonicalPath = p.url_path || `/p/${p.slug ?? params.slug}`;
     const titleBase = p.title || p.seo_title || params.slug;
     const title = p.seo_title || `${titleBase} | ${SITE_NAME}`;
     const description = (p.seo_description || p.description || titleBase || "").slice(0, 160);
@@ -111,6 +115,7 @@ export const Route = createFileRoute("/p/$slug")({
       title,
       description,
       path,
+      canonicalPath,
       image: p.cover_image_url || p.hero_image_url || undefined,
       type: isArticleType(p.template_type) ? "article" : "website",
       hreflang,
