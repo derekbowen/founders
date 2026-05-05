@@ -125,7 +125,50 @@ function AdminContentMigration() {
           >
             Reload next
           </button>
+          <button
+            onClick={() => setAutoRun((v) => !v)}
+            disabled={!next?.id && !autoRun}
+            className={`rounded-full px-4 py-1.5 text-sm font-semibold ${
+              autoRun
+                ? "bg-destructive text-destructive-foreground"
+                : "bg-primary text-primary-foreground"
+            }`}
+          >
+            {autoRun ? "Stop auto-run" : "Auto-run all"}
+          </button>
         </div>
+
+        {progress && (
+          <div className="mt-6">
+            <div className="flex items-center justify-between text-sm">
+              <span className="font-medium">
+                Progress: {progress.scraped} / {progress.total}
+              </span>
+              <span className="text-muted-foreground">
+                {progress.pending} pending
+                {progress.total > 0 &&
+                  ` · ${Math.round((progress.scraped / progress.total) * 100)}%`}
+              </span>
+            </div>
+            <div className="mt-2 h-3 w-full overflow-hidden rounded-full bg-muted">
+              <div
+                className={`h-full bg-primary transition-all duration-500 ${
+                  autoRun ? "animate-pulse" : ""
+                }`}
+                style={{
+                  width: `${
+                    progress.total > 0
+                      ? Math.min(
+                          100,
+                          (progress.scraped / progress.total) * 100,
+                        )
+                      : 0
+                  }%`,
+                }}
+              />
+            </div>
+          </div>
+        )}
 
         {error && (
           <div className="mt-4 rounded border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
