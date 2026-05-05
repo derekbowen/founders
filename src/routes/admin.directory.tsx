@@ -17,11 +17,43 @@ export const Route = createFileRoute("/admin/directory")({
   component: AdminDirectory,
 });
 
+type StatusFilter = "pending" | "all" | "approved" | "rejected";
+type PlanFilter = "all" | "featured_active" | "paid_active" | "expiring_soon" | "expired" | "free";
+type SortKey = "newest" | "name" | "paid_until" | "featured_until";
+
+const DAY = 86_400_000;
+
+function planBucket(p: any): PlanFilter {
+  const now = Date.now();
+  const fUntil = p.featured_until ? new Date(p.featured_until).getTime() : 0;
+  const pUntil = p.listing_paid_until ? new Date(p.listing_paid_until).getTime() : 0;
+  if (p.is_featured && fUntil > now) return "featured_active";
+  if (pUntil > now) return "paid_active";
+  if ((fUntil && fUntil <= now) || (pUntil && pUntil <= now)) return "expired";
+  return "free";
+}
+
+function fmtDate(d: any) {
+  return d ? new Date(d).toLocaleDateString() : "—";
+}
+
+function fmtRelative(d: any) {
+  if (!d) return "";
+  const diff = new Date(d).getTime() - Date.now();
+  const days = Math.round(diff / DAY);
+  if (days === 0) return "today";
+  if (days > 0) return `in ${days}d`;
+  return `${-days}d ago`;
+}
+
 function AdminDirectory() {
   const [rows, setRows] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [busy, setBusy] = React.useState<string | null>(null);
-  const [filter, setFilter] = React.useState<"pending" | "all" | "approved" | "rejected">("pending");
+  const [filter, setFilter] = React.useState<StatusFilter>("pending");
+  const [planFilter, setPlanFilter] = React.useState<PlanFilter>("all");
+  const [sort, setSort] = React.useState<SortKey>("newest");
+  const [search, setSearch] = React.useState("");
 
   const load = React.useCallback(async () => {
     setLoading(true);
@@ -41,7 +73,58 @@ function AdminDirectory() {
     finally { setBusy(null); }
   }
 
-  const visible = rows.filter((r) => filter === "all" ? true : r.submission_status === filter);
+  const now = Date.now();
+  const visible = React.useMemo(() => {
+    let list = rows.filter((r) => filter === "all" ? true : r.submission_status === filter);
+    if (planFilter !== "all") {
+      list = list.filter((r) => {
+        if (planFilter === "expiring_soon") {
+          const f = r.featured_until ? new Date(r.featured_until).getTime() : 0;
+          const p = r.listing_paid_until ? new Date(r.listing_paid_until).getTime() : 0;
+          const soon = (t: number) => t > now && t - now < 30 * DAY;
+          return soon(f) || soon(p);
+        }
+        return planBucket(r) === planFilter;
+      });
+    }
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      list = list.filter((r) =>
+        [r.name, r.slug, r.city, r.state_code, r.email, r.submitter_email]
+          .filter(Boolean).some((v: string) => v.toLowerCase().includes(q)),
+      );
+    }
+    const cmp: Record<SortKey, (a: any, b: any) => number> = {
+      newest: (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+      name: (a, b) => (a.name || "").localeCompare(b.name || ""),
+      paid_until: (a, b) =>
+        (b.listing_paid_until ? new Date(b.listing_paid_until).getTime() : 0) -
+        (a.listing_paid_until ? new Date(a.listing_paid_until).getTime() : 0),
+      featured_until: (a, b) =>
+        (b.featured_until ? new Date(b.featured_until).getTime() : 0) -
+        (a.featured_until ? new Date(a.featured_until).getTime() : 0),
+    };
+    return [...list].sort(cmp[sort]);
+  }, [rows, filter, planFilter, sort, search, now]);
+
+  const planCounts = React.useMemo(() => {
+    const buckets = ["all","featured_active","paid_active","expiring_soon","expired","free"] as const;
+    const out: Record<string, number> = {};
+    for (const b of buckets) {
+      if (b === "all") { out[b] = rows.length; continue; }
+      if (b === "expiring_soon") {
+        out[b] = rows.filter((r) => {
+          const f = r.featured_until ? new Date(r.featured_until).getTime() : 0;
+          const p = r.listing_paid_until ? new Date(r.listing_paid_until).getTime() : 0;
+          const soon = (t: number) => t > now && t - now < 30 * DAY;
+          return soon(f) || soon(p);
+        }).length;
+      } else {
+        out[b] = rows.filter((r) => planBucket(r) === b).length;
+      }
+    }
+    return out;
+  }, [rows, now]);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -55,7 +138,7 @@ function AdminDirectory() {
           <Link to="/admin/dashboard" className="text-sm text-primary hover:underline">← Dashboard</Link>
         </div>
 
-        <div className="mt-4 flex gap-2">
+        <div className="mt-4 flex flex-wrap gap-2">
           {(["pending","approved","rejected","all"] as const).map((f) => (
             <button key={f} onClick={() => setFilter(f)}
               className={`rounded-full px-3 py-1 text-xs font-semibold ${filter === f ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"}`}>
@@ -64,6 +147,46 @@ function AdminDirectory() {
           ))}
           <button onClick={load} className="ml-auto rounded-full bg-card border border-border px-3 py-1 text-xs">Refresh</button>
         </div>
+
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <span className="text-xs font-semibold uppercase text-muted-foreground">Plan:</span>
+          {([
+            ["all","All"],
+            ["featured_active","Featured active"],
+            ["paid_active","Paid active"],
+            ["expiring_soon","Expiring ≤30d"],
+            ["expired","Expired"],
+            ["free","Free"],
+          ] as [PlanFilter, string][]).map(([key, label]) => (
+            <button key={key} onClick={() => setPlanFilter(key)}
+              className={`rounded-full px-3 py-1 text-xs font-semibold ${planFilter === key ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"}`}>
+              {label} ({planCounts[key] ?? 0})
+            </button>
+          ))}
+        </div>
+
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search name, slug, city, email…"
+            className="flex-1 min-w-[200px] rounded-lg border border-border bg-card px-3 py-1.5 text-sm"
+          />
+          <label className="text-xs font-semibold uppercase text-muted-foreground">Sort:</label>
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value as SortKey)}
+            className="rounded-lg border border-border bg-card px-3 py-1.5 text-sm"
+          >
+            <option value="newest">Newest</option>
+            <option value="name">Name (A–Z)</option>
+            <option value="paid_until">Paid until (latest)</option>
+            <option value="featured_until">Featured until (latest)</option>
+          </select>
+          <span className="text-xs text-muted-foreground">{visible.length} shown</span>
+        </div>
+
 
         {loading ? (
           <p className="mt-8 text-sm text-muted-foreground">Loading…</p>
@@ -91,11 +214,19 @@ function AdminDirectory() {
                       <a href={`/providers/${p.slug}`} target="_blank" rel="noreferrer" className="text-primary hover:underline">/providers/{p.slug}</a>
                     </div>
                     <div className="mt-2 flex flex-wrap gap-3 text-xs">
-                      <span className={p.listing_paid_until && new Date(p.listing_paid_until) > new Date() ? "text-green-700" : "text-muted-foreground"}>
-                        Paid until: {p.listing_paid_until ? new Date(p.listing_paid_until).toLocaleDateString() : "—"}
+                      <span
+                        title={p.listing_paid_until || ""}
+                        className={p.listing_paid_until && new Date(p.listing_paid_until) > new Date() ? "text-green-700" : "text-muted-foreground"}
+                      >
+                        Paid until: {fmtDate(p.listing_paid_until)}
+                        {p.listing_paid_until && <span className="ml-1 opacity-70">({fmtRelative(p.listing_paid_until)})</span>}
                       </span>
-                      <span className={p.featured_until && new Date(p.featured_until) > new Date() ? "text-primary" : "text-muted-foreground"}>
-                        Featured until: {p.featured_until ? new Date(p.featured_until).toLocaleDateString() : "—"}
+                      <span
+                        title={p.featured_until || ""}
+                        className={p.featured_until && new Date(p.featured_until) > new Date() ? "text-primary" : "text-muted-foreground"}
+                      >
+                        Featured until: {fmtDate(p.featured_until)}
+                        {p.featured_until && <span className="ml-1 opacity-70">({fmtRelative(p.featured_until)})</span>}
                       </span>
                     </div>
                   </div>
