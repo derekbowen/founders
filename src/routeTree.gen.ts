@@ -87,6 +87,7 @@ import { Route as AdminBlogRouteImport } from './routes/admin.blog'
 import { Route as AccountLearningRouteImport } from './routes/account.learning'
 import { Route as AcademySlugRouteImport } from './routes/academy.$slug'
 import { Route as HelpCenterCategoryIndexRouteImport } from './routes/help-center.$category.index'
+import { Route as ProvidersSlugClaimRouteImport } from './routes/providers.$slug.claim'
 import { Route as PoolBuildersStateCityRouteImport } from './routes/pool-builders.$state.$city'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as LSlugIdRouteImport } from './routes/l.$slug.$id'
@@ -508,6 +509,11 @@ const HelpCenterCategoryIndexRoute = HelpCenterCategoryIndexRouteImport.update({
   path: '/help-center/$category/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProvidersSlugClaimRoute = ProvidersSlugClaimRouteImport.update({
+  id: '/claim',
+  path: '/claim',
+  getParentRoute: () => ProvidersSlugRoute,
+} as any)
 const PoolBuildersStateCityRoute = PoolBuildersStateCityRouteImport.update({
   id: '/$city',
   path: '/$city',
@@ -657,7 +663,7 @@ export interface FileRoutesByFullPath {
   '/pool-builders/$state': typeof PoolBuildersStateRouteWithChildren
   '/pool-rental-laws/$city': typeof PoolRentalLawsCityRoute
   '/pool-rental/$city': typeof PoolRentalCityRoute
-  '/providers/$slug': typeof ProvidersSlugRoute
+  '/providers/$slug': typeof ProvidersSlugRouteWithChildren
   '/verify/$uid': typeof VerifyUidRoute
   '/academy/': typeof AcademyIndexRoute
   '/help-center/': typeof HelpCenterIndexRoute
@@ -671,6 +677,7 @@ export interface FileRoutesByFullPath {
   '/l/$slug/$id': typeof LSlugIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/pool-builders/$state/$city': typeof PoolBuildersStateCityRoute
+  '/providers/$slug/claim': typeof ProvidersSlugClaimRoute
   '/help-center/$category/': typeof HelpCenterCategoryIndexRoute
   '/api/certificates/$uid/pdf': typeof ApiCertificatesUidPdfRoute
   '/api/public/hooks/sync-listings': typeof ApiPublicHooksSyncListingsRoute
@@ -750,7 +757,7 @@ export interface FileRoutesByTo {
   '/pool-builders/$state': typeof PoolBuildersStateRouteWithChildren
   '/pool-rental-laws/$city': typeof PoolRentalLawsCityRoute
   '/pool-rental/$city': typeof PoolRentalCityRoute
-  '/providers/$slug': typeof ProvidersSlugRoute
+  '/providers/$slug': typeof ProvidersSlugRouteWithChildren
   '/verify/$uid': typeof VerifyUidRoute
   '/academy': typeof AcademyIndexRoute
   '/help-center': typeof HelpCenterIndexRoute
@@ -764,6 +771,7 @@ export interface FileRoutesByTo {
   '/l/$slug/$id': typeof LSlugIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/pool-builders/$state/$city': typeof PoolBuildersStateCityRoute
+  '/providers/$slug/claim': typeof ProvidersSlugClaimRoute
   '/help-center/$category': typeof HelpCenterCategoryIndexRoute
   '/api/certificates/$uid/pdf': typeof ApiCertificatesUidPdfRoute
   '/api/public/hooks/sync-listings': typeof ApiPublicHooksSyncListingsRoute
@@ -845,7 +853,7 @@ export interface FileRoutesById {
   '/pool-builders/$state': typeof PoolBuildersStateRouteWithChildren
   '/pool-rental-laws/$city': typeof PoolRentalLawsCityRoute
   '/pool-rental/$city': typeof PoolRentalCityRoute
-  '/providers/$slug': typeof ProvidersSlugRoute
+  '/providers/$slug': typeof ProvidersSlugRouteWithChildren
   '/verify/$uid': typeof VerifyUidRoute
   '/academy/': typeof AcademyIndexRoute
   '/help-center/': typeof HelpCenterIndexRoute
@@ -859,6 +867,7 @@ export interface FileRoutesById {
   '/l/$slug/$id': typeof LSlugIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/pool-builders/$state/$city': typeof PoolBuildersStateCityRoute
+  '/providers/$slug/claim': typeof ProvidersSlugClaimRoute
   '/help-center/$category/': typeof HelpCenterCategoryIndexRoute
   '/api/certificates/$uid/pdf': typeof ApiCertificatesUidPdfRoute
   '/api/public/hooks/sync-listings': typeof ApiPublicHooksSyncListingsRoute
@@ -955,6 +964,7 @@ export interface FileRouteTypes {
     | '/l/$slug/$id'
     | '/lovable/email/suppression'
     | '/pool-builders/$state/$city'
+    | '/providers/$slug/claim'
     | '/help-center/$category/'
     | '/api/certificates/$uid/pdf'
     | '/api/public/hooks/sync-listings'
@@ -1048,6 +1058,7 @@ export interface FileRouteTypes {
     | '/l/$slug/$id'
     | '/lovable/email/suppression'
     | '/pool-builders/$state/$city'
+    | '/providers/$slug/claim'
     | '/help-center/$category'
     | '/api/certificates/$uid/pdf'
     | '/api/public/hooks/sync-listings'
@@ -1142,6 +1153,7 @@ export interface FileRouteTypes {
     | '/l/$slug/$id'
     | '/lovable/email/suppression'
     | '/pool-builders/$state/$city'
+    | '/providers/$slug/claim'
     | '/help-center/$category/'
     | '/api/certificates/$uid/pdf'
     | '/api/public/hooks/sync-listings'
@@ -1783,6 +1795,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HelpCenterCategoryIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/providers/$slug/claim': {
+      id: '/providers/$slug/claim'
+      path: '/claim'
+      fullPath: '/providers/$slug/claim'
+      preLoaderRoute: typeof ProvidersSlugClaimRouteImport
+      parentRoute: typeof ProvidersSlugRoute
+    }
     '/pool-builders/$state/$city': {
       id: '/pool-builders/$state/$city'
       path: '/$city'
@@ -1956,12 +1975,24 @@ const DirectoryRouteWithChildren = DirectoryRoute._addFileChildren(
   DirectoryRouteChildren,
 )
 
+interface ProvidersSlugRouteChildren {
+  ProvidersSlugClaimRoute: typeof ProvidersSlugClaimRoute
+}
+
+const ProvidersSlugRouteChildren: ProvidersSlugRouteChildren = {
+  ProvidersSlugClaimRoute: ProvidersSlugClaimRoute,
+}
+
+const ProvidersSlugRouteWithChildren = ProvidersSlugRoute._addFileChildren(
+  ProvidersSlugRouteChildren,
+)
+
 interface ProvidersRouteChildren {
-  ProvidersSlugRoute: typeof ProvidersSlugRoute
+  ProvidersSlugRoute: typeof ProvidersSlugRouteWithChildren
 }
 
 const ProvidersRouteChildren: ProvidersRouteChildren = {
-  ProvidersSlugRoute: ProvidersSlugRoute,
+  ProvidersSlugRoute: ProvidersSlugRouteWithChildren,
 }
 
 const ProvidersRouteWithChildren = ProvidersRoute._addFileChildren(
