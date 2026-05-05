@@ -53,6 +53,12 @@ export const Route = createFileRoute("/sitemap.xml")({
           lastmod: new Date(),
         });
 
+        // 1c. Pool pros directory (categories + providers)
+        entries.push({
+          loc: `${SITE_URL}/sitemap-directory.xml`,
+          lastmod: new Date(),
+        });
+
         // 2. Per-template-type content_pages sub-sitemaps (with auto-pagination)
         for (const group of TEMPLATE_GROUPS) {
           const { count, error } = await (supabaseAdmin as any)
