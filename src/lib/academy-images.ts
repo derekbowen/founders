@@ -14,8 +14,10 @@ import migrate from "@/assets/academy/migrate.jpg";
 import multiPlatform from "@/assets/academy/multi-platform.jpg";
 import income from "@/assets/academy/income.jpg";
 import holiday from "@/assets/academy/holiday.jpg";
-
-export const ACADEMY_HERO_MAP: Record<string, string> = {
+import taxes from "@/assets/academy/taxes.jpg";
+import difficultGuests from "@/assets/academy/difficult-guests.jpg";
+import hoa from "@/assets/academy/hoa.jpg";
+import neighborComplaints from "@/assets/academy/neighbor-complaints.jpg";
   "academy/bachelorette.jpg": bachelorette,
   "academy/quinceanera.jpg": quinceanera,
   "academy/photoshoot.jpg": photoshoot,
