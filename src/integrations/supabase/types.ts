@@ -1554,6 +1554,57 @@ export type Database = {
           },
         ]
       }
+      seo_fix_jobs: {
+        Row: {
+          attempts: number
+          batch_id: string | null
+          created_at: string
+          enqueued_by: string | null
+          error: string | null
+          finished_at: string | null
+          id: string
+          max_attempts: number
+          mode: string
+          page_id: string
+          result: Json | null
+          started_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          batch_id?: string | null
+          created_at?: string
+          enqueued_by?: string | null
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          max_attempts?: number
+          mode: string
+          page_id: string
+          result?: Json | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          batch_id?: string | null
+          created_at?: string
+          enqueued_by?: string | null
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          max_attempts?: number
+          mode?: string
+          page_id?: string
+          result?: Json | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       seo_overrides: {
         Row: {
           canonical_url: string | null
