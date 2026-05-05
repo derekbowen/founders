@@ -125,8 +125,11 @@ function StateHub() {
                   params={{ slug: p.slug }}
                   className="rounded-2xl border border-primary/40 bg-card p-5 ring-1 ring-primary/20 transition hover:shadow-md"
                 >
-                  <h3 className="font-semibold text-foreground">{p.name}</h3>
-                  {p.city && <p className="text-sm text-muted-foreground">{p.city}, {p.state_code}</p>}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="font-semibold text-foreground">{p.name}</h3>
+                    <ProviderPlanBadges p={p} />
+                  </div>
+                  {p.city && <p className="mt-1 text-sm text-muted-foreground">{p.city}, {p.state_code}</p>}
                 </Link>
               ))}
             </div>
