@@ -431,7 +431,7 @@ function HomePageInner({ data }: { data: HomeData | undefined | null }) {
                   {FEATURED_OCCASIONS.map((o) => (
                     <a
                       key={o.slug}
-                      href={`/s?keywords=${encodeURIComponent(o.title)}`}
+                      href={`https://www.poolrentalnearme.com/s?keywords=${encodeURIComponent(o.title)}`}
                       className="group relative overflow-hidden rounded-2xl bg-white text-foreground shadow-md transition-all hover:-translate-y-0.5 hover:shadow-xl"
                     >
                       <div className="aspect-[4/3] overflow-hidden">
