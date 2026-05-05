@@ -35,6 +35,10 @@ export const ACADEMY_HERO_MAP: Record<string, string> = {
   "academy/multi-platform.jpg": multiPlatform,
   "academy/income.jpg": income,
   "academy/holiday.jpg": holiday,
+  "academy/taxes.jpg": taxes,
+  "academy/difficult-guests.jpg": difficultGuests,
+  "academy/hoa.jpg": hoa,
+  "academy/neighbor-complaints.jpg": neighborComplaints,
 };
 
 /** Resolve a stored cover_image_url to a usable URL. */
