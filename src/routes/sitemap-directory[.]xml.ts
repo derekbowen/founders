@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { SITE_URL } from "@/lib/seo";
 import { buildUrlsetXml, sitemapResponse, type SitemapUrl } from "@/lib/sitemap";
+import { listCategoryGeoCoverage } from "@/server/directory.functions";
 
 export const Route = createFileRoute("/sitemap-directory.xml")({
   server: {
@@ -13,8 +14,23 @@ export const Route = createFileRoute("/sitemap-directory.xml")({
           .from("service_categories")
           .select("slug, updated_at")
           .eq("is_published", true);
+
         for (const c of cats ?? []) {
           urls.push({ loc: `${SITE_URL}/directory/${c.slug}`, lastmod: c.updated_at });
+          // Per-category state + city pages
+          try {
+            const { states } = await listCategoryGeoCoverage({ data: { slug: c.slug } });
+            for (const st of states) {
+              urls.push({ loc: `${SITE_URL}/directory/${c.slug}/${st.code.toLowerCase()}` });
+              for (const city of st.cities) {
+                urls.push({
+                  loc: `${SITE_URL}/directory/${c.slug}/${st.code.toLowerCase()}/${city.slug}`,
+                });
+              }
+            }
+          } catch (e) {
+            console.error("[sitemap-directory] coverage error", c.slug, e);
+          }
         }
 
         const { data: provs } = await supabaseAdmin
