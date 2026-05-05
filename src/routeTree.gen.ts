@@ -91,6 +91,7 @@ import { Route as PoolBuildersStateCityRouteImport } from './routes/pool-builder
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as LSlugIdRouteImport } from './routes/l.$slug.$id'
 import { Route as HelpCenterCategorySlugRouteImport } from './routes/help-center.$category.$slug'
+import { Route as DirectoryCategoryStateRouteImport } from './routes/directory.$category.$state'
 import { Route as ApiPublicTrackCityClickRouteImport } from './routes/api/public/track-city-click'
 import { Route as ApiPublicBackfillContentPagesRouteImport } from './routes/api/public/backfill-content-pages'
 import { Route as AdminLearningUserIdRouteImport } from './routes/admin.learning.$userId'
@@ -526,6 +527,11 @@ const HelpCenterCategorySlugRoute = HelpCenterCategorySlugRouteImport.update({
   path: '/help-center/$category/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DirectoryCategoryStateRoute = DirectoryCategoryStateRouteImport.update({
+  id: '/$state',
+  path: '/$state',
+  getParentRoute: () => DirectoryCategoryRoute,
+} as any)
 const ApiPublicTrackCityClickRoute = ApiPublicTrackCityClickRouteImport.update({
   id: '/api/public/track-city-click',
   path: '/api/public/track-city-click',
@@ -625,7 +631,7 @@ export interface FileRoutesByFullPath {
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
-  '/directory/$category': typeof DirectoryCategoryRoute
+  '/directory/$category': typeof DirectoryCategoryRouteWithChildren
   '/directory/list': typeof DirectoryListRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/host-tools/$slug': typeof HostToolsSlugRoute
@@ -653,6 +659,7 @@ export interface FileRoutesByFullPath {
   '/admin/learning/$userId': typeof AdminLearningUserIdRoute
   '/api/public/backfill-content-pages': typeof ApiPublicBackfillContentPagesRoute
   '/api/public/track-city-click': typeof ApiPublicTrackCityClickRoute
+  '/directory/$category/$state': typeof DirectoryCategoryStateRoute
   '/help-center/$category/$slug': typeof HelpCenterCategorySlugRoute
   '/l/$slug/$id': typeof LSlugIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -716,7 +723,7 @@ export interface FileRoutesByTo {
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
-  '/directory/$category': typeof DirectoryCategoryRoute
+  '/directory/$category': typeof DirectoryCategoryRouteWithChildren
   '/directory/list': typeof DirectoryListRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/host-tools/$slug': typeof HostToolsSlugRoute
@@ -744,6 +751,7 @@ export interface FileRoutesByTo {
   '/admin/learning/$userId': typeof AdminLearningUserIdRoute
   '/api/public/backfill-content-pages': typeof ApiPublicBackfillContentPagesRoute
   '/api/public/track-city-click': typeof ApiPublicTrackCityClickRoute
+  '/directory/$category/$state': typeof DirectoryCategoryStateRoute
   '/help-center/$category/$slug': typeof HelpCenterCategorySlugRoute
   '/l/$slug/$id': typeof LSlugIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -809,7 +817,7 @@ export interface FileRoutesById {
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
-  '/directory/$category': typeof DirectoryCategoryRoute
+  '/directory/$category': typeof DirectoryCategoryRouteWithChildren
   '/directory/list': typeof DirectoryListRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/host-tools/$slug': typeof HostToolsSlugRoute
@@ -837,6 +845,7 @@ export interface FileRoutesById {
   '/admin/learning/$userId': typeof AdminLearningUserIdRoute
   '/api/public/backfill-content-pages': typeof ApiPublicBackfillContentPagesRoute
   '/api/public/track-city-click': typeof ApiPublicTrackCityClickRoute
+  '/directory/$category/$state': typeof DirectoryCategoryStateRoute
   '/help-center/$category/$slug': typeof HelpCenterCategorySlugRoute
   '/l/$slug/$id': typeof LSlugIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -931,6 +940,7 @@ export interface FileRouteTypes {
     | '/admin/learning/$userId'
     | '/api/public/backfill-content-pages'
     | '/api/public/track-city-click'
+    | '/directory/$category/$state'
     | '/help-center/$category/$slug'
     | '/l/$slug/$id'
     | '/lovable/email/suppression'
@@ -1022,6 +1032,7 @@ export interface FileRouteTypes {
     | '/admin/learning/$userId'
     | '/api/public/backfill-content-pages'
     | '/api/public/track-city-click'
+    | '/directory/$category/$state'
     | '/help-center/$category/$slug'
     | '/l/$slug/$id'
     | '/lovable/email/suppression'
@@ -1114,6 +1125,7 @@ export interface FileRouteTypes {
     | '/admin/learning/$userId'
     | '/api/public/backfill-content-pages'
     | '/api/public/track-city-click'
+    | '/directory/$category/$state'
     | '/help-center/$category/$slug'
     | '/l/$slug/$id'
     | '/lovable/email/suppression'
@@ -1786,6 +1798,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HelpCenterCategorySlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/directory/$category/$state': {
+      id: '/directory/$category/$state'
+      path: '/$state'
+      fullPath: '/directory/$category/$state'
+      preLoaderRoute: typeof DirectoryCategoryStateRouteImport
+      parentRoute: typeof DirectoryCategoryRoute
+    }
     '/api/public/track-city-click': {
       id: '/api/public/track-city-click'
       path: '/api/public/track-city-click'
@@ -1878,13 +1897,24 @@ const BlogRouteChildren: BlogRouteChildren = {
 
 const BlogRouteWithChildren = BlogRoute._addFileChildren(BlogRouteChildren)
 
+interface DirectoryCategoryRouteChildren {
+  DirectoryCategoryStateRoute: typeof DirectoryCategoryStateRoute
+}
+
+const DirectoryCategoryRouteChildren: DirectoryCategoryRouteChildren = {
+  DirectoryCategoryStateRoute: DirectoryCategoryStateRoute,
+}
+
+const DirectoryCategoryRouteWithChildren =
+  DirectoryCategoryRoute._addFileChildren(DirectoryCategoryRouteChildren)
+
 interface DirectoryRouteChildren {
-  DirectoryCategoryRoute: typeof DirectoryCategoryRoute
+  DirectoryCategoryRoute: typeof DirectoryCategoryRouteWithChildren
   DirectoryListRoute: typeof DirectoryListRoute
 }
 
 const DirectoryRouteChildren: DirectoryRouteChildren = {
-  DirectoryCategoryRoute: DirectoryCategoryRoute,
+  DirectoryCategoryRoute: DirectoryCategoryRouteWithChildren,
   DirectoryListRoute: DirectoryListRoute,
 }
 

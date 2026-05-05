@@ -98,7 +98,7 @@ function StateHub() {
           <section className="mt-10">
             <h2 className="text-xl font-semibold text-foreground">Browse by city</h2>
             <div className="mt-4 grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-              {cities.map((city) => (
+              {cities.map((city: { name: string; slug: string; count: number }) => (
                 <Link
                   key={city.slug}
                   to="/directory/$category/$state/$city"
