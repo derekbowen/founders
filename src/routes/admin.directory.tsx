@@ -214,20 +214,8 @@ function AdminDirectory() {
                       <a href={`/providers/${p.slug}`} target="_blank" rel="noreferrer" className="text-primary hover:underline">/providers/{p.slug}</a>
                     </div>
                     <div className="mt-2 flex flex-wrap gap-3 text-xs">
-                      <span
-                        title={p.listing_paid_until || ""}
-                        className={p.listing_paid_until && new Date(p.listing_paid_until) > new Date() ? "text-green-700" : "text-muted-foreground"}
-                      >
-                        Paid until: {fmtDate(p.listing_paid_until)}
-                        {p.listing_paid_until && <span className="ml-1 opacity-70">({fmtRelative(p.listing_paid_until)})</span>}
-                      </span>
-                      <span
-                        title={p.featured_until || ""}
-                        className={p.featured_until && new Date(p.featured_until) > new Date() ? "text-primary" : "text-muted-foreground"}
-                      >
-                        Featured until: {fmtDate(p.featured_until)}
-                        {p.featured_until && <span className="ml-1 opacity-70">({fmtRelative(p.featured_until)})</span>}
-                      </span>
+                      <TimestampPill label="Paid until" value={p.listing_paid_until} activeClass="text-green-700" />
+                      <TimestampPill label="Featured until" value={p.featured_until} activeClass="text-primary" />
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -270,6 +258,34 @@ function Badge({ children, tone }: { children: React.ReactNode; tone?: "ok" | "w
     : tone === "primary" ? "bg-primary text-primary-foreground"
     : "bg-secondary text-secondary-foreground";
   return <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${cls}`}>{children}</span>;
+}
+
+function TimestampPill({ label, value, activeClass }: { label: string; value: string | null | undefined; activeClass: string }) {
+  const [copied, setCopied] = React.useState(false);
+  const isActive = !!value && new Date(value) > new Date();
+  const iso = value ? new Date(value).toISOString() : "";
+  async function copy() {
+    if (!iso) return;
+    try { await navigator.clipboard.writeText(iso); setCopied(true); setTimeout(() => setCopied(false), 1200); } catch {}
+  }
+  return (
+    <span className={`inline-flex items-center gap-1 ${isActive ? activeClass : "text-muted-foreground"}`}>
+      <span title={iso || "—"}>
+        {label}: {fmtDate(value)}
+        {value && <span className="ml-1 opacity-70">({fmtRelative(value)})</span>}
+      </span>
+      {value && (
+        <button
+          type="button"
+          onClick={copy}
+          title={`Copy ISO-8601: ${iso}`}
+          className="rounded border border-border bg-background px-1.5 py-0.5 text-[10px] font-mono hover:bg-secondary"
+        >
+          {copied ? "✓" : "copy"}
+        </button>
+      )}
+    </span>
+  );
 }
 
 function Btn({ children, onClick, busy, tone }: { children: React.ReactNode; onClick: () => void; busy?: boolean; tone?: "ok" | "danger" | "primary" }) {
