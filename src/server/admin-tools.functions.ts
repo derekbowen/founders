@@ -218,33 +218,26 @@ function humanizeSlug(slug: string): string {
   return slug.replace(/^\/p\//, "").replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-export const aiFixContentPage = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
-    z.object({
-      id: z.string().uuid(),
-      mode: z.enum(["full", "meta_only", "title_only"]).default("full"),
-    }).parse(d),
-  )
-  .handler(async ({ data, context }) => {
-    await assertAdmin((context as any).userId);
-    const apiKey = process.env.LOVABLE_API_KEY;
-    if (!apiKey) return { ok: false, error: "LOVABLE_API_KEY not configured" };
+export async function runSeoFix(pageId: string, mode: "full" | "meta_only" | "title_only"): Promise<
+  { ok: true; newWords: number; newTitle: string } | { ok: false; error: string }
+> {
+  const apiKey = process.env.LOVABLE_API_KEY;
+  if (!apiKey) return { ok: false, error: "LOVABLE_API_KEY not configured" };
 
-    const { data: page, error: pErr } = await (supabaseAdmin as any)
-      .from("content_pages")
-      .select("id, url_path, slug, title, seo_title, seo_description, body_markdown, template_type, category")
-      .eq("id", data.id)
-      .maybeSingle();
-    if (pErr || !page) return { ok: false, error: "Page not found" };
+  const { data: page, error: pErr } = await (supabaseAdmin as any)
+    .from("content_pages")
+    .select("id, url_path, slug, title, seo_title, seo_description, body_markdown, template_type, category")
+    .eq("id", pageId)
+    .maybeSingle();
+  if (pErr || !page) return { ok: false, error: "Page not found" };
 
-    const topic = humanizeSlug(page.url_path || page.slug || "");
-    const currentBody = page.body_markdown || "";
-    const wordCount = currentBody.split(/\s+/).filter(Boolean).length;
+  const topic = humanizeSlug(page.url_path || page.slug || "");
+  const currentBody = page.body_markdown || "";
+  const wordCount = currentBody.split(/\s+/).filter(Boolean).length;
 
-    let userPrompt = "";
-    if (data.mode === "meta_only" || data.mode === "title_only") {
-      userPrompt = `Generate ONLY a clean human-readable title and SEO title/description for this existing page.
+  let userPrompt = "";
+  if (mode === "meta_only" || mode === "title_only") {
+    userPrompt = `Generate ONLY a clean human-readable title and SEO title/description for this existing page.
 
 URL: ${page.url_path}
 Topic (derived from slug): ${topic}
@@ -257,12 +250,12 @@ Produce:
 - seo_description: <=155 chars, compelling and specific
 
 For body_markdown, return the EXISTING body unchanged.`;
-    } else {
-      const reason =
-        wordCount === 0 ? "Page body is EMPTY — write fresh content." :
-        wordCount < 500 ? `Page body is THIN (${wordCount} words) — expand to 800-1200 words while keeping any existing facts.` :
-        "Improve the existing page.";
-      userPrompt = `Repair this content page.
+  } else {
+    const reason =
+      wordCount === 0 ? "Page body is EMPTY — write fresh content." :
+      wordCount < 500 ? `Page body is THIN (${wordCount} words) — expand to 800-1200 words while keeping any existing facts.` :
+      "Improve the existing page.";
+    userPrompt = `Repair this content page.
 
 URL: ${page.url_path}
 Topic (derived from slug): ${topic}
@@ -271,44 +264,137 @@ Issue: ${reason}
 ${currentBody ? `Existing body to expand/improve:\n---\n${currentBody.slice(0, 3000)}\n---` : ""}
 
 Length: 800-1200 words. Use ## sections and ### sub-points. Strong opening, no fluff.`;
+  }
+
+  const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "google/gemini-2.5-flash",
+      messages: [{ role: "system", content: SEO_SYSTEM }, { role: "user", content: userPrompt }],
+      tools: [SEO_TOOL],
+      tool_choice: { type: "function", function: { name: "write_page" } },
+    }),
+  });
+  if (resp.status === 402) return { ok: false, error: "AI credits exhausted" };
+  if (resp.status === 429) return { ok: false, error: "Rate limited — slow down" };
+  if (!resp.ok) return { ok: false, error: `AI gateway ${resp.status}: ${(await resp.text()).slice(0, 200)}` };
+
+  const json = await resp.json();
+  const tc = json?.choices?.[0]?.message?.tool_calls?.[0];
+  if (!tc?.function?.arguments) return { ok: false, error: "AI returned no tool call" };
+  const gen = JSON.parse(tc.function.arguments) as {
+    title: string; seo_title: string; seo_description: string; body_markdown: string;
+  };
+
+  const update: any = {
+    title: gen.title || page.title,
+    seo_title: (gen.seo_title || page.seo_title || gen.title || "").slice(0, 70),
+    seo_description: (gen.seo_description || page.seo_description || "").slice(0, 160),
+    updated_at: new Date().toISOString(),
+  };
+  if (mode === "full" && gen.body_markdown && gen.body_markdown.length > 300) {
+    update.body_markdown = gen.body_markdown;
+  }
+
+  const { error: uErr } = await (supabaseAdmin as any).from("content_pages").update(update).eq("id", pageId);
+  if (uErr) return { ok: false, error: uErr.message };
+  return {
+    ok: true,
+    newWords: (update.body_markdown || currentBody).split(/\s+/).filter(Boolean).length,
+    newTitle: update.title,
+  };
+}
+
+export const aiFixContentPage = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      id: z.string().uuid(),
+      mode: z.enum(["full", "meta_only", "title_only"]).default("full"),
+    }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin((context as any).userId);
+    return runSeoFix(data.id, data.mode);
+  });
+
+// ============================================================================
+// Background job queue: enqueue / status / cancel
+// ============================================================================
+
+export type SeoJobRow = {
+  id: string;
+  page_id: string;
+  mode: "full" | "meta_only" | "title_only";
+  status: "queued" | "processing" | "done" | "failed" | "cancelled";
+  attempts: number;
+  result: any;
+  error: string | null;
+  batch_id: string | null;
+  created_at: string;
+  finished_at: string | null;
+};
+
+export const enqueueSeoFixJobs = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      pageIds: z.array(z.string().uuid()).min(1).max(500),
+      mode: z.enum(["full", "meta_only", "title_only"]).default("full"),
+    }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const userId = (context as any).userId as string;
+    await assertAdmin(userId);
+    const sb = supabaseAdmin as any;
+    const batchId = crypto.randomUUID();
+    const rows = data.pageIds.map((pid) => ({
+      page_id: pid, mode: data.mode, status: "queued", batch_id: batchId, enqueued_by: userId,
+    }));
+    const { error } = await sb.from("seo_fix_jobs").insert(rows);
+    if (error) return { ok: false, error: error.message };
+    return { ok: true, batchId, count: rows.length };
+  });
+
+export const getSeoJobStatus = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      batchId: z.string().uuid().optional(),
+      pageIds: z.array(z.string().uuid()).max(500).optional(),
+    }).parse(d ?? {}),
+  )
+  .handler(async ({ data, context }): Promise<{ jobs: SeoJobRow[]; summary: { queued: number; processing: number; done: number; failed: number; cancelled: number } }> => {
+    await assertAdmin((context as any).userId);
+    const sb = supabaseAdmin as any;
+    let q = sb.from("seo_fix_jobs").select("id, page_id, mode, status, attempts, result, error, batch_id, created_at, finished_at").order("created_at", { ascending: false }).limit(500);
+    if (data.batchId) q = q.eq("batch_id", data.batchId);
+    if (data.pageIds && data.pageIds.length) q = q.in("page_id", data.pageIds);
+    const { data: jobs } = await q;
+    const summary = { queued: 0, processing: 0, done: 0, failed: 0, cancelled: 0 };
+    // For each page, only count the most recent job
+    const seen = new Set<string>();
+    const latest: SeoJobRow[] = [];
+    for (const j of (jobs || []) as SeoJobRow[]) {
+      if (seen.has(j.page_id)) continue;
+      seen.add(j.page_id);
+      latest.push(j);
+      (summary as any)[j.status] = ((summary as any)[j.status] || 0) + 1;
     }
+    return { jobs: latest, summary };
+  });
 
-    const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [{ role: "system", content: SEO_SYSTEM }, { role: "user", content: userPrompt }],
-        tools: [SEO_TOOL],
-        tool_choice: { type: "function", function: { name: "write_page" } },
-      }),
-    });
-    if (resp.status === 402) return { ok: false, error: "AI credits exhausted" };
-    if (resp.status === 429) return { ok: false, error: "Rate limited — slow down" };
-    if (!resp.ok) return { ok: false, error: `AI gateway ${resp.status}: ${(await resp.text()).slice(0, 200)}` };
-
-    const json = await resp.json();
-    const tc = json?.choices?.[0]?.message?.tool_calls?.[0];
-    if (!tc?.function?.arguments) return { ok: false, error: "AI returned no tool call" };
-    const gen = JSON.parse(tc.function.arguments) as {
-      title: string; seo_title: string; seo_description: string; body_markdown: string;
-    };
-
-    const update: any = {
-      title: gen.title || page.title,
-      seo_title: (gen.seo_title || page.seo_title || gen.title || "").slice(0, 70),
-      seo_description: (gen.seo_description || page.seo_description || "").slice(0, 160),
-      updated_at: new Date().toISOString(),
-    };
-    if (data.mode === "full" && gen.body_markdown && gen.body_markdown.length > 300) {
-      update.body_markdown = gen.body_markdown;
-    }
-
-    const { error: uErr } = await (supabaseAdmin as any).from("content_pages").update(update).eq("id", data.id);
-    if (uErr) return { ok: false, error: uErr.message };
-    return {
-      ok: true,
-      newWords: (update.body_markdown || currentBody).split(/\s+/).filter(Boolean).length,
-      newTitle: update.title,
-    };
+export const cancelQueuedSeoJobs = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ batchId: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin((context as any).userId);
+    const { error, count } = await (supabaseAdmin as any)
+      .from("seo_fix_jobs")
+      .update({ status: "cancelled", finished_at: new Date().toISOString() }, { count: "exact" })
+      .eq("batch_id", data.batchId)
+      .eq("status", "queued");
+    if (error) return { ok: false, error: error.message };
+    return { ok: true, cancelled: count || 0 };
   });
