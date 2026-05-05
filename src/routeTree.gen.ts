@@ -75,6 +75,7 @@ import { Route as CategorySlugRouteImport } from './routes/category.$slug'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth.reset-password'
 import { Route as AdminQuickPageRouteImport } from './routes/admin.quick-page'
+import { Route as AdminPlanRequestsRouteImport } from './routes/admin.plan-requests'
 import { Route as AdminMissingPagesRouteImport } from './routes/admin.missing-pages'
 import { Route as AdminLearningRouteImport } from './routes/admin.learning'
 import { Route as AdminGenerateContentRouteImport } from './routes/admin.generate-content'
@@ -451,6 +452,11 @@ const AdminQuickPageRoute = AdminQuickPageRouteImport.update({
   path: '/admin/quick-page',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminPlanRequestsRoute = AdminPlanRequestsRouteImport.update({
+  id: '/admin/plan-requests',
+  path: '/admin/plan-requests',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminMissingPagesRoute = AdminMissingPagesRouteImport.update({
   id: '/admin/missing-pages',
   path: '/admin/missing-pages',
@@ -653,6 +659,7 @@ export interface FileRoutesByFullPath {
   '/admin/generate-content': typeof AdminGenerateContentRoute
   '/admin/learning': typeof AdminLearningRouteWithChildren
   '/admin/missing-pages': typeof AdminMissingPagesRoute
+  '/admin/plan-requests': typeof AdminPlanRequestsRoute
   '/admin/quick-page': typeof AdminQuickPageRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/blog/$slug': typeof BlogSlugRoute
@@ -749,6 +756,7 @@ export interface FileRoutesByTo {
   '/admin/generate-content': typeof AdminGenerateContentRoute
   '/admin/learning': typeof AdminLearningRouteWithChildren
   '/admin/missing-pages': typeof AdminMissingPagesRoute
+  '/admin/plan-requests': typeof AdminPlanRequestsRoute
   '/admin/quick-page': typeof AdminQuickPageRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/blog/$slug': typeof BlogSlugRoute
@@ -847,6 +855,7 @@ export interface FileRoutesById {
   '/admin/generate-content': typeof AdminGenerateContentRoute
   '/admin/learning': typeof AdminLearningRouteWithChildren
   '/admin/missing-pages': typeof AdminMissingPagesRoute
+  '/admin/plan-requests': typeof AdminPlanRequestsRoute
   '/admin/quick-page': typeof AdminQuickPageRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/blog/$slug': typeof BlogSlugRoute
@@ -946,6 +955,7 @@ export interface FileRouteTypes {
     | '/admin/generate-content'
     | '/admin/learning'
     | '/admin/missing-pages'
+    | '/admin/plan-requests'
     | '/admin/quick-page'
     | '/auth/reset-password'
     | '/blog/$slug'
@@ -1042,6 +1052,7 @@ export interface FileRouteTypes {
     | '/admin/generate-content'
     | '/admin/learning'
     | '/admin/missing-pages'
+    | '/admin/plan-requests'
     | '/admin/quick-page'
     | '/auth/reset-password'
     | '/blog/$slug'
@@ -1139,6 +1150,7 @@ export interface FileRouteTypes {
     | '/admin/generate-content'
     | '/admin/learning'
     | '/admin/missing-pages'
+    | '/admin/plan-requests'
     | '/admin/quick-page'
     | '/auth/reset-password'
     | '/blog/$slug'
@@ -1236,6 +1248,7 @@ export interface RootRouteChildren {
   AdminGenerateContentRoute: typeof AdminGenerateContentRoute
   AdminLearningRoute: typeof AdminLearningRouteWithChildren
   AdminMissingPagesRoute: typeof AdminMissingPagesRoute
+  AdminPlanRequestsRoute: typeof AdminPlanRequestsRoute
   AdminQuickPageRoute: typeof AdminQuickPageRoute
   CategorySlugRoute: typeof CategorySlugRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
@@ -1736,6 +1749,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminQuickPageRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/plan-requests': {
+      id: '/admin/plan-requests'
+      path: '/admin/plan-requests'
+      fullPath: '/admin/plan-requests'
+      preLoaderRoute: typeof AdminPlanRequestsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/missing-pages': {
       id: '/admin/missing-pages'
       path: '/admin/missing-pages'
@@ -2113,6 +2133,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminGenerateContentRoute: AdminGenerateContentRoute,
   AdminLearningRoute: AdminLearningRouteWithChildren,
   AdminMissingPagesRoute: AdminMissingPagesRoute,
+  AdminPlanRequestsRoute: AdminPlanRequestsRoute,
   AdminQuickPageRoute: AdminQuickPageRoute,
   CategorySlugRoute: CategorySlugRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
