@@ -91,12 +91,14 @@ import { Route as PoolBuildersStateCityRouteImport } from './routes/pool-builder
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as LSlugIdRouteImport } from './routes/l.$slug.$id'
 import { Route as HelpCenterCategorySlugRouteImport } from './routes/help-center.$category.$slug'
+import { Route as DirectoryCategoryStateRouteImport } from './routes/directory.$category.$state'
 import { Route as ApiPublicTrackCityClickRouteImport } from './routes/api/public/track-city-click'
 import { Route as ApiPublicBackfillContentPagesRouteImport } from './routes/api/public/backfill-content-pages'
 import { Route as AdminLearningUserIdRouteImport } from './routes/admin.learning.$userId'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
+import { Route as DirectoryCategoryStateCityRouteImport } from './routes/directory.$category.$state.$city'
 import { Route as ApiPublicHooksSyncListingsRouteImport } from './routes/api/public/hooks.sync-listings'
 import { Route as ApiCertificatesUidPdfRouteImport } from './routes/api/certificates.$uid.pdf'
 
@@ -526,6 +528,11 @@ const HelpCenterCategorySlugRoute = HelpCenterCategorySlugRouteImport.update({
   path: '/help-center/$category/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DirectoryCategoryStateRoute = DirectoryCategoryStateRouteImport.update({
+  id: '/$state',
+  path: '/$state',
+  getParentRoute: () => DirectoryCategoryRoute,
+} as any)
 const ApiPublicTrackCityClickRoute = ApiPublicTrackCityClickRouteImport.update({
   id: '/api/public/track-city-click',
   path: '/api/public/track-city-click',
@@ -559,6 +566,12 @@ const LovableEmailQueueProcessRoute =
     id: '/lovable/email/queue/process',
     path: '/lovable/email/queue/process',
     getParentRoute: () => rootRouteImport,
+  } as any)
+const DirectoryCategoryStateCityRoute =
+  DirectoryCategoryStateCityRouteImport.update({
+    id: '/$city',
+    path: '/$city',
+    getParentRoute: () => DirectoryCategoryStateRoute,
   } as any)
 const ApiPublicHooksSyncListingsRoute =
   ApiPublicHooksSyncListingsRouteImport.update({
@@ -625,7 +638,7 @@ export interface FileRoutesByFullPath {
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
-  '/directory/$category': typeof DirectoryCategoryRoute
+  '/directory/$category': typeof DirectoryCategoryRouteWithChildren
   '/directory/list': typeof DirectoryListRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/host-tools/$slug': typeof HostToolsSlugRoute
@@ -653,6 +666,7 @@ export interface FileRoutesByFullPath {
   '/admin/learning/$userId': typeof AdminLearningUserIdRoute
   '/api/public/backfill-content-pages': typeof ApiPublicBackfillContentPagesRoute
   '/api/public/track-city-click': typeof ApiPublicTrackCityClickRoute
+  '/directory/$category/$state': typeof DirectoryCategoryStateRouteWithChildren
   '/help-center/$category/$slug': typeof HelpCenterCategorySlugRoute
   '/l/$slug/$id': typeof LSlugIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -660,6 +674,7 @@ export interface FileRoutesByFullPath {
   '/help-center/$category/': typeof HelpCenterCategoryIndexRoute
   '/api/certificates/$uid/pdf': typeof ApiCertificatesUidPdfRoute
   '/api/public/hooks/sync-listings': typeof ApiPublicHooksSyncListingsRoute
+  '/directory/$category/$state/$city': typeof DirectoryCategoryStateCityRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -716,7 +731,7 @@ export interface FileRoutesByTo {
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
-  '/directory/$category': typeof DirectoryCategoryRoute
+  '/directory/$category': typeof DirectoryCategoryRouteWithChildren
   '/directory/list': typeof DirectoryListRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/host-tools/$slug': typeof HostToolsSlugRoute
@@ -744,6 +759,7 @@ export interface FileRoutesByTo {
   '/admin/learning/$userId': typeof AdminLearningUserIdRoute
   '/api/public/backfill-content-pages': typeof ApiPublicBackfillContentPagesRoute
   '/api/public/track-city-click': typeof ApiPublicTrackCityClickRoute
+  '/directory/$category/$state': typeof DirectoryCategoryStateRouteWithChildren
   '/help-center/$category/$slug': typeof HelpCenterCategorySlugRoute
   '/l/$slug/$id': typeof LSlugIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -751,6 +767,7 @@ export interface FileRoutesByTo {
   '/help-center/$category': typeof HelpCenterCategoryIndexRoute
   '/api/certificates/$uid/pdf': typeof ApiCertificatesUidPdfRoute
   '/api/public/hooks/sync-listings': typeof ApiPublicHooksSyncListingsRoute
+  '/directory/$category/$state/$city': typeof DirectoryCategoryStateCityRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -809,7 +826,7 @@ export interface FileRoutesById {
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
-  '/directory/$category': typeof DirectoryCategoryRoute
+  '/directory/$category': typeof DirectoryCategoryRouteWithChildren
   '/directory/list': typeof DirectoryListRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/host-tools/$slug': typeof HostToolsSlugRoute
@@ -837,6 +854,7 @@ export interface FileRoutesById {
   '/admin/learning/$userId': typeof AdminLearningUserIdRoute
   '/api/public/backfill-content-pages': typeof ApiPublicBackfillContentPagesRoute
   '/api/public/track-city-click': typeof ApiPublicTrackCityClickRoute
+  '/directory/$category/$state': typeof DirectoryCategoryStateRouteWithChildren
   '/help-center/$category/$slug': typeof HelpCenterCategorySlugRoute
   '/l/$slug/$id': typeof LSlugIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
@@ -844,6 +862,7 @@ export interface FileRoutesById {
   '/help-center/$category/': typeof HelpCenterCategoryIndexRoute
   '/api/certificates/$uid/pdf': typeof ApiCertificatesUidPdfRoute
   '/api/public/hooks/sync-listings': typeof ApiPublicHooksSyncListingsRoute
+  '/directory/$category/$state/$city': typeof DirectoryCategoryStateCityRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -931,6 +950,7 @@ export interface FileRouteTypes {
     | '/admin/learning/$userId'
     | '/api/public/backfill-content-pages'
     | '/api/public/track-city-click'
+    | '/directory/$category/$state'
     | '/help-center/$category/$slug'
     | '/l/$slug/$id'
     | '/lovable/email/suppression'
@@ -938,6 +958,7 @@ export interface FileRouteTypes {
     | '/help-center/$category/'
     | '/api/certificates/$uid/pdf'
     | '/api/public/hooks/sync-listings'
+    | '/directory/$category/$state/$city'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -1022,6 +1043,7 @@ export interface FileRouteTypes {
     | '/admin/learning/$userId'
     | '/api/public/backfill-content-pages'
     | '/api/public/track-city-click'
+    | '/directory/$category/$state'
     | '/help-center/$category/$slug'
     | '/l/$slug/$id'
     | '/lovable/email/suppression'
@@ -1029,6 +1051,7 @@ export interface FileRouteTypes {
     | '/help-center/$category'
     | '/api/certificates/$uid/pdf'
     | '/api/public/hooks/sync-listings'
+    | '/directory/$category/$state/$city'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -1114,6 +1137,7 @@ export interface FileRouteTypes {
     | '/admin/learning/$userId'
     | '/api/public/backfill-content-pages'
     | '/api/public/track-city-click'
+    | '/directory/$category/$state'
     | '/help-center/$category/$slug'
     | '/l/$slug/$id'
     | '/lovable/email/suppression'
@@ -1121,6 +1145,7 @@ export interface FileRouteTypes {
     | '/help-center/$category/'
     | '/api/certificates/$uid/pdf'
     | '/api/public/hooks/sync-listings'
+    | '/directory/$category/$state/$city'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -1786,6 +1811,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HelpCenterCategorySlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/directory/$category/$state': {
+      id: '/directory/$category/$state'
+      path: '/$state'
+      fullPath: '/directory/$category/$state'
+      preLoaderRoute: typeof DirectoryCategoryStateRouteImport
+      parentRoute: typeof DirectoryCategoryRoute
+    }
     '/api/public/track-city-click': {
       id: '/api/public/track-city-click'
       path: '/api/public/track-city-click'
@@ -1827,6 +1859,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/lovable/email/queue/process'
       preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/directory/$category/$state/$city': {
+      id: '/directory/$category/$state/$city'
+      path: '/$city'
+      fullPath: '/directory/$category/$state/$city'
+      preLoaderRoute: typeof DirectoryCategoryStateCityRouteImport
+      parentRoute: typeof DirectoryCategoryStateRoute
     }
     '/api/public/hooks/sync-listings': {
       id: '/api/public/hooks/sync-listings'
@@ -1878,13 +1917,38 @@ const BlogRouteChildren: BlogRouteChildren = {
 
 const BlogRouteWithChildren = BlogRoute._addFileChildren(BlogRouteChildren)
 
+interface DirectoryCategoryStateRouteChildren {
+  DirectoryCategoryStateCityRoute: typeof DirectoryCategoryStateCityRoute
+}
+
+const DirectoryCategoryStateRouteChildren: DirectoryCategoryStateRouteChildren =
+  {
+    DirectoryCategoryStateCityRoute: DirectoryCategoryStateCityRoute,
+  }
+
+const DirectoryCategoryStateRouteWithChildren =
+  DirectoryCategoryStateRoute._addFileChildren(
+    DirectoryCategoryStateRouteChildren,
+  )
+
+interface DirectoryCategoryRouteChildren {
+  DirectoryCategoryStateRoute: typeof DirectoryCategoryStateRouteWithChildren
+}
+
+const DirectoryCategoryRouteChildren: DirectoryCategoryRouteChildren = {
+  DirectoryCategoryStateRoute: DirectoryCategoryStateRouteWithChildren,
+}
+
+const DirectoryCategoryRouteWithChildren =
+  DirectoryCategoryRoute._addFileChildren(DirectoryCategoryRouteChildren)
+
 interface DirectoryRouteChildren {
-  DirectoryCategoryRoute: typeof DirectoryCategoryRoute
+  DirectoryCategoryRoute: typeof DirectoryCategoryRouteWithChildren
   DirectoryListRoute: typeof DirectoryListRoute
 }
 
 const DirectoryRouteChildren: DirectoryRouteChildren = {
-  DirectoryCategoryRoute: DirectoryCategoryRoute,
+  DirectoryCategoryRoute: DirectoryCategoryRouteWithChildren,
   DirectoryListRoute: DirectoryListRoute,
 }
 
