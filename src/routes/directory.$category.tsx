@@ -2,6 +2,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { getCategoryWithProviders } from "@/server/directory.functions";
 import { SiteHeader, SiteFooter } from "@/components/site-layout";
 import { buildMeta, breadcrumbJsonLd, itemListJsonLd, ldJsonScript, SITE_URL } from "@/lib/seo";
+import { ProviderPlanBadges } from "@/components/provider-plan-badges";
 
 export const Route = createFileRoute("/directory/$category")({
   loader: async ({ params }) => {
@@ -149,9 +150,6 @@ function CategoryPage() {
 }
 
 function ProviderCard({ p, featured = false }: { p: any; featured?: boolean }) {
-  const now = Date.now();
-  const featuredActive = p.is_featured && (!p.featured_until || new Date(p.featured_until).getTime() > now);
-  const paidActive = p.listing_paid_until && new Date(p.listing_paid_until).getTime() > now;
   return (
     <Link
       to="/providers/$slug"
@@ -168,8 +166,7 @@ function ProviderCard({ p, featured = false }: { p: any; featured?: boolean }) {
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-2">
           <h3 className="truncate font-semibold text-foreground">{p.name}</h3>
-          {featuredActive && <span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold uppercase text-primary-foreground">Featured</span>}
-          {!featuredActive && paidActive && <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-bold uppercase text-secondary-foreground">Verified</span>}
+          <ProviderPlanBadges p={p} />
         </div>
         {(p.city || p.state_code) && (
           <p className="text-sm text-muted-foreground">{[p.city, p.state_code].filter(Boolean).join(", ")}</p>

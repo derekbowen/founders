@@ -2,6 +2,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { getCategoryStateProviders } from "@/server/directory.functions";
 import { SiteHeader, SiteFooter } from "@/components/site-layout";
 import { buildMeta, breadcrumbJsonLd, itemListJsonLd, ldJsonScript } from "@/lib/seo";
+import { ProviderPlanBadges } from "@/components/provider-plan-badges";
 
 export const Route = createFileRoute("/directory/$category/$state")({
   loader: async ({ params }) => {
@@ -124,8 +125,11 @@ function StateHub() {
                   params={{ slug: p.slug }}
                   className="rounded-2xl border border-primary/40 bg-card p-5 ring-1 ring-primary/20 transition hover:shadow-md"
                 >
-                  <h3 className="font-semibold text-foreground">{p.name}</h3>
-                  {p.city && <p className="text-sm text-muted-foreground">{p.city}, {p.state_code}</p>}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="font-semibold text-foreground">{p.name}</h3>
+                    <ProviderPlanBadges p={p} />
+                  </div>
+                  {p.city && <p className="mt-1 text-sm text-muted-foreground">{p.city}, {p.state_code}</p>}
                 </Link>
               ))}
             </div>
