@@ -4,6 +4,21 @@ import { Link } from "@tanstack/react-router";
 // Stable across SSR + hydration. Bumped at build time, not at request time.
 const FOOTER_YEAR = 2026;
 
+// When the root layout renders a single global header + footer, per-page
+// instances of <SiteHeader /> / <SiteFooter /> become no-ops. This avoids
+// editing every existing page while still guaranteeing one global chrome.
+const GlobalChromeContext = React.createContext(false);
+
+export function GlobalChromeProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <GlobalChromeContext.Provider value={true}>{children}</GlobalChromeContext.Provider>
+  );
+}
+
+function useSuppressChrome() {
+  return React.useContext(GlobalChromeContext);
+}
+
 // Legacy backend (signup, /s search, /p/* marketing pages) is served on the same
 // host as this app. Use root-relative hrefs so links resolve on www, custom
 // domain, and preview hosts without hardcoding the production URL.
@@ -22,6 +37,13 @@ const MARKETPLACE_ORIGIN = "https://www.poolrentalnearme.com";
 const marketplace = (path: string): string => `${MARKETPLACE_ORIGIN}${path.startsWith("/") ? path : `/${path}`}`;
 
 export function SiteHeader() {
+  if (useSuppressChrome()) return null;
+  return (
+    <SiteHeaderInner />
+  );
+}
+
+function SiteHeaderInner() {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -112,6 +134,11 @@ const SOCIALS: Array<{ label: string; href: string; icon: React.ReactNode }> = [
 ];
 
 export function SiteFooter() {
+  if (useSuppressChrome()) return null;
+  return <SiteFooterInner />;
+}
+
+function SiteFooterInner() {
   return (
     <footer className="border-t border-border bg-background">
       <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">

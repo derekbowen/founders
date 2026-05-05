@@ -1,7 +1,7 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts, useRouterState } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
-import { SiteHeader, SiteFooter } from "@/components/site-layout";
+import { SiteHeader, SiteFooter, GlobalChromeProvider } from "@/components/site-layout";
 import { HydrationDebug } from "@/components/hydration-debug";
 import { IntercomWidget } from "@/components/intercom-widget";
 import {
@@ -88,7 +88,15 @@ function RootComponent() {
   return (
     <>
       <HydrationDebug />
-      <Outlet />
+      <div className="flex min-h-screen flex-col">
+        <SiteHeader />
+        <div className="flex flex-1 flex-col">
+          <GlobalChromeProvider>
+            <Outlet />
+          </GlobalChromeProvider>
+        </div>
+        <SiteFooter />
+      </div>
       {showIntercom && <IntercomWidget />}
     </>
   );
