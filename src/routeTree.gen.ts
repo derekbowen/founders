@@ -40,6 +40,7 @@ import { Route as ProvidersRouteImport } from './routes/providers'
 import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
 import { Route as PoolsDirectorySitemapDotxmlRouteImport } from './routes/pools-directory-sitemap[.]xml'
 import { Route as LandingPageRouteImport } from './routes/landing-page'
+import { Route as DirectoryRouteImport } from './routes/directory'
 import { Route as BlogRouteImport } from './routes/blog'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AcademyRouteImport } from './routes/academy'
@@ -259,6 +260,11 @@ const PoolsDirectorySitemapDotxmlRoute =
 const LandingPageRoute = LandingPageRouteImport.update({
   id: '/landing-page',
   path: '/landing-page',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DirectoryRoute = DirectoryRouteImport.update({
+  id: '/directory',
+  path: '/directory',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BlogRoute = BlogRouteImport.update({
@@ -547,6 +553,7 @@ export interface FileRoutesByFullPath {
   '/academy': typeof AcademyRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
   '/blog': typeof BlogRouteWithChildren
+  '/directory': typeof DirectoryRoute
   '/landing-page': typeof LandingPageRoute
   '/pools-directory-sitemap.xml': typeof PoolsDirectorySitemapDotxmlRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
@@ -633,6 +640,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
   '/blog': typeof BlogRouteWithChildren
+  '/directory': typeof DirectoryRoute
   '/landing-page': typeof LandingPageRoute
   '/pools-directory-sitemap.xml': typeof PoolsDirectorySitemapDotxmlRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
@@ -721,6 +729,7 @@ export interface FileRoutesById {
   '/academy': typeof AcademyRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
   '/blog': typeof BlogRouteWithChildren
+  '/directory': typeof DirectoryRoute
   '/landing-page': typeof LandingPageRoute
   '/pools-directory-sitemap.xml': typeof PoolsDirectorySitemapDotxmlRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
@@ -810,6 +819,7 @@ export interface FileRouteTypes {
     | '/academy'
     | '/auth'
     | '/blog'
+    | '/directory'
     | '/landing-page'
     | '/pools-directory-sitemap.xml'
     | '/privacy-policy'
@@ -896,6 +906,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/blog'
+    | '/directory'
     | '/landing-page'
     | '/pools-directory-sitemap.xml'
     | '/privacy-policy'
@@ -983,6 +994,7 @@ export interface FileRouteTypes {
     | '/academy'
     | '/auth'
     | '/blog'
+    | '/directory'
     | '/landing-page'
     | '/pools-directory-sitemap.xml'
     | '/privacy-policy'
@@ -1071,6 +1083,7 @@ export interface RootRouteChildren {
   AcademyRoute: typeof AcademyRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
   BlogRoute: typeof BlogRouteWithChildren
+  DirectoryRoute: typeof DirectoryRoute
   LandingPageRoute: typeof LandingPageRoute
   PoolsDirectorySitemapDotxmlRoute: typeof PoolsDirectorySitemapDotxmlRoute
   PrivacyPolicyRoute: typeof PrivacyPolicyRoute
@@ -1364,6 +1377,13 @@ declare module '@tanstack/react-router' {
       path: '/landing-page'
       fullPath: '/landing-page'
       preLoaderRoute: typeof LandingPageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/directory': {
+      id: '/directory'
+      path: '/directory'
+      fullPath: '/directory'
+      preLoaderRoute: typeof DirectoryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/blog': {
@@ -1820,6 +1840,7 @@ const rootRouteChildren: RootRouteChildren = {
   AcademyRoute: AcademyRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
   BlogRoute: BlogRouteWithChildren,
+  DirectoryRoute: DirectoryRoute,
   LandingPageRoute: LandingPageRoute,
   PoolsDirectorySitemapDotxmlRoute: PoolsDirectorySitemapDotxmlRoute,
   PrivacyPolicyRoute: PrivacyPolicyRoute,
