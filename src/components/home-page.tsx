@@ -103,6 +103,9 @@ function HomePageInner({ data }: { data: HomeData | undefined | null }) {
     <div className="flex min-h-screen flex-col">
       <SiteHeader />
       <main className="flex-1">
+        <ErrorBoundary silent>
+          <DustBanner />
+        </ErrorBoundary>
         <section className="relative overflow-hidden bg-primary text-primary-foreground">
           <div className="absolute inset-0 -z-0">
             <img
