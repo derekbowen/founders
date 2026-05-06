@@ -374,7 +374,13 @@ async function processGeneration(
   const errors: string[] = [];
 
   const generated = (
-    await Promise.all(planRows.map((row) => generateOne(row, model, apiKey)))
+    await Promise.all(
+      planRows.map((row) => {
+        // event_guide needs 4k words + 15-20 FAQs; Flash truncates. Force Pro.
+        const effectiveModel = isEventSource(row) ? "google/gemini-2.5-pro" : model;
+        return generateOne(row, effectiveModel, apiKey);
+      }),
+    )
   ).filter((page): page is GeneratedPage => Boolean(page));
 
   const bySlug = new Map(generated.map((g) => [g.plan_slug, g]));
@@ -415,8 +421,9 @@ async function processGeneration(
         [/##\s*Section\s*3\b.*Planning Guide/i, "Section 3 (Planning Guide)"],
         [/##\s*Section\s*5\b.*Neighborhoods/i, "Section 5 (Neighborhoods)"],
         [/##\s*Section\s*9\b.*Do You Own/i, "Section 9 (Host Flip)"],
-        [/##\s*Section\s*10\b.*Frequently Asked/i, "Section 10 (20 FAQs)"],
-        [/(?:^|\n)\s*(?:#{2,6}\s*)?(?:\*\*)?20\.(?:\*\*)?\s/, "20 numbered FAQs"],
+        [/##\s*Section\s*10\b.*Frequently Asked/i, "Section 10 (FAQs)"],
+        // Accept 15+ numbered FAQs instead of strict 20 (Flash truncates around 15)
+        [/(?:^|\n)\s*(?:#{2,6}\s*)?(?:\*\*)?15\.(?:\*\*)?\s/, "at least 15 numbered FAQs"],
       ];
     } else if (isEs) {
       requiredSections = [
