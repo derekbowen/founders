@@ -218,7 +218,7 @@ export const compareCompetitorToPage = createServerFn({ method: "POST" })
     if (!ours) return { ok: false, error: "Our page not found" };
     const ourWords = (ours.body_markdown || "").split(/\s+/).filter(Boolean).length;
     const ourHeadings = Array.from((ours.body_markdown || "").matchAll(/^(#{1,3})\s+(.+)$/gm))
-      .map((m) => m[2].trim().toLowerCase());
+      .map((m) => (m as RegExpMatchArray)[2].trim().toLowerCase());
     const compHeadings = (comp.headings || []) as Array<{ level: number; text: string }>;
     const missing = compHeadings.filter((h) => !ourHeadings.includes(h.text.toLowerCase()));
     return {
