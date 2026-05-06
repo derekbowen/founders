@@ -12,8 +12,6 @@ export const Route = createFileRoute("/admin/dashboard")({
     if (error || !data.user) {
       throw redirect({ to: "/auth", search: { redirect: "/admin/dashboard", mode: "signin" } });
     }
-    const { isAdmin } = await checkAdminRole();
-    if (!isAdmin) throw redirect({ to: "/admin/no-access" });
   },
   head: () => ({
     meta: [
