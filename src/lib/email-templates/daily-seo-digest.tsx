@@ -117,6 +117,32 @@ const DailySeoDigestEmail = ({
             </>
           )}
 
+          {hostLeads.length > 0 && (
+            <>
+              <Heading as="h2" style={h2}>🎯 New host leads ({totalHostLeads})</Heading>
+              <Section style={card}>
+                <Text style={{ ...text, fontSize: '12px', marginBottom: '12px' }}>
+                  Potential identity matches for competitor listings (above-board sources only — public business pages, Yelp, host-published contact info).
+                </Text>
+                {hostLeads.slice(0, 10).map((h, i) => (
+                  <Text key={i} style={rowText}>
+                    <span style={confidenceBadge(h.match_confidence)}>{h.match_confidence}%</span>{' '}
+                    {h.domain && <span style={domainTag}>{h.domain}</span>}{' '}
+                    <strong>{h.candidate_name || h.candidate_business_name || 'Unknown'}</strong>
+                    {h.candidate_email && <> — <Link href={`mailto:${h.candidate_email}`} style={linkStyle}>{h.candidate_email}</Link></>}
+                    {h.candidate_phone && <> — {h.candidate_phone}</>}
+                    {h.candidate_evidence && <span style={summaryStyle}><br />{h.candidate_evidence}</span>}
+                    <br />
+                    <Link href={h.competitor_url} style={{ ...linkStyle, fontSize: '11px' }}>view listing</Link>
+                  </Text>
+                ))}
+                {totalHostLeads > hostLeads.length && (
+                  <Text style={moreText}>…and {totalHostLeads - hostLeads.length} more</Text>
+                )}
+              </Section>
+            </>
+          )}
+
           <Hr style={hr} />
           <Text style={footer}>
             Sent automatically by Pool Rental Near Me admin.
