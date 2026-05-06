@@ -24,6 +24,35 @@ function GscImport() {
   const [parsed, setParsed] = React.useState<Row[]>([]);
   const [busy, setBusy] = React.useState(false);
   const [result, setResult] = React.useState<{ updated: number; total: number } | null>(null);
+  const [fileName, setFileName] = React.useState<string | null>(null);
+
+  async function handleFiles(files: FileList | null) {
+    if (!files || !files.length) return;
+    const file = files[0];
+    setFileName(file.name);
+    setResult(null);
+    try {
+      // GSC exports often come as a .zip containing Pages.csv + Queries.csv
+      if (/\.zip$/i.test(file.name) || file.type === "application/zip") {
+        const { unzipSync, strFromU8 } = await import("fflate");
+        const buf = new Uint8Array(await file.arrayBuffer());
+        const entries = unzipSync(buf);
+        // Prefer Pages.csv (any case); fall back to first CSV
+        const names = Object.keys(entries);
+        const pick =
+          names.find((n) => /pages\.csv$/i.test(n)) ||
+          names.find((n) => /\.csv$/i.test(n));
+        if (!pick) { alert("No CSV found inside ZIP"); return; }
+        setCsv(strFromU8(entries[pick]));
+      } else {
+        setCsv(await file.text());
+      }
+      // Auto-parse after load
+      setTimeout(() => parse(), 0);
+    } catch (e: any) {
+      alert(e?.message || "Failed to read file");
+    }
+  }
 
   function parse() {
     setResult(null);
@@ -77,15 +106,33 @@ function GscImport() {
         </div>
 
         <div className="mt-6 rounded-2xl border border-border bg-card p-5">
-          <textarea
-            value={csv}
-            onChange={(e) => setCsv(e.target.value)}
-            placeholder={"Page,Clicks,Impressions,CTR,Position\nhttps://example.com/providers/some-pool-co,12,340,3.5%,8.2"}
-            rows={10}
-            className="w-full rounded-lg border border-border bg-background p-3 font-mono text-xs"
-          />
+          <label className="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border p-8 text-center hover:bg-secondary/40 cursor-pointer">
+            <input
+              type="file"
+              accept=".csv,.tsv,.zip,text/csv,text/tab-separated-values,application/zip"
+              className="hidden"
+              onChange={(e) => handleFiles(e.target.files)}
+            />
+            <span className="text-sm font-semibold">Upload CSV, TSV, or ZIP</span>
+            <span className="text-xs text-muted-foreground">
+              Drag a Google Search Console export here, or click to browse. ZIPs are auto-extracted (Pages.csv).
+            </span>
+            {fileName && <span className="mt-1 text-xs text-primary">Loaded: {fileName}</span>}
+          </label>
+
+          <div className="mt-4">
+            <div className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Or paste CSV / TSV</div>
+            <textarea
+              value={csv}
+              onChange={(e) => setCsv(e.target.value)}
+              placeholder={"Page,Clicks,Impressions,CTR,Position\nhttps://example.com/providers/some-pool-co,12,340,3.5%,8.2"}
+              rows={8}
+              className="w-full rounded-lg border border-border bg-background p-3 font-mono text-xs"
+            />
+          </div>
+
           <div className="mt-3 flex items-center gap-3">
-            <button onClick={parse} className="rounded-full bg-secondary px-5 py-2 text-sm font-semibold">Parse CSV</button>
+            <button onClick={parse} className="rounded-full bg-secondary px-5 py-2 text-sm font-semibold">Parse</button>
             <button onClick={submit} disabled={busy || !parsed.length}
               className="rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50">
               {busy ? "Importing…" : `Import ${parsed.length} rows`}
