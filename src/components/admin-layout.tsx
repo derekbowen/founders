@@ -180,7 +180,7 @@ export function AdminLayout({ title, children, maxWidth = "max-w-7xl" }: {
             </nav>
             {title && <span className="ml-auto truncate text-sm font-semibold text-foreground/80">{title}</span>}
           </div>
-          <main className={`mx-auto w-full flex-1 px-3 py-4 pb-24 sm:px-6 lg:px-8 lg:py-6 lg:pb-6 ${maxWidth}`}>
+          <main className={`mx-auto w-full flex-1 px-3 py-4 sm:px-6 lg:px-8 lg:py-6 ${maxWidth}`}>
             {children}
           </main>
         </div>
