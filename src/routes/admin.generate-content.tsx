@@ -27,7 +27,7 @@ function useAdminGate() {
       const { isAdmin } = await checkAdminRole();
       if (cancelled) return;
       if (!isAdmin) {
-        navigate({ to: "/" });
+        navigate({ to: "/admin/no-access" });
         return;
       }
       setReady(true);
