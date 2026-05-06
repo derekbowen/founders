@@ -62,13 +62,24 @@ function extractFactsFromListing(markdown: string, url: string): ListingFacts {
   }
 
   // In-listing contact info the host themselves published (totally fair game)
-  const emails = Array.from(new Set((markdown.match(EMAIL_RE) || []).filter((e) =>
-    !/swimply|peerspace|giggster|sentry|cloudflare|gstatic|googleusercontent/i.test(e)
-  ))).slice(0, 5);
-  const phones = Array.from(new Set(markdown.match(PHONE_RE) || [])).slice(0, 5);
-  const urls = Array.from(new Set((markdown.match(URL_RE) || []).filter((u) =>
-    !/swimply|peerspace|giggster|googleapis|google\.com|gstatic|cloudfront|sentry|stripe|cloudflare|facebook\.com\/tr|fbcdn/i.test(u)
-  ))).slice(0, 10);
+  // — but validate hard so we don't grab tracking pixels, SKUs, or role addresses.
+  const rawEmails = Array.from(new Set(markdown.match(EMAIL_RE) || []));
+  const emails = rawEmails
+    .filter((e) => validateEmail(e, { firstName: host_first_name }).ok)
+    .slice(0, 5);
+
+  const rawPhones = Array.from(new Set(markdown.match(PHONE_RE) || []));
+  const phones: string[] = [];
+  for (const p of rawPhones) {
+    const v = validateUSPhone(p, markdown);
+    if (v.ok && v.normalized && !phones.includes(v.normalized)) phones.push(v.normalized);
+    if (phones.length >= 5) break;
+  }
+
+  const urls = Array.from(new Set(markdown.match(URL_RE) || []))
+    .filter((u) => !/swimply|peerspace|giggster|googleapis|google\.com|gstatic|cloudfront|sentry|stripe|cloudflare|facebook\.com\/tr|fbcdn/i.test(u))
+    .filter((u) => !isStoplistedUrl(u))
+    .slice(0, 10);
 
   return {
     host_first_name,
