@@ -251,6 +251,15 @@ function CompetitorRadar() {
 
       {tab === "matches" && (
         <div className="mt-3">
+          {spend && (
+            <div className="mb-3 flex flex-wrap items-center gap-2 rounded-2xl border border-border bg-card p-3 text-xs">
+              <DollarSign className="h-4 w-4 text-primary" />
+              <span><strong>${spend.today_spend_usd.toFixed(2)}</strong> / ${spend.daily_cap_usd} today</span>
+              <span className="text-muted-foreground">· {spend.today_calls} calls, {spend.today_hits} hits</span>
+              <span className="text-muted-foreground">· <strong>${spend.month_spend_usd.toFixed(2)}</strong> month-to-date (target ${spend.monthly_target_usd})</span>
+              {spend.today_spend_usd >= spend.daily_cap_usd && <span className="rounded-full bg-amber-100 px-2 py-0.5 font-semibold text-amber-800">Cap hit — paid tiers paused</span>}
+            </div>
+          )}
           <div className="mb-3 flex flex-wrap gap-2">
             {(["new", "contacted", "converted", "dismissed", "all"] as const).map((s) => (
               <button key={s} onClick={() => setMatchStatus(s)}
