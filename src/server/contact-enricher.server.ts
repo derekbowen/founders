@@ -16,6 +16,7 @@
  */
 
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { validateUSPhone, validateEmail, formatPhoneForDisplay } from "./lead-validators.server";
 
 const sb = () => supabaseAdmin as any;
 
