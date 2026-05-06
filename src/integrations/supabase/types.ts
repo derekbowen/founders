@@ -272,6 +272,86 @@ export type Database = {
         }
         Relationships: []
       }
+      competitor_sites: {
+        Row: {
+          created_at: string
+          domain: string
+          id: string
+          is_active: boolean
+          label: string | null
+          last_checked_at: string | null
+          last_url_count: number
+          sitemap_url: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          domain: string
+          id?: string
+          is_active?: boolean
+          label?: string | null
+          last_checked_at?: string | null
+          last_url_count?: number
+          sitemap_url: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          domain?: string
+          id?: string
+          is_active?: boolean
+          label?: string | null
+          last_checked_at?: string | null
+          last_url_count?: number
+          sitemap_url?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      competitor_urls: {
+        Row: {
+          acknowledged: boolean
+          first_seen_at: string
+          id: string
+          last_seen_at: string
+          scraped_at: string | null
+          site_id: string
+          title: string | null
+          url: string
+          word_count: number | null
+        }
+        Insert: {
+          acknowledged?: boolean
+          first_seen_at?: string
+          id?: string
+          last_seen_at?: string
+          scraped_at?: string | null
+          site_id: string
+          title?: string | null
+          url: string
+          word_count?: number | null
+        }
+        Update: {
+          acknowledged?: boolean
+          first_seen_at?: string
+          id?: string
+          last_seen_at?: string
+          scraped_at?: string | null
+          site_id?: string
+          title?: string | null
+          url?: string
+          word_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competitor_urls_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "competitor_sites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       content_404_log: {
         Row: {
           first_seen_at: string
@@ -1236,6 +1316,39 @@ export type Database = {
         }
         Relationships: []
       }
+      page_audits: {
+        Row: {
+          audited_at: string
+          id: string
+          recommendations: Json
+          score: number | null
+          strengths: Json
+          summary: string | null
+          url_path: string
+          weaknesses: Json
+        }
+        Insert: {
+          audited_at?: string
+          id?: string
+          recommendations?: Json
+          score?: number | null
+          strengths?: Json
+          summary?: string | null
+          url_path: string
+          weaknesses?: Json
+        }
+        Update: {
+          audited_at?: string
+          id?: string
+          recommendations?: Json
+          score?: number | null
+          strengths?: Json
+          summary?: string | null
+          url_path?: string
+          weaknesses?: Json
+        }
+        Relationships: []
+      }
       pool_waitlist: {
         Row: {
           city: string | null
@@ -1800,6 +1913,38 @@ export type Database = {
         }
         Relationships: []
       }
+      serp_rankings: {
+        Row: {
+          checked_at: string
+          id: string
+          keyword_id: string
+          position: number | null
+          url_found: string | null
+        }
+        Insert: {
+          checked_at?: string
+          id?: string
+          keyword_id: string
+          position?: number | null
+          url_found?: string | null
+        }
+        Update: {
+          checked_at?: string
+          id?: string
+          keyword_id?: string
+          position?: number | null
+          url_found?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "serp_rankings_keyword_id_fkey"
+            columns: ["keyword_id"]
+            isOneToOne: false
+            referencedRelation: "tracked_keywords"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       service_categories: {
         Row: {
           created_at: string
@@ -2067,6 +2212,42 @@ export type Database = {
           state_code?: string | null
           title?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      tracked_keywords: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          keyword: string
+          last_checked_at: string | null
+          last_position: number | null
+          market: string
+          previous_position: number | null
+          target_url_path: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          keyword: string
+          last_checked_at?: string | null
+          last_position?: number | null
+          market?: string
+          previous_position?: number | null
+          target_url_path?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          keyword?: string
+          last_checked_at?: string | null
+          last_position?: number | null
+          market?: string
+          previous_position?: number | null
+          target_url_path?: string | null
         }
         Relationships: []
       }
