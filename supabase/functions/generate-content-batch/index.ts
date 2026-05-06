@@ -374,7 +374,13 @@ async function processGeneration(
   const errors: string[] = [];
 
   const generated = (
-    await Promise.all(planRows.map((row) => generateOne(row, model, apiKey)))
+    await Promise.all(
+      planRows.map((row) => {
+        // event_guide needs 4k words + 15-20 FAQs; Flash truncates. Force Pro.
+        const effectiveModel = isEventSource(row) ? "google/gemini-2.5-pro" : model;
+        return generateOne(row, effectiveModel, apiKey);
+      }),
+    )
   ).filter((page): page is GeneratedPage => Boolean(page));
 
   const bySlug = new Map(generated.map((g) => [g.plan_slug, g]));
