@@ -30,19 +30,22 @@ const DailySeoDigestEmail = ({
   newCompetitorPages = [],
   criticalAudits = [],
   rankDrops = [],
+  hostLeads = [],
   totalNewCompetitor = 0,
   totalCriticalAudits = 0,
+  totalHostLeads = 0,
 }: DailySeoDigestProps) => {
   const nothing =
     newCompetitorPages.length === 0 &&
     criticalAudits.length === 0 &&
-    rankDrops.length === 0
+    rankDrops.length === 0 &&
+    hostLeads.length === 0
 
   return (
     <Html lang="en" dir="ltr">
       <Head />
       <Preview>
-        {`Daily SEO digest — ${totalNewCompetitor} new competitor pages, ${totalCriticalAudits} critical audits`}
+        {`Daily SEO digest — ${totalNewCompetitor} new competitor pages, ${totalCriticalAudits} critical audits, ${totalHostLeads} host leads`}
       </Preview>
       <Body style={main}>
         <Container style={container}>
