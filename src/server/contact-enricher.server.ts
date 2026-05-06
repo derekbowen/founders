@@ -16,6 +16,7 @@
  */
 
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { validateUSPhone, validateEmail, formatPhoneForDisplay } from "./lead-validators.server";
 
 const sb = () => supabaseAdmin as any;
 
@@ -57,6 +58,22 @@ const EMPTY: EnrichedShape = {
   property_state: null,
   property_zip: null,
 };
+
+function sanitizeShape(s: EnrichedShape, firstName: string | null): EnrichedShape {
+  const emails: string[] = [];
+  for (const e of s.emails) {
+    if (validateEmail(e, { firstName }).ok && !emails.includes(e.toLowerCase())) emails.push(e.toLowerCase());
+  }
+  const phones: string[] = [];
+  for (const p of s.phones) {
+    const v = validateUSPhone(p);
+    if (v.ok && v.normalized) {
+      const display = formatPhoneForDisplay(v.normalized);
+      if (!phones.includes(display)) phones.push(display);
+    }
+  }
+  return { ...s, emails, phones };
+}
 
 function normalizeKey(parts: (string | null | undefined)[]): string {
   return parts
@@ -442,7 +459,7 @@ export async function enrichHostMatch(match_id: string, opts?: { force_tier?: "o
     existing_phone: match.candidate_phone,
   });
 
-  let combined: EnrichedShape = { ...t0 };
+  let combined: EnrichedShape = sanitizeShape({ ...t0 }, match.host_first_name);
   let highestTier: EnrichResult["tier_reached"] = "osint";
   let totalCost = 0;
 
@@ -453,8 +470,25 @@ export async function enrichHostMatch(match_id: string, opts?: { force_tier?: "o
   const priority = isPriorityCity(match.host_city);
   const confidence = Number(match.match_confidence || 0);
 
+  // Hard refusal: if the match is junk (no validated contact AND no first name), don't burn money.
+  const hasAnyValidatedSignal = combined.emails.length > 0 || combined.phones.length > 0 || !!match.host_first_name;
+  if (!hasAnyValidatedSignal && !opts?.force_tier) {
+    await sb().from("competitor_host_matches").update({
+      enriched_at: new Date().toISOString(),
+      enriched_tier: "osint",
+      enriched_emails: combined.emails,
+      enriched_phones: combined.phones,
+      enriched_socials: combined.social_profiles,
+      revenue_signal_score: revenue.score,
+      revenue_signal_notes: revenue.notes,
+      enrichment_cost_usd: 0,
+    }).eq("id", match_id);
+    return { ok: true, match_id, tier_reached: "osint", cost_usd: 0, emails_found: 0, phones_found: 0, reason: "no validated signal — paid tiers skipped" };
+  }
+
   // ---------- Tier 1: BatchData ----------
-  const tier1Eligible = !overCap && priority && confidence >= 70 && !!(t0.property_address || combined.property_address);
+  // Now also requires confidence >= 85 (was 70) AND the match isn't all-garbage.
+  const tier1Eligible = !overCap && priority && confidence >= 85 && !!combined.property_address;
   const forceT1 = opts?.force_tier === "batchdata" || opts?.force_tier === "pdl";
 
   if ((tier1Eligible || forceT1) && (combined.property_address)) {
@@ -497,7 +531,8 @@ export async function enrichHostMatch(match_id: string, opts?: { force_tier?: "o
     }
   }
 
-  // Persist cache + match
+  // Final sanitize before persisting/caching — never write garbage to the DB.
+  combined = sanitizeShape(combined, match.host_first_name);
   if (cacheKey) {
     await writeCache(cacheKey, highestTier, combined, { revenue, listingMd: !!listingMd }, totalCost);
   }

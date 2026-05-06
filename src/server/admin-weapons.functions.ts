@@ -280,7 +280,7 @@ export const listHostMatches = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
     z.object({
-      status: z.enum(["new", "contacted", "converted", "dismissed", "all"]).default("new"),
+      status: z.enum(["new", "review", "contacted", "converted", "dismissed", "all"]).default("new"),
       minConfidence: z.number().min(0).max(100).default(40),
       limit: z.number().min(1).max(500).default(100),
     }).parse(d ?? {}),
@@ -302,7 +302,7 @@ export const updateHostMatchStatus = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
     z.object({
       id: z.string().uuid(),
-      status: z.enum(["new", "contacted", "converted", "dismissed"]),
+      status: z.enum(["new", "review", "contacted", "converted", "dismissed"]),
       admin_notes: z.string().max(2000).optional(),
     }).parse(d),
   )

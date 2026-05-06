@@ -8,6 +8,7 @@
  */
 
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { validateUSPhone, validateEmail, isStoplistedUrl, formatPhoneForDisplay } from "./lead-validators.server";
 
 const sb = () => supabaseAdmin as any;
 
@@ -61,13 +62,24 @@ function extractFactsFromListing(markdown: string, url: string): ListingFacts {
   }
 
   // In-listing contact info the host themselves published (totally fair game)
-  const emails = Array.from(new Set((markdown.match(EMAIL_RE) || []).filter((e) =>
-    !/swimply|peerspace|giggster|sentry|cloudflare|gstatic|googleusercontent/i.test(e)
-  ))).slice(0, 5);
-  const phones = Array.from(new Set(markdown.match(PHONE_RE) || [])).slice(0, 5);
-  const urls = Array.from(new Set((markdown.match(URL_RE) || []).filter((u) =>
-    !/swimply|peerspace|giggster|googleapis|google\.com|gstatic|cloudfront|sentry|stripe|cloudflare|facebook\.com\/tr|fbcdn/i.test(u)
-  ))).slice(0, 10);
+  // — but validate hard so we don't grab tracking pixels, SKUs, or role addresses.
+  const rawEmails = Array.from(new Set(markdown.match(EMAIL_RE) || []));
+  const emails = rawEmails
+    .filter((e) => validateEmail(e, { firstName: host_first_name }).ok)
+    .slice(0, 5);
+
+  const rawPhones = Array.from(new Set(markdown.match(PHONE_RE) || []));
+  const phones: string[] = [];
+  for (const p of rawPhones) {
+    const v = validateUSPhone(p, markdown);
+    if (v.ok && v.normalized && !phones.includes(v.normalized)) phones.push(v.normalized);
+    if (phones.length >= 5) break;
+  }
+
+  const urls = Array.from(new Set(markdown.match(URL_RE) || []))
+    .filter((u) => !/swimply|peerspace|giggster|googleapis|google\.com|gstatic|cloudfront|sentry|stripe|cloudflare|facebook\.com\/tr|fbcdn/i.test(u))
+    .filter((u) => !isStoplistedUrl(u))
+    .slice(0, 10);
 
   return {
     host_first_name,
@@ -130,9 +142,17 @@ We searched Google/Yelp/Facebook Pages for related public business listings. Her
 
 ${searchResults.map((r, i) => `[${i}] (source=${r.source}) ${r.title}\n  ${r.url}\n  ${r.description}`).join("\n\n")}
 
-For EACH search result, decide if it plausibly belongs to the same person/household. Match strongly only if: name matches AND city matches, OR business is clearly a pool-related side hustle in the same city, OR result contains an email/phone/website that ALSO appears in the listing.
+For EACH search result, decide if it plausibly belongs to the same person/household.
 
-Return JSON array (max 5 entries, only confidence>=30). Each entry:
+STRICT SCORING RULES:
+- Score 85+ ONLY if BOTH the host's first name AND city appear in the result, OR a phone/email/URL from the listing literally appears in the result.
+- Score 60-84 if there is a strong single-signal match (name+state, or a pool-related local business in the same city).
+- Score below 60 for weak matches; we'll send those to a review queue.
+- HARD REJECT (do not return) if the result is: a product page, e-commerce listing, marketplace product (jansport, coupang, ebay, amazon, etsy, alibaba, walmart), a TikTok/Pinterest pin, a news article unrelated to this person, or a foreign-language business with no name overlap.
+- Phone numbers that look like product IDs / SKUs / URL path segments must NOT be returned as candidate_phone. Only return real US/CA phone numbers (NANP format, 10 digits, valid area code).
+- Never invent contact info. If the result doesn't contain a real email/phone, leave those fields null.
+
+Return JSON array (max 5 entries, only confidence>=40). Each entry:
 {
   "result_index": number,
   "candidate_name": string|null,
@@ -175,7 +195,7 @@ Return ONLY the JSON array, no prose.`;
         candidate_evidence: c.candidate_evidence || "",
         match_confidence: Math.min(100, Math.max(0, Number(c.match_confidence) || 0)),
       } as Candidate;
-    }).filter((c) => c.match_confidence >= 30);
+    }).filter((c) => c.match_confidence >= 40);
   } catch (e) {
     console.error("[host-matcher] gemini parse failed", e);
     return [];
@@ -240,7 +260,10 @@ export async function matchCompetitorUrl(competitor_url_id: string): Promise<{ o
   const allResults: Array<{ url: string; title: string; description: string; source: string }> = [];
   for (const { q, source } of queries.slice(0, 5)) {
     const results = await firecrawlSearch(q, 4);
-    for (const r of results) allResults.push({ ...r, source });
+    for (const r of results) {
+      if (isStoplistedUrl(r.url)) continue;
+      allResults.push({ ...r, source });
+    }
   }
 
   if (allResults.length === 0) return { ok: true, inserted: 0, reason: "no search results" };
@@ -248,13 +271,43 @@ export async function matchCompetitorUrl(competitor_url_id: string): Promise<{ o
   const candidates = await geminiRankCandidates(facts, allResults);
   if (candidates.length === 0) return { ok: true, inserted: 0, reason: "no confident matches" };
 
-  const rows = candidates.map((c) => ({
+  // Validate every candidate field. Drop garbage; route low-confidence to review queue.
+  const cleaned = candidates
+    .map((c) => {
+      const emailV = c.candidate_email ? validateEmail(c.candidate_email, { firstName: facts.host_first_name }) : { ok: false };
+      const phoneV = c.candidate_phone ? validateUSPhone(c.candidate_phone) : { ok: false };
+      const websiteBad = c.candidate_website ? isStoplistedUrl(c.candidate_website) : false;
+      const socialBad = c.candidate_social_url ? isStoplistedUrl(c.candidate_social_url) : false;
+      return {
+        ...c,
+        candidate_email: emailV.ok ? c.candidate_email : null,
+        candidate_phone: phoneV.ok && (phoneV as any).normalized ? formatPhoneForDisplay((phoneV as any).normalized) : null,
+        candidate_website: websiteBad ? null : c.candidate_website,
+        candidate_social_url: socialBad ? null : c.candidate_social_url,
+      };
+    })
+    // Must have SOMETHING after validation: a name + city, or a validated email/phone, or a clean website
+    .filter((c) =>
+      c.candidate_email ||
+      c.candidate_phone ||
+      c.candidate_website ||
+      c.candidate_social_url ||
+      (c.candidate_name && (facts.host_first_name || facts.host_city)),
+    );
+
+  if (cleaned.length === 0) return { ok: true, inserted: 0, reason: "all candidates failed validation" };
+
+  const rows = cleaned.map((c) => ({
     competitor_url_id,
     competitor_url: row.url,
     domain,
     host_first_name: facts.host_first_name,
     host_city: facts.host_city,
     host_state: facts.host_state,
+    // Confidence floor: only ≥85 lands in the active "new" queue.
+    // Everything else goes to "review" so it doesn't burn enrichment budget
+    // and doesn't clutter Brandon's call list.
+    status: c.match_confidence >= 85 ? "new" : "review",
     ...c,
   }));
   const { error } = await sb().from("competitor_host_matches").insert(rows);
