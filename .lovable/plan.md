@@ -1,122 +1,38 @@
-Here’s what you’ve got right now, and what I recommend.
+## Goal
 
-The admin dashboard already exists. The current main dashboard route is:
+Add a prominent "pardon our dust" notice to the homepage so the wave of incoming traffic understands we're rebuilding the front-end (replacing the old Sharetribe template) and isn't confused by anything that looks half-finished.
 
-```text
-/admin/dashboard
-```
+## What you'll see
 
-The stable published Lovable URL for that route is:
+A new banner section pinned to the very top of the homepage (above the hero), with:
 
-```text
-https://project--4831238c-ae4b-468a-bfd8-41cba26ba0b1.lovable.app/admin/dashboard
-```
+- Small eyebrow label: **Heads up**
+- Headline: **Pardon our dust — we're rebuilding the whole experience**
+- 2–3 sentences in your voice explaining what's happening, e.g.:
+  > We're ripping out the old booking front-end and replacing it with something built specifically for pool hosts and the people who actually book them. New search, new host tools, new everything. If a page looks rough or a link goes somewhere weird over the next few weeks, that's why.
+  >
+  > The 5,100+ city pages, the host playbooks, and the booking flow all still work — we're just upgrading the chassis underneath them.
+- Two CTAs side by side:
+  - **Browse pools** → `/s` (relative, hits Sharetribe through the proxy)
+  - **List your pool** → `/l/draft/00000000-0000-0000-0000-000000000000/new/details`
+- Subtle dismiss "×" that hides the banner for that visitor (localStorage key `prnm_dust_banner_dismissed_v1`), so repeat traffic isn't nagged.
 
-But the reason it showed **Forbidden** is not the URL. The URL is reaching the app. The issue is access control: only users with an `admin` role in the backend can get into admin tools.
+Style: warm sand/amber background (`bg-amber-50`, `border-b border-amber-200`, dark amber text) so it reads as a friendly notice, not an error. Sentence case, no em dashes, no banned words. Mobile: stacks vertically, CTAs full-width.
 
-There are currently four admin accounts in the backend:
+## Where it lives
 
-```text
-Derek Bowen
-Michelle Lupo
-brandon
-Matthew Ryan
-```
+- New component: `src/components/dust-banner.tsx` — self-contained, client-only dismiss logic via `useEffect` + `useState` so it doesn't hydration-mismatch (renders visible on SSR, hides after mount if dismissed).
+- Mounted at the very top of `HomePageInner` in `src/components/home-page.tsx`, above the hero block.
+- Wrapped in `<ErrorBoundary silent>` so a banner crash can never take the homepage down (defensive rendering rule).
 
-If you or a helper logs in with a different account, the dashboard rejects them. That is good security, but the onboarding flow is too confusing right now.
+Only the homepage gets it for now. The `/p/*` content pages stay clean since most of that traffic lands from Google on a specific topic and the banner would be noise.
 
-## Plan
+## Copy — please confirm or tweak
 
-1. Add a clean short admin entry route
+Default headline + body above is my best guess at your voice. If you want it sharper (e.g. lean harder into "Swimply is scared, here's what we're building") say the word and I'll adjust before shipping. Otherwise I'll go with the version above.
 
-Create this route inside the app:
+## Out of scope
 
-```text
-/admin
-```
-
-It will redirect to:
-
-```text
-/admin/dashboard
-```
-
-So your easy permanent link can be:
-
-```text
-https://project--4831238c-ae4b-468a-bfd8-41cba26ba0b1.lovable.app/admin
-```
-
-And your shortlink can point here:
-
-```text
-go.poolrentalnearme.com/admin
-→ https://project--4831238c-ae4b-468a-bfd8-41cba26ba0b1.lovable.app/admin
-```
-
-That gives you one easy link to send to helpers.
-
-2. Improve the “not allowed” experience
-
-Right now, if someone logs in but is not an admin, they just get bounced or see a vague **Forbidden** message.
-
-I’ll make the admin check more helpful:
-
-- If they are not logged in, send them to sign in.
-- If they are logged in but not an admin, show an “Admin access required” page.
-- Show the signed-in email / user ID so you can tell me exactly who needs access.
-- Include simple instructions: “Ask an existing admin to grant access.”
-
-3. Add an admin-only “team access” page
-
-Add a page like:
-
-```text
-/admin/team
-```
-
-Only existing admins can open it.
-
-On that page, admins can:
-
-- See current admin users.
-- Add another admin by user ID or, if available from profile data, by email.
-- Remove an admin role from someone else.
-- Avoid accidentally removing the last admin.
-
-This gives you a real way to manage helpers without asking me to manually patch access every time.
-
-4. Keep it secure
-
-I will not make this a public “anyone with the link is admin” page. That would be dangerous.
-
-The link can be public. The dashboard cannot be public.
-
-The correct setup is:
-
-```text
-Anyone can open /admin
-Only invited admin users can enter the dashboard
-```
-
-5. Optional immediate fix after this
-
-Once the better blocked-access screen exists, you or any helper can open:
-
-```text
-/admin
-```
-
-If they are blocked, they can copy the displayed user ID/email and send it to you. Then either:
-
-- you add them from `/admin/team`, or
-- I can add the first missing admin role if you tell me which account should be allowed.
-
-## Technical details
-
-- Keep roles in `public.user_roles`, not on user/profile records.
-- Keep admin validation server-side through the existing `checkAdminRole` / `has_role` pattern.
-- Add `/admin` as a route file that redirects to `/admin/dashboard`.
-- Add a shared admin guard/result so every admin page handles unauthorized users consistently.
-- Add server functions for listing and updating admin roles, using server-only privileged backend access.
-- Do not touch marketplace routes, DNS, proxy settings, asset paths, or SEO routes.
+- No changes to the hero, listings grid, FAQs, or any `/p/*` page.
+- No backend, DB, or sitemap changes.
+- Not touching `vite.config.ts`, asset paths, or routing.
