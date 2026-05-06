@@ -265,6 +265,15 @@ export type CompetitorHostMatchRow = {
   status: string;
   admin_notes: string | null;
   created_at: string;
+  enriched_at: string | null;
+  enriched_tier: string | null;
+  enriched_emails: string[] | null;
+  enriched_phones: string[] | null;
+  enriched_socials: string[] | null;
+  property_address: string | null;
+  revenue_signal_score: number | null;
+  revenue_signal_notes: string | null;
+  enrichment_cost_usd: number | null;
 };
 
 export const listHostMatches = createServerFn({ method: "GET" })
