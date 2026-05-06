@@ -6,11 +6,11 @@ import {
   listCompetitorSites, addCompetitorSite, deleteCompetitorSite,
   runCompetitorScan, listNewCompetitorUrls, acknowledgeCompetitorUrls,
   scrapeCompetitorUrlRow, listHostMatches, updateHostMatchStatus, runHostMatchOne,
-  enrichHostMatchOne, getEnrichmentSpend,
+  enrichHostMatchOne, getEnrichmentSpend, reportFalsePositive, runValidatorSelfTests,
   type CompetitorSiteRow, type CompetitorUrlRow, type CompetitorHostMatchRow,
 } from "@/server/admin-weapons.functions";
 import { AdminLayout } from "@/components/admin-layout";
-import { Loader2, Plus, RefreshCw, Trash2, ExternalLink, Check, Eye, Radar, Target, Mail, Phone, X, Sparkles, DollarSign } from "lucide-react";
+import { Loader2, Plus, RefreshCw, Trash2, ExternalLink, Check, Eye, Radar, Target, Mail, Phone, X, Sparkles, DollarSign, AlertTriangle, ChevronDown, FlaskConical } from "lucide-react";
 
 export const Route = createFileRoute("/admin/competitor-radar")({
   beforeLoad: async () => {
