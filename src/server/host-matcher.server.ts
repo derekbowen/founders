@@ -8,7 +8,10 @@
  */
 
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import { validateUSPhone, validateEmail, isStoplistedUrl, formatPhoneForDisplay } from "./lead-validators.server";
+import {
+  validateUSPhone, validateEmail, isStoplistedUrl, formatPhoneForDisplay,
+  containsBusinessEntity, scoreCandidate,
+} from "./lead-validators.server";
 
 const sb = () => supabaseAdmin as any;
 
