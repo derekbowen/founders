@@ -39,6 +39,26 @@ function CompetitorRadar() {
   const [spend, setSpend] = React.useState<{ today_spend_usd: number; today_calls: number; today_hits: number; month_spend_usd: number; daily_cap_usd: number; monthly_target_usd: number } | null>(null);
   const [msg, setMsg] = React.useState<string | null>(null);
   const [showAck, setShowAck] = React.useState(false);
+  const [expandedMatch, setExpandedMatch] = React.useState<string | null>(null);
+  const [testReport, setTestReport] = React.useState<{ name: string; pass: boolean; rejected: boolean; expectReject: boolean; reason?: string }[] | null>(null);
+  const [runningTests, setRunningTests] = React.useState(false);
+
+  async function flagFalsePositive(id: string) {
+    const reason = prompt("Why is this a false positive? (optional, helps train the filter)") ?? "";
+    const r: any = await reportFalsePositive({ data: { match_id: id, reason: reason || undefined } });
+    if (r.ok) { setMsg("Logged as false positive — filter will improve."); await load(); }
+    else setMsg(`Failed: ${r.error}`);
+  }
+
+  async function runTests() {
+    setRunningTests(true);
+    try {
+      const r: any = await runValidatorSelfTests();
+      setTestReport(r.results);
+      setMsg(r.allPassed ? "✅ All validator self-tests passed" : "⚠️ Some validator tests failed — see report below");
+    } finally { setRunningTests(false); }
+  }
+
 
   const load = React.useCallback(async () => {
     const [s, n, m, sp] = await Promise.all([
