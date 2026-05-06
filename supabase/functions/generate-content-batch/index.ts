@@ -404,7 +404,7 @@ async function processGeneration(
         [/##\s*Section\s*5\b.*Neighborhoods/i, "Section 5 (Neighborhoods)"],
         [/##\s*Section\s*9\b.*Do You Own/i, "Section 9 (Host Flip)"],
         [/##\s*Section\s*10\b.*Frequently Asked/i, "Section 10 (20 FAQs)"],
-        [/\*\*20\.\*\*/, "20 numbered FAQs"],
+        [/(?:^|\n)\s*(?:\*\*)?20\.(?:\*\*)?\s/, "20 numbered FAQs"],
       ];
     } else if (isEs) {
       requiredSections = [
@@ -412,7 +412,7 @@ async function processGeneration(
         [/##\s*Cuánto Puedes Ganar/i, "Cuánto Puedes Ganar"],
         [/##\s*Preguntas Frecuentes/i, "Preguntas Frecuentes"],
         [/##\s*¿Listo Para Empezar\?/i, "¿Listo Para Empezar?"],
-        [/\*\*15\.\*\*/, "15 numbered FAQs"],
+        [/(?:^|\n)\s*(?:\*\*)?15\.(?:\*\*)?\s/, "15 numbered FAQs"],
       ];
     } else {
       requiredSections = [
