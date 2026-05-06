@@ -33,7 +33,7 @@ const DailySeoDigestEmail = ({
     <Html lang="en" dir="ltr">
       <Head />
       <Preview>
-        Daily SEO digest — {totalNewCompetitor} new competitor pages, {totalCriticalAudits} critical audits
+        {`Daily SEO digest — ${totalNewCompetitor} new competitor pages, ${totalCriticalAudits} critical audits`}
       </Preview>
       <Body style={main}>
         <Container style={container}>
