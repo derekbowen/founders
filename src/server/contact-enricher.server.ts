@@ -531,7 +531,8 @@ export async function enrichHostMatch(match_id: string, opts?: { force_tier?: "o
     }
   }
 
-  // Persist cache + match
+  // Final sanitize before persisting/caching — never write garbage to the DB.
+  combined = sanitizeShape(combined, match.host_first_name);
   if (cacheKey) {
     await writeCache(cacheKey, highestTier, combined, { revenue, listingMd: !!listingMd }, totalCost);
   }
