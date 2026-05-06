@@ -502,6 +502,10 @@ export type Database = {
           content: string | null
           created_at: string
           description: string | null
+          gsc_clicks: number | null
+          gsc_impressions: number | null
+          gsc_position: number | null
+          gsc_updated_at: string | null
           hero_image_url: string | null
           hreflang_group: string | null
           id: string
@@ -530,6 +534,10 @@ export type Database = {
           content?: string | null
           created_at?: string
           description?: string | null
+          gsc_clicks?: number | null
+          gsc_impressions?: number | null
+          gsc_position?: number | null
+          gsc_updated_at?: string | null
           hero_image_url?: string | null
           hreflang_group?: string | null
           id?: string
@@ -558,6 +566,10 @@ export type Database = {
           content?: string | null
           created_at?: string
           description?: string | null
+          gsc_clicks?: number | null
+          gsc_impressions?: number | null
+          gsc_position?: number | null
+          gsc_updated_at?: string | null
           hero_image_url?: string | null
           hreflang_group?: string | null
           id?: string
