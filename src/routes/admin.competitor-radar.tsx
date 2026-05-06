@@ -316,9 +316,10 @@ function CompetitorRadar() {
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-1.5">
-                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${m.match_confidence >= 70 ? "bg-emerald-100 text-emerald-800" : m.match_confidence >= 50 ? "bg-amber-100 text-amber-800" : "bg-secondary"}`}>
-                        {m.match_confidence}% match
+                      <span title={m.candidate_evidence || ""} className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${m.match_confidence >= 90 ? "bg-emerald-100 text-emerald-800" : m.match_confidence >= 85 ? "bg-amber-100 text-amber-800" : "bg-red-100 text-red-800"}`}>
+                        Confidence: {m.match_confidence}%
                       </span>
+                      {m.status === "review" && <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700"><AlertTriangle className="mr-0.5 inline h-2.5 w-2.5" />review</span>}
                       {m.domain && <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold">{m.domain}</span>}
                       {m.candidate_source && <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">{m.candidate_source}</span>}
                       <span className="text-[10px] text-muted-foreground">{new Date(m.created_at).toLocaleDateString()}</span>
