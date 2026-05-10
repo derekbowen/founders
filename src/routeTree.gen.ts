@@ -17,11 +17,13 @@ import { Route as SitemapDefaultDotxmlRouteImport } from './routes/sitemap-defau
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as ReferralRouteImport } from './routes/referral'
 import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as HelpCenterIndexRouteImport } from './routes/help-center.index'
 import { Route as VerifyUidRouteImport } from './routes/verify.$uid'
+import { Route as PSlugRouteImport } from './routes/p.$slug'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth.reset-password'
 import { Route as AdminTeamRouteImport } from './routes/admin.team'
@@ -54,11 +56,13 @@ import { Route as AdminClaimsRouteImport } from './routes/admin.claims'
 import { Route as AdminCitiesHeroesRouteImport } from './routes/admin.cities-heroes'
 import { Route as AdminBlogRouteImport } from './routes/admin.blog'
 import { Route as AccountLearningRouteImport } from './routes/account.learning'
+import { Route as AccountBillingRouteImport } from './routes/account.billing'
 import { Route as HelpCenterCategoryIndexRouteImport } from './routes/help-center.$category.index'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as HelpCenterCategorySlugRouteImport } from './routes/help-center.$category.$slug'
 import { Route as ApiPublicTrackCityClickRouteImport } from './routes/api/public/track-city-click'
 import { Route as ApiPublicBackfillContentPagesRouteImport } from './routes/api/public/backfill-content-pages'
+import { Route as ApiBillingWebhookRouteImport } from './routes/api/billing.webhook'
 import { Route as AdminLearningUserIdRouteImport } from './routes/admin.learning.$userId'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
@@ -110,6 +114,11 @@ const PrivacyPolicyRoute = PrivacyPolicyRouteImport.update({
   path: '/privacy-policy',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -133,6 +142,11 @@ const HelpCenterIndexRoute = HelpCenterIndexRouteImport.update({
 const VerifyUidRoute = VerifyUidRouteImport.update({
   id: '/verify/$uid',
   path: '/verify/$uid',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PSlugRoute = PSlugRouteImport.update({
+  id: '/p/$slug',
+  path: '/p/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
@@ -296,6 +310,11 @@ const AccountLearningRoute = AccountLearningRouteImport.update({
   path: '/account/learning',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AccountBillingRoute = AccountBillingRouteImport.update({
+  id: '/account/billing',
+  path: '/account/billing',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HelpCenterCategoryIndexRoute = HelpCenterCategoryIndexRouteImport.update({
   id: '/help-center/$category/',
   path: '/help-center/$category/',
@@ -322,6 +341,11 @@ const ApiPublicBackfillContentPagesRoute =
     path: '/api/public/backfill-content-pages',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiBillingWebhookRoute = ApiBillingWebhookRouteImport.update({
+  id: '/api/billing/webhook',
+  path: '/api/billing/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminLearningUserIdRoute = AdminLearningUserIdRouteImport.update({
   id: '/$userId',
   path: '/$userId',
@@ -384,6 +408,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
+  '/onboarding': typeof OnboardingRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/referral': typeof ReferralRoute
   '/robots.txt': typeof RobotsDottxtRoute
@@ -392,6 +417,7 @@ export interface FileRoutesByFullPath {
   '/sitemap-static.xml': typeof SitemapStaticDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/account/billing': typeof AccountBillingRoute
   '/account/learning': typeof AccountLearningRoute
   '/admin/blog': typeof AdminBlogRoute
   '/admin/cities-heroes': typeof AdminCitiesHeroesRoute
@@ -424,9 +450,11 @@ export interface FileRoutesByFullPath {
   '/admin/team': typeof AdminTeamRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/p/$slug': typeof PSlugRoute
   '/verify/$uid': typeof VerifyUidRoute
   '/help-center/': typeof HelpCenterIndexRoute
   '/admin/learning/$userId': typeof AdminLearningUserIdRoute
+  '/api/billing/webhook': typeof ApiBillingWebhookRoute
   '/api/public/backfill-content-pages': typeof ApiPublicBackfillContentPagesRoute
   '/api/public/track-city-click': typeof ApiPublicTrackCityClickRoute
   '/help-center/$category/$slug': typeof HelpCenterCategorySlugRoute
@@ -446,6 +474,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
+  '/onboarding': typeof OnboardingRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/referral': typeof ReferralRoute
   '/robots.txt': typeof RobotsDottxtRoute
@@ -454,6 +483,7 @@ export interface FileRoutesByTo {
   '/sitemap-static.xml': typeof SitemapStaticDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/account/billing': typeof AccountBillingRoute
   '/account/learning': typeof AccountLearningRoute
   '/admin/blog': typeof AdminBlogRoute
   '/admin/cities-heroes': typeof AdminCitiesHeroesRoute
@@ -486,9 +516,11 @@ export interface FileRoutesByTo {
   '/admin/team': typeof AdminTeamRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/p/$slug': typeof PSlugRoute
   '/verify/$uid': typeof VerifyUidRoute
   '/help-center': typeof HelpCenterIndexRoute
   '/admin/learning/$userId': typeof AdminLearningUserIdRoute
+  '/api/billing/webhook': typeof ApiBillingWebhookRoute
   '/api/public/backfill-content-pages': typeof ApiPublicBackfillContentPagesRoute
   '/api/public/track-city-click': typeof ApiPublicTrackCityClickRoute
   '/help-center/$category/$slug': typeof HelpCenterCategorySlugRoute
@@ -509,6 +541,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
+  '/onboarding': typeof OnboardingRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
   '/referral': typeof ReferralRoute
   '/robots.txt': typeof RobotsDottxtRoute
@@ -517,6 +550,7 @@ export interface FileRoutesById {
   '/sitemap-static.xml': typeof SitemapStaticDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/account/billing': typeof AccountBillingRoute
   '/account/learning': typeof AccountLearningRoute
   '/admin/blog': typeof AdminBlogRoute
   '/admin/cities-heroes': typeof AdminCitiesHeroesRoute
@@ -549,9 +583,11 @@ export interface FileRoutesById {
   '/admin/team': typeof AdminTeamRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/p/$slug': typeof PSlugRoute
   '/verify/$uid': typeof VerifyUidRoute
   '/help-center/': typeof HelpCenterIndexRoute
   '/admin/learning/$userId': typeof AdminLearningUserIdRoute
+  '/api/billing/webhook': typeof ApiBillingWebhookRoute
   '/api/public/backfill-content-pages': typeof ApiPublicBackfillContentPagesRoute
   '/api/public/track-city-click': typeof ApiPublicTrackCityClickRoute
   '/help-center/$category/$slug': typeof HelpCenterCategorySlugRoute
@@ -573,6 +609,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/auth'
+    | '/onboarding'
     | '/privacy-policy'
     | '/referral'
     | '/robots.txt'
@@ -581,6 +618,7 @@ export interface FileRouteTypes {
     | '/sitemap-static.xml'
     | '/sitemap.xml'
     | '/unsubscribe'
+    | '/account/billing'
     | '/account/learning'
     | '/admin/blog'
     | '/admin/cities-heroes'
@@ -613,9 +651,11 @@ export interface FileRouteTypes {
     | '/admin/team'
     | '/auth/reset-password'
     | '/email/unsubscribe'
+    | '/p/$slug'
     | '/verify/$uid'
     | '/help-center/'
     | '/admin/learning/$userId'
+    | '/api/billing/webhook'
     | '/api/public/backfill-content-pages'
     | '/api/public/track-city-click'
     | '/help-center/$category/$slug'
@@ -635,6 +675,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/auth'
+    | '/onboarding'
     | '/privacy-policy'
     | '/referral'
     | '/robots.txt'
@@ -643,6 +684,7 @@ export interface FileRouteTypes {
     | '/sitemap-static.xml'
     | '/sitemap.xml'
     | '/unsubscribe'
+    | '/account/billing'
     | '/account/learning'
     | '/admin/blog'
     | '/admin/cities-heroes'
@@ -675,9 +717,11 @@ export interface FileRouteTypes {
     | '/admin/team'
     | '/auth/reset-password'
     | '/email/unsubscribe'
+    | '/p/$slug'
     | '/verify/$uid'
     | '/help-center'
     | '/admin/learning/$userId'
+    | '/api/billing/webhook'
     | '/api/public/backfill-content-pages'
     | '/api/public/track-city-click'
     | '/help-center/$category/$slug'
@@ -697,6 +741,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/auth'
+    | '/onboarding'
     | '/privacy-policy'
     | '/referral'
     | '/robots.txt'
@@ -705,6 +750,7 @@ export interface FileRouteTypes {
     | '/sitemap-static.xml'
     | '/sitemap.xml'
     | '/unsubscribe'
+    | '/account/billing'
     | '/account/learning'
     | '/admin/blog'
     | '/admin/cities-heroes'
@@ -737,9 +783,11 @@ export interface FileRouteTypes {
     | '/admin/team'
     | '/auth/reset-password'
     | '/email/unsubscribe'
+    | '/p/$slug'
     | '/verify/$uid'
     | '/help-center/'
     | '/admin/learning/$userId'
+    | '/api/billing/webhook'
     | '/api/public/backfill-content-pages'
     | '/api/public/track-city-click'
     | '/help-center/$category/$slug'
@@ -760,6 +808,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
+  OnboardingRoute: typeof OnboardingRoute
   PrivacyPolicyRoute: typeof PrivacyPolicyRoute
   ReferralRoute: typeof ReferralRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
@@ -768,10 +817,13 @@ export interface RootRouteChildren {
   SitemapStaticDotxmlRoute: typeof SitemapStaticDotxmlRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
+  AccountBillingRoute: typeof AccountBillingRoute
   AccountLearningRoute: typeof AccountLearningRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
+  PSlugRoute: typeof PSlugRoute
   VerifyUidRoute: typeof VerifyUidRoute
   HelpCenterIndexRoute: typeof HelpCenterIndexRoute
+  ApiBillingWebhookRoute: typeof ApiBillingWebhookRoute
   ApiPublicBackfillContentPagesRoute: typeof ApiPublicBackfillContentPagesRoute
   ApiPublicTrackCityClickRoute: typeof ApiPublicTrackCityClickRoute
   HelpCenterCategorySlugRoute: typeof HelpCenterCategorySlugRoute
@@ -846,6 +898,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivacyPolicyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -879,6 +938,13 @@ declare module '@tanstack/react-router' {
       path: '/verify/$uid'
       fullPath: '/verify/$uid'
       preLoaderRoute: typeof VerifyUidRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/p/$slug': {
+      id: '/p/$slug'
+      path: '/p/$slug'
+      fullPath: '/p/$slug'
+      preLoaderRoute: typeof PSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/email/unsubscribe': {
@@ -1105,6 +1171,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountLearningRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/account/billing': {
+      id: '/account/billing'
+      path: '/account/billing'
+      fullPath: '/account/billing'
+      preLoaderRoute: typeof AccountBillingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/help-center/$category/': {
       id: '/help-center/$category/'
       path: '/help-center/$category'
@@ -1138,6 +1211,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/backfill-content-pages'
       fullPath: '/api/public/backfill-content-pages'
       preLoaderRoute: typeof ApiPublicBackfillContentPagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/billing/webhook': {
+      id: '/api/billing/webhook'
+      path: '/api/billing/webhook'
+      fullPath: '/api/billing/webhook'
+      preLoaderRoute: typeof ApiBillingWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/learning/$userId': {
@@ -1305,6 +1385,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
+  OnboardingRoute: OnboardingRoute,
   PrivacyPolicyRoute: PrivacyPolicyRoute,
   ReferralRoute: ReferralRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
@@ -1313,10 +1394,13 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapStaticDotxmlRoute: SitemapStaticDotxmlRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   UnsubscribeRoute: UnsubscribeRoute,
+  AccountBillingRoute: AccountBillingRoute,
   AccountLearningRoute: AccountLearningRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
+  PSlugRoute: PSlugRoute,
   VerifyUidRoute: VerifyUidRoute,
   HelpCenterIndexRoute: HelpCenterIndexRoute,
+  ApiBillingWebhookRoute: ApiBillingWebhookRoute,
   ApiPublicBackfillContentPagesRoute: ApiPublicBackfillContentPagesRoute,
   ApiPublicTrackCityClickRoute: ApiPublicTrackCityClickRoute,
   HelpCenterCategorySlugRoute: HelpCenterCategorySlugRoute,
