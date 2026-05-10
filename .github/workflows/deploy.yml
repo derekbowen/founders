@@ -36,6 +36,14 @@ jobs:
         run: npm ci --no-audit --no-fund
 
       - name: Build (vite + Cloudflare plugin)
+        # VITE_-prefixed values get inlined into the client bundle by Vite at
+        # build time. These are PUBLIC (publishable / anon) keys — safe to
+        # commit. The server-only SUPABASE_SERVICE_ROLE_KEY etc. are set as
+        # Cloudflare Worker secrets via `wrangler secret put` (not here).
+        env:
+          VITE_SUPABASE_URL: https://xbxhzinnfhosoztqaaao.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_BFdJmuINpp_FQJo6L-0YZA_QMsNHT2x
+          VITE_SUPABASE_PROJECT_ID: xbxhzinnfhosoztqaaao
         run: npm run build
 
       - name: Deploy with Wrangler
