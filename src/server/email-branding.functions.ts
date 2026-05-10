@@ -21,12 +21,12 @@ export type EmailBranding = {
 };
 
 export const DEFAULT_BRANDING: EmailBranding = {
-  site_name: "fresh-web",
-  sender_name: "fresh-web",
+  site_name: "founders.click",
+  sender_name: "founders.click",
   logo_url: null,
-  primary_color: "#000000",
+  primary_color: "#0ea5e9",
   primary_text_color: "#ffffff",
-  footer_text: null,
+  footer_text: "founders.click — the AI growth engine for Sharetribe marketplace founders.",
 };
 
 export async function loadEmailBranding(): Promise<EmailBranding> {

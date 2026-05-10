@@ -25,7 +25,7 @@
   // SUPABASE_SERVICE_ROLE_KEY, SEND_EMAIL_HOOK_SECRET, EMAILIT_WEBHOOK_SECRET)
   // goes in via `wrangler secret put NAME` — never in this file.
   "vars": {
-    "EMAILIT_SENDER_DOMAIN": "notify.poolrentalnearme.online",
-    "SITE_ROOT_DOMAIN": "poolrentalnearme.online",
+    "EMAILIT_SENDER_DOMAIN": "founders.click",
+    "SITE_ROOT_DOMAIN": "founders.click",
   },
 }

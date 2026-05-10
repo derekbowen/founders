@@ -33,11 +33,10 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
   reauthentication: ReauthenticationEmail,
 }
 
-// Sending domain — overridable per environment so we can flip the brand
-// (poolrentalnearme.online → notify.founders.click) without a code change.
-const SENDER_DOMAIN =
-  process.env.EMAILIT_SENDER_DOMAIN ?? 'notify.poolrentalnearme.online'
-const ROOT_DOMAIN = process.env.SITE_ROOT_DOMAIN ?? 'poolrentalnearme.online'
+// Sending domain — overridable per environment via wrangler.jsonc vars.
+// Must match a verified domain in your Emailit workspace.
+const SENDER_DOMAIN = process.env.EMAILIT_SENDER_DOMAIN ?? 'founders.click'
+const ROOT_DOMAIN = process.env.SITE_ROOT_DOMAIN ?? 'founders.click'
 const FROM_DOMAIN = SENDER_DOMAIN
 
 // Shape of the Supabase Auth Send Email hook payload.
@@ -195,17 +194,21 @@ async function handlePost(request: Request): Promise<Response> {
           footerText: brandingRow.footer_text,
         }
 
-        // Build the confirmation URL Supabase doesn't give us directly. Pattern:
-        //   ${site_url}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${redirect_to}
-        // (https://supabase.com/docs/guides/auth/auth-hooks/send-email-hook)
+        // Build the confirmation URL. Pattern:
+        //   https://<project-ref>.supabase.co/auth/v1/verify?token=<token_hash>&type=<email_action_type>&redirect_to=<redirect_to>
+        // We use the Supabase Auth API URL (always supabase.co) for the
+        // verify endpoint; user lands on the redirect_to (founders.click)
+        // after Supabase consumes the token.
         const confirmationUrl = (() => {
-          const base = payload.email_data.site_url.replace(/\/$/, '')
+          const supabaseUrl = (
+            import.meta.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || ''
+          ).replace(/\/$/, '')
           const params = new URLSearchParams({
             token: payload.email_data.token_hash,
             type: emailType,
             redirect_to: payload.email_data.redirect_to,
           })
-          return `${base}/auth/v1/verify?${params.toString()}`
+          return `${supabaseUrl}/auth/v1/verify?${params.toString()}`
         })()
 
         // Build template props from Supabase's send-email payload.
