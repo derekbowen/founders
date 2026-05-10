@@ -4,6 +4,10 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireFeatureAccess } from "@/server/workspace.functions";
 import { resolveWorkspaceApiKey } from "@/server/workspace-api-keys.functions";
+import {
+  assertWithinPageGenerationQuota,
+  recordPageGeneration,
+} from "@/server/workspace-usage.functions";
 
 /**
  * Admin "quick page" creator. The user types a title, optional short
@@ -79,10 +83,12 @@ export const createQuickPage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => InputSchema.parse(data))
   .handler(async ({ data, context }) => {
-    const { workspaceId } = await requireFeatureAccess(
+    const { workspaceId, plan, isInternal } = await requireFeatureAccess(
       context.userId,
       "content.quick_page",
     );
+
+    await assertWithinPageGenerationQuota(workspaceId, plan, isInternal);
 
     const apiKey = await resolveWorkspaceApiKey(workspaceId, "openrouter");
     if (!apiKey) throw new Error("OpenRouter API key not configured — add it in Workspace Settings or contact support.");
@@ -191,6 +197,10 @@ seo_title (≤60 chars) and seo_description (≤155 chars) optimized for the top
       .select("id, url_path, title, slug")
       .single();
     if (insErr) throw new Error(insErr.message);
+
+    if (!isInternal) {
+      await recordPageGeneration(workspaceId).catch(() => {});
+    }
 
     return {
       ok: true,

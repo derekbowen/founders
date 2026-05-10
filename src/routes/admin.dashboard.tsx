@@ -8,6 +8,7 @@ import {
   type DashboardStats,
   type WorkspaceDashboard,
 } from "@/server/admin-dashboard.functions";
+import { getMyUsage } from "@/server/workspace-usage.functions";
 import { AdminLayout, ADMIN_NAV_GROUPS } from "@/components/admin-layout";
 import { useCurrentWorkspace } from "@/hooks/use-current-workspace";
 import { PLAN_FEATURES, type Plan } from "@/lib/plans";
@@ -306,13 +307,14 @@ function PrnmDashboard() {
 
 function CustomerDashboard({ workspace }: { workspace: CurrentWorkspace }) {
   const [dash, setDash] = React.useState<WorkspaceDashboard | null>(null);
+  const [usage, setUsage] = React.useState<{ used: number; limit: number | null } | null>(null);
   const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
-    getWorkspaceDashboard()
-      .then(setDash)
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    Promise.all([
+      getWorkspaceDashboard().then(setDash).catch(() => {}),
+      getMyUsage().then((u) => setUsage({ used: u.used, limit: u.limit })).catch(() => {}),
+    ]).finally(() => setLoading(false));
   }, []);
 
   const planName = PLAN_FEATURES[workspace.plan as Plan]?.name ?? workspace.plan;
@@ -353,6 +355,35 @@ function CustomerDashboard({ workspace }: { workspace: CurrentWorkspace }) {
         </div>
       )}
       {loading && <div className="mt-6 h-24 animate-pulse rounded-xl bg-muted" />}
+
+      {/* Monthly generation usage */}
+      {!loading && usage && usage.limit !== null && (() => {
+        const pct = Math.min(100, Math.round((usage.used / Math.max(usage.limit, 1)) * 100));
+        const tone = pct >= 100 ? "danger" : pct >= 80 ? "warn" : "ok";
+        const barCls = tone === "danger" ? "bg-red-500" : tone === "warn" ? "bg-yellow-500" : "bg-primary";
+        return (
+          <section className="mt-6 rounded-xl border border-border bg-card p-4">
+            <div className="flex items-center justify-between text-sm">
+              <span className="font-semibold">Page generations this month</span>
+              <span className="text-muted-foreground">
+                {usage.used} / {usage.limit}
+              </span>
+            </div>
+            <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-muted">
+              <div className={`h-full transition-all ${barCls}`} style={{ width: `${pct}%` }} />
+            </div>
+            {pct >= 80 && (
+              <Link
+                to="/account/billing"
+                search={{} as never}
+                className="mt-2 inline-block text-xs font-medium text-primary hover:underline"
+              >
+                {pct >= 100 ? "Quota reached — upgrade for more →" : "Approaching your limit — upgrade →"}
+              </Link>
+            )}
+          </section>
+        );
+      })()}
 
       {/* First-run empty state */}
       {!loading && dash?.totalPages === 0 && (

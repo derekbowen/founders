@@ -113,7 +113,7 @@ export const getCurrentWorkspace = createServerFn({ method: "POST" })
 export async function requireFeatureAccess(
   userId: string,
   feature: Feature,
-): Promise<{ workspaceId: string; plan: Plan }> {
+): Promise<{ workspaceId: string; plan: Plan; isInternal: boolean }> {
   const sb = supabaseAdmin as any;
 
   const { data: roleRow } = await sb
@@ -129,7 +129,11 @@ export async function requireFeatureAccess(
       .select("id, plan")
       .eq("slug", "pool-rental-near-me")
       .maybeSingle();
-    return { workspaceId: prnm?.id ?? "", plan: (prnm?.plan as Plan) ?? "enterprise" };
+    return {
+      workspaceId: prnm?.id ?? "",
+      plan: (prnm?.plan as Plan) ?? "enterprise",
+      isInternal: true,
+    };
   }
 
   const { data: memberships } = await sb
@@ -144,7 +148,7 @@ export async function requireFeatureAccess(
     throw new Error("No workspace — finish onboarding first.");
   }
   if (w.is_internal) {
-    return { workspaceId: w.id, plan: w.plan as Plan };
+    return { workspaceId: w.id, plan: w.plan as Plan, isInternal: true };
   }
   if (!featureUnlocked(w.plan as Plan, feature)) {
     const planName = PLAN_FEATURES[w.plan as Plan].name;
@@ -152,7 +156,7 @@ export async function requireFeatureAccess(
       `Feature "${feature}" not available on the ${planName} plan. Upgrade to unlock.`,
     );
   }
-  return { workspaceId: w.id, plan: w.plan as Plan };
+  return { workspaceId: w.id, plan: w.plan as Plan, isInternal: false };
 }
 
 const _SwitchInput = z.object({ workspaceId: z.string().uuid() });
