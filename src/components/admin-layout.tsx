@@ -4,11 +4,24 @@ import {
   LayoutDashboard, FileText, Wand2, Database, AlertTriangle, Newspaper,
   GraduationCap, Image as ImageIcon, MousePointerClick, Building2, ShieldCheck,
   CreditCard, Search, Bot, Mail, Activity, ChevronLeft, Menu, X, Home, LinkIcon,
-  TrendingUp, Swords, Network, Radar, Sparkles,
+  TrendingUp, Swords, Network, Radar, Sparkles, Lock,
 } from "lucide-react";
 import { SiteHeader } from "@/components/site-layout";
+import { useCurrentWorkspace } from "@/hooks/use-current-workspace";
+import {
+  type Feature,
+  featureUnlocked,
+  minimumPlanFor,
+  PLAN_FEATURES,
+} from "@/lib/plans";
 
-type Item = { to: string; label: string; icon: React.ComponentType<{ className?: string }> };
+type Item = {
+  to: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  /** Plan feature this tool requires. Omit for tools available to every workspace (e.g. Dashboard). */
+  feature?: Feature;
+};
 
 const GROUPS: Array<{ label: string; items: Item[] }> = [
   {
@@ -18,43 +31,43 @@ const GROUPS: Array<{ label: string; items: Item[] }> = [
   {
     label: "Content",
     items: [
-      { to: "/admin/quick-page", label: "Quick page builder", icon: Wand2 },
-      { to: "/admin/generate-content", label: "Generate content", icon: Bot },
-      { to: "/admin/content-migration", label: "Content migration", icon: Database },
-      { to: "/admin/content-pages", label: "Bulk page editor", icon: FileText },
-      { to: "/admin/blog", label: "Blog admin", icon: Newspaper },
-      { to: "/admin/learning", label: "Learning admin", icon: GraduationCap },
-      { to: "/admin/cities-heroes", label: "City heroes", icon: ImageIcon },
+      { to: "/admin/quick-page", label: "Quick page builder", icon: Wand2, feature: "content.quick_page" },
+      { to: "/admin/generate-content", label: "Generate content", icon: Bot, feature: "content.generate" },
+      { to: "/admin/content-migration", label: "Content migration", icon: Database, feature: "content.migration" },
+      { to: "/admin/content-pages", label: "Bulk page editor", icon: FileText, feature: "content.bulk_editor" },
+      { to: "/admin/blog", label: "Blog admin", icon: Newspaper, feature: "content.blog" },
+      { to: "/admin/learning", label: "Learning admin", icon: GraduationCap, feature: "content.learning" },
+      { to: "/admin/cities-heroes", label: "City heroes", icon: ImageIcon, feature: "content.city_heroes" },
     ],
   },
   {
     label: "SEO",
     items: [
-      { to: "/admin/competitor-radar", label: "Competitor radar 🚨", icon: Radar },
-      { to: "/admin/rank-tracker", label: "Rank tracker", icon: TrendingUp },
-      { to: "/admin/page-auditor", label: "AI page auditor", icon: Sparkles },
-      { to: "/admin/keyword-opportunities", label: "Keyword opportunities", icon: TrendingUp },
-      { to: "/admin/competitors", label: "Competitor tracker", icon: Swords },
-      { to: "/admin/internal-links", label: "Internal link recommender", icon: Network },
-      { to: "/admin/seo-health", label: "SEO health", icon: Activity },
-      { to: "/admin/link-checker", label: "Link checker", icon: LinkIcon },
-      { to: "/admin/missing-pages", label: "Missing pages (404s)", icon: AlertTriangle },
-      { to: "/admin/indexing", label: "Sitemap & indexing", icon: Search },
-      { to: "/admin/gsc-import", label: "GSC import", icon: Search },
-      { to: "/admin/scrape-import", label: "Scrape import", icon: Database },
-      { to: "/admin/click-report", label: "Click report", icon: MousePointerClick },
+      { to: "/admin/competitor-radar", label: "Competitor radar 🚨", icon: Radar, feature: "seo.competitor_radar" },
+      { to: "/admin/rank-tracker", label: "Rank tracker", icon: TrendingUp, feature: "seo.rank_tracker" },
+      { to: "/admin/page-auditor", label: "AI page auditor", icon: Sparkles, feature: "seo.page_auditor" },
+      { to: "/admin/keyword-opportunities", label: "Keyword opportunities", icon: TrendingUp, feature: "seo.keyword_opportunities" },
+      { to: "/admin/competitors", label: "Competitor tracker", icon: Swords, feature: "seo.competitor_tracker" },
+      { to: "/admin/internal-links", label: "Internal link recommender", icon: Network, feature: "seo.internal_links" },
+      { to: "/admin/seo-health", label: "SEO health", icon: Activity, feature: "seo.health" },
+      { to: "/admin/link-checker", label: "Link checker", icon: LinkIcon, feature: "seo.link_checker" },
+      { to: "/admin/missing-pages", label: "Missing pages (404s)", icon: AlertTriangle, feature: "seo.missing_pages" },
+      { to: "/admin/indexing", label: "Sitemap & indexing", icon: Search, feature: "seo.indexing" },
+      { to: "/admin/gsc-import", label: "GSC import", icon: Search, feature: "seo.gsc_import" },
+      { to: "/admin/scrape-import", label: "Scrape import", icon: Database, feature: "seo.scrape_import" },
+      { to: "/admin/click-report", label: "Click report", icon: MousePointerClick, feature: "seo.click_report" },
     ],
   },
   {
     label: "Users & Ops",
     items: [
-      { to: "/admin/leads", label: "Lead inbox", icon: Mail },
-      { to: "/admin/email-branding", label: "Email branding", icon: Mail },
-      { to: "/admin/site-footer", label: "Site footer", icon: LinkIcon },
-      { to: "/admin/directory", label: "Directory moderation", icon: Building2 },
-      { to: "/admin/claims", label: "Listing claims", icon: ShieldCheck },
-      { to: "/admin/plan-requests", label: "Plan requests", icon: CreditCard },
-      { to: "/admin/team", label: "Admin team", icon: ShieldCheck },
+      { to: "/admin/leads", label: "Lead inbox", icon: Mail, feature: "ops.leads" },
+      { to: "/admin/email-branding", label: "Email branding", icon: Mail, feature: "ops.email_branding" },
+      { to: "/admin/site-footer", label: "Site footer", icon: LinkIcon, feature: "ops.site_footer" },
+      { to: "/admin/directory", label: "Directory moderation", icon: Building2, feature: "ops.directory" },
+      { to: "/admin/claims", label: "Listing claims", icon: ShieldCheck, feature: "ops.claims" },
+      { to: "/admin/plan-requests", label: "Plan requests", icon: CreditCard, feature: "ops.plan_requests" },
+      { to: "/admin/team", label: "Admin team", icon: ShieldCheck, feature: "ops.team" },
     ],
   },
 ];
@@ -69,6 +82,10 @@ function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: {
   collapsed: boolean; onToggle: () => void; mobileOpen: boolean; onMobileClose: () => void;
 }) {
   const path = useCurrentPath();
+  const { workspace } = useCurrentWorkspace();
+  // Internal workspaces (founders.click team) and super-admins bypass plan gating.
+  const bypassGating = !workspace || workspace.is_internal || workspace.is_super_admin;
+  const plan = workspace?.plan;
   return (
     <>
       {mobileOpen && (
@@ -101,6 +118,33 @@ function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: {
               <ul className="space-y-0.5">
                 {g.items.map((it) => {
                   const active = path === it.to || path.startsWith(it.to + "/");
+                  const locked =
+                    !bypassGating &&
+                    it.feature !== undefined &&
+                    plan !== undefined &&
+                    !featureUnlocked(plan, it.feature);
+                  const minPlanLabel = it.feature ? PLAN_FEATURES[minimumPlanFor(it.feature)].name : null;
+                  if (locked) {
+                    return (
+                      <li key={it.to}>
+                        <Link
+                          to="/account/billing"
+                          search={{ upgrade: it.feature } as never}
+                          onClick={onMobileClose}
+                          title={collapsed ? `${it.label} — upgrade to ${minPlanLabel}` : undefined}
+                          className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-muted-foreground/70 hover:bg-muted/60"
+                        >
+                          <it.icon className="h-4 w-4 shrink-0 opacity-60" />
+                          {!collapsed && (
+                            <>
+                              <span className="truncate">{it.label}</span>
+                              <Lock className="ml-auto h-3 w-3 shrink-0 opacity-70" />
+                            </>
+                          )}
+                        </Link>
+                      </li>
+                    );
+                  }
                   return (
                     <li key={it.to}>
                       <Link

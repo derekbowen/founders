@@ -452,9 +452,19 @@ function WhyChooseUsSection() {
 
 // ─── Pricing ────────────────────────────────────────────────────────────────
 function Pricing() {
-  const plans = [
+  const plans: Array<{
+    name: string;
+    /** Used to deep-link into /onboarding?plan=... — null for Enterprise (sales-led). */
+    slug: "starter" | "growth" | "scale" | null;
+    price: string;
+    period: string;
+    blurb: string;
+    highlight?: boolean;
+    features: string[];
+  }> = [
     {
       name: "Starter",
+      slug: "starter",
       price: "$109",
       period: "/mo",
       blurb: "Solo founders launching their first marketplace.",
@@ -473,6 +483,7 @@ function Pricing() {
     },
     {
       name: "Growth",
+      slug: "growth",
       price: "$390",
       period: "/mo",
       blurb: "Scaling marketplaces with active SEO &amp; content goals.",
@@ -494,6 +505,7 @@ function Pricing() {
     },
     {
       name: "Scale",
+      slug: "scale",
       price: "$899",
       period: "/mo",
       blurb: "Established platforms competing on volume and velocity.",
@@ -513,6 +525,7 @@ function Pricing() {
     },
     {
       name: "Enterprise",
+      slug: null,
       price: "Custom",
       period: "",
       blurb: "Multi-team operators with custom integrations.",
@@ -571,17 +584,26 @@ function Pricing() {
                   </li>
                 ))}
               </ul>
-              <Link
-                to="/auth"
-                search={{ redirect: "/admin/dashboard", mode: "signup" } as never}
-                className={`mt-8 inline-flex h-10 w-full items-center justify-center rounded-full px-5 text-sm font-semibold transition-all ${
-                  p.highlight
-                    ? "bg-primary text-primary-foreground hover:opacity-90"
-                    : "border border-border hover:bg-muted"
-                }`}
-              >
-                {p.name === "Enterprise" ? "Talk to us" : "Start free trial"}
-              </Link>
+              {p.slug ? (
+                <Link
+                  to="/auth"
+                  search={{ redirect: `/onboarding?plan=${p.slug}`, mode: "signup" } as never}
+                  className={`mt-8 inline-flex h-10 w-full items-center justify-center rounded-full px-5 text-sm font-semibold transition-all ${
+                    p.highlight
+                      ? "bg-primary text-primary-foreground hover:opacity-90"
+                      : "border border-border hover:bg-muted"
+                  }`}
+                >
+                  Start free trial
+                </Link>
+              ) : (
+                <a
+                  href="mailto:hello@founders.click?subject=Enterprise%20plan%20inquiry"
+                  className="mt-8 inline-flex h-10 w-full items-center justify-center rounded-full border border-border px-5 text-sm font-semibold transition-all hover:bg-muted"
+                >
+                  Talk to us
+                </a>
+              )}
             </div>
           ))}
         </div>
