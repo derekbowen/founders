@@ -96,18 +96,28 @@ function RootComponent() {
   const data = Route.useLoaderData();
   const showIntercom = pathname === "/" || pathname.startsWith("/admin");
   const footer = data?.footer;
+
+  // The founders.click home route renders its own self-contained chrome
+  // (founders-home.tsx provides its own Header + Footer). Skip the legacy
+  // pool-rental SiteHeader/SiteFooter to avoid double chrome.
+  const isFoundersHome = pathname === "/";
+
   const content = (
     <>
       <HydrationDebug />
-      <div className="flex min-h-screen flex-col">
-        <SiteHeader />
-        <div className="flex flex-1 flex-col">
-          <GlobalChromeProvider>
-            <Outlet />
-          </GlobalChromeProvider>
+      {isFoundersHome ? (
+        <Outlet />
+      ) : (
+        <div className="flex min-h-screen flex-col">
+          <SiteHeader />
+          <div className="flex flex-1 flex-col">
+            <GlobalChromeProvider>
+              <Outlet />
+            </GlobalChromeProvider>
+          </div>
+          <SiteFooter />
         </div>
-        <SiteFooter />
-      </div>
+      )}
       {showIntercom && <IntercomWidget />}
     </>
   );
