@@ -26,6 +26,10 @@ dist-ssr
 .wrangler/
 .dev.vars
 
+# Supabase CLI cache (machine-specific)
+supabase/.temp/
+supabase/.branches/
+
 # Claude Code session config (machine-specific cwd)
 .claude/launch.json
 
