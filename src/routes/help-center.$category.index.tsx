@@ -3,7 +3,7 @@ import * as LucideIcons from "lucide-react";
 import { ChevronRight, Search } from "lucide-react";
 import { getHelpCategoryWithArticles } from "@/server/help-center.functions";
 import { SiteHeader, SiteFooter } from "@/components/site-layout";
-import { Breadcrumbs } from "@/components/listing-card";
+import { Breadcrumbs } from "@/components/breadcrumbs";
 import {
   buildMeta,
   breadcrumbJsonLd,

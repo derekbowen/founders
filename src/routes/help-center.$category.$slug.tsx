@@ -2,7 +2,7 @@ import { createFileRoute, Link, notFound, useRouter } from "@tanstack/react-rout
 import { Mail, Phone } from "lucide-react";
 import { getHelpArticle } from "@/server/help-center.functions";
 import { SiteHeader, SiteFooter } from "@/components/site-layout";
-import { Breadcrumbs } from "@/components/listing-card";
+import { Breadcrumbs } from "@/components/breadcrumbs";
 import {
   buildMeta,
   breadcrumbJsonLd,
