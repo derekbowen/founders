@@ -11,6 +11,12 @@ concurrency:
   group: deploy-${{ github.ref }}
   cancel-in-progress: true
 
+# Future-proof: GitHub is deprecating Node 20 on runners (Sep 2026).
+# This forces composite/JS actions that target Node 20 to run on Node 24
+# today, so we don't get surprised when the deprecation lands.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -18,10 +24,10 @@ jobs:
       contents: read
       deployments: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: "22"
           cache: "npm"
