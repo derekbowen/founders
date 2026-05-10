@@ -74,14 +74,14 @@ function Competitors() {
       <div className="mb-4">
         <h1 className="text-2xl font-bold sm:text-3xl">Competitor tracker</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Scrape competitor pages (Swimply, Giggster, Peerspace) and compare them to your pages. See word gaps and missing sections.
+          Scrape competitor pages and compare them to your own. See word gaps and missing sections.
         </p>
       </div>
 
       <div className="rounded-2xl border border-border bg-card p-4">
         <label className="block text-xs font-medium text-muted-foreground">Add competitor URL</label>
         <div className="mt-2 flex flex-col gap-2 sm:flex-row">
-          <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://swimply.com/pool/los-angeles"
+          <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://competitor.com/category/city-name"
             className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm" />
           <button onClick={add} disabled={busy || !url.trim()}
             className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50">

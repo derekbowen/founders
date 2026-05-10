@@ -5,6 +5,21 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireFeatureAccess } from "@/server/workspace.functions";
 import { resolveWorkspaceApiKey } from "@/server/workspace-api-keys.functions";
 
+/** Distinct template_types present in the workspace's content_pages table. */
+export const listTemplateTypes = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { workspaceId } = await requireFeatureAccess(context.userId, "content.migration");
+    const { data, error } = await (supabaseAdmin as any)
+      .from("content_pages")
+      .select("template_type")
+      .eq("workspace_id", workspaceId)
+      .not("template_type", "is", null);
+    if (error) throw new Error(error.message);
+    const types: string[] = [...new Set<string>((data ?? []).map((r: any) => r.template_type as string))].sort();
+    return { types };
+  });
+
 /**
  * Scrape a single content_pages row via Firecrawl and store raw_html +
  * body_markdown for human review. Idempotent — overwrites prior scrape data

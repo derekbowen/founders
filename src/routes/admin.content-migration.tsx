@@ -5,6 +5,7 @@ import {
   nextPendingPage,
   scrapeContentPage,
   scrapeProgress,
+  listTemplateTypes,
 } from "@/server/content-scrape.functions";
 import { checkAdminRole } from "@/server/admin-auth.functions";
 import { AdminLayout } from "@/components/admin-layout";
@@ -20,7 +21,15 @@ export const Route = createFileRoute("/admin/content-migration")({
 });
 
 function AdminContentMigration() {
-  const [templateType, setTemplateType] = React.useState("host_acq_city");
+  const [templateTypes, setTemplateTypes] = React.useState<string[]>([]);
+  const [templateType, setTemplateType] = React.useState("");
+
+  React.useEffect(() => {
+    listTemplateTypes().then((r) => {
+      setTemplateTypes(r.types);
+      if (r.types.length > 0) setTemplateType(r.types[0]);
+    }).catch(() => {});
+  }, []);
   const [next, setNext] = React.useState<any>(null);
   const [scraped, setScraped] = React.useState<any>(null);
   const [busy, setBusy] = React.useState(false);
@@ -117,16 +126,24 @@ function AdminContentMigration() {
 
         <div className="mt-6 flex items-center gap-3">
           <label className="text-sm font-medium">template_type:</label>
-          <select
-            value={templateType}
-            onChange={(e) => setTemplateType(e.target.value)}
-            className="rounded border border-border bg-background px-2 py-1 text-sm"
-          >
-            <option value="host_acq_city">host_acq_city</option>
-            <option value="public_pool">public_pool</option>
-            <option value="event_guide">event_guide</option>
-            <option value="resource">resource</option>
-          </select>
+          {templateTypes.length > 0 ? (
+            <select
+              value={templateType}
+              onChange={(e) => setTemplateType(e.target.value)}
+              className="rounded border border-border bg-background px-2 py-1 text-sm"
+            >
+              {templateTypes.map((t) => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
+          ) : (
+            <input
+              value={templateType}
+              onChange={(e) => setTemplateType(e.target.value)}
+              placeholder="template_type"
+              className="rounded border border-border bg-background px-2 py-1 text-sm w-40"
+            />
+          )}
           <button
             onClick={loadNext}
             disabled={busy}

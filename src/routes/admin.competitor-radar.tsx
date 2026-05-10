@@ -145,7 +145,7 @@ function CompetitorRadar() {
           <Radar className="h-6 w-6 text-primary" /> Competitor Radar
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Monitor competitor sitemaps daily. The moment Swimply, Giggster, or Peerspace ship a new page, it shows up here.
+          Monitor competitor sitemaps daily. The moment a competitor ships a new page, it shows up here.
         </p>
       </div>
 
@@ -153,9 +153,9 @@ function CompetitorRadar() {
       <div className="rounded-2xl border border-border bg-card p-4">
         <p className="text-sm font-semibold">Track a new competitor sitemap</p>
         <div className="mt-2 grid gap-2 sm:grid-cols-3">
-          <input value={domain} onChange={(e) => setDomain(e.target.value)} placeholder="swimply.com"
+          <input value={domain} onChange={(e) => setDomain(e.target.value)} placeholder="competitor.com"
             className="rounded-lg border border-border bg-background px-3 py-2 text-sm" />
-          <input value={sitemap} onChange={(e) => setSitemap(e.target.value)} placeholder="https://swimply.com/sitemap.xml"
+          <input value={sitemap} onChange={(e) => setSitemap(e.target.value)} placeholder="https://competitor.com/sitemap.xml"
             className="rounded-lg border border-border bg-background px-3 py-2 text-sm sm:col-span-2" />
           <input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Label (optional)"
             className="rounded-lg border border-border bg-background px-3 py-2 text-sm" />
@@ -183,7 +183,7 @@ function CompetitorRadar() {
         ))}
         {sites.length === 0 && (
           <p className="rounded-2xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground md:col-span-2">
-            No competitors tracked yet. Add Swimply, Giggster, Peerspace above.
+            No competitors tracked yet. Add your competitors above.
           </p>
         )}
       </div>
