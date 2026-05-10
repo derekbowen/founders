@@ -1,56 +1,43 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { buildMeta, ldJsonScript, SITE_NAME, SITE_URL } from "@/lib/seo";
-import { getHomeData, type HomeData } from "@/server/home-data.functions";
-import { HomePageContent, HOMEPAGE_FAQS, HOMEPAGE_HERO_IMAGE } from "@/components/home-page";
+import { FoundersHome } from "@/components/founders-home";
 
-const EMPTY_HOME_DATA: HomeData = {
-  cities: [],
-  cityCount: 0,
-  categories: [],
-  listings: [],
-  nearby: { city: null, region: null, count: 0, nearestMiles: null },
-};
+const SITE_NAME = "founders.click";
+const SITE_URL = "https://founders.click";
 
 export const Route = createFileRoute("/")({
-  loader: async (): Promise<HomeData> => {
-    try {
-      return (await getHomeData()) ?? EMPTY_HOME_DATA;
-    } catch (err) {
-      console.error("index loader failed:", err);
-      return EMPTY_HOME_DATA;
-    }
-  },
-  head: () => {
-    const meta = buildMeta({
-      title: "Pool Rental Near Me — Rent a Private Pool by the Hour",
-      description:
-        "Find and book private pool rentals near you. Heated pools, hot tubs, and luxury backyards. Hourly bookings with $2M liability insurance included.",
-      path: "/",
-      noindex: true,
-      image: HOMEPAGE_HERO_IMAGE,
-    });
-    const org = {
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      name: SITE_NAME,
-      url: SITE_URL,
-      sameAs: ["https://www.poolrentalnearme.com"],
-    };
-    const faqLd = {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      mainEntity: HOMEPAGE_FAQS.map((f) => ({
-        "@type": "Question",
-        name: f.q,
-        acceptedAnswer: { "@type": "Answer", text: f.a },
-      })),
-    };
-    return { ...meta, scripts: [ldJsonScript(org), ldJsonScript(faqLd)] };
-  },
+  head: () => ({
+    meta: [
+      { title: "founders.click — AI Growth Engine for Sharetribe Marketplace Founders" },
+      {
+        name: "description",
+        content:
+          "Custom-coded SEO, AI content generation, and ops tools — without the agency price tag. Built for Sharetribe marketplace founders.",
+      },
+      { property: "og:title", content: "founders.click — Replace your SEO agency" },
+      {
+        property: "og:description",
+        content:
+          "Most Sharetribe founders can't afford an SEO agency. founders.click replaces one — at a fraction of the cost.",
+      },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: SITE_URL },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: SITE_NAME,
+          url: SITE_URL,
+        }),
+      },
+    ],
+  }),
   component: HomePage,
 });
 
 function HomePage() {
-  const data = Route.useLoaderData();
-  return <HomePageContent data={data} />;
+  return <FoundersHome />;
 }
