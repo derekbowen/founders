@@ -2,12 +2,16 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireFeatureAccess } from "@/server/workspace.functions";
 
 /**
- * Admin "quick page" creator. Brandon (or any admin) types a title, optional
- * short description, and a "what should this page be about" prompt. We send
- * that to the Lovable AI gateway, get back a fully-formed PRNM-branded
- * markdown page, and insert it into content_pages as a published /p/{slug}.
+ * Admin "quick page" creator. The user types a title, optional short
+ * description, and a "what should this page be about" prompt. We send that
+ * to the Lovable AI gateway, get back a fully-formed markdown page, and
+ * insert it into content_pages as a published /p/{slug}.
+ *
+ * Writes scope to the caller's active workspace, so each customer's pages
+ * land in their own /p/* namespace (resolved at render time by host header).
  */
 
 const InputSchema = z.object({
@@ -27,7 +31,10 @@ function slugify(s: string): string {
     .slice(0, 80);
 }
 
-const SYSTEM = `
+// PRNM has a hand-crafted brand voice + internal-link map. New customer
+// workspaces get a generic-but-useful prompt until per-workspace prompt
+// settings ship.
+const PRNM_SYSTEM = `
 You write SEO + brand content for Pool Rental Near Me (PRNM), a marketplace where homeowners rent out private pools by the hour.
 Differentiators (mention naturally where it fits): 10% flat host fee (vs Swimply's 15%+), $2M liability insurance included, AI-built features same day on request.
 Voice: confident, friendly, host-first, never spammy. Short paragraphs. Real, useful copy — no filler, no "in this article we will".
@@ -37,6 +44,16 @@ List Your Pool CTA URL: /l/draft/00000000-0000-0000-0000-000000000000/new/detail
 Always end with a short CTA paragraph linking to the List Your Pool URL OR /s, whichever fits.
 Return your answer ONLY by calling the write_page tool.
 `.trim();
+
+function genericSystemPrompt(workspaceName: string): string {
+  return `
+You write SEO + brand content for ${workspaceName}, a Sharetribe marketplace.
+Voice: confident, friendly, customer-first, never spammy. Short paragraphs. Real, useful copy — no filler, no "in this article we will".
+Format: Markdown only. Use ## and ### headings. Aim for 600-1200 words.
+End with a short CTA paragraph that drives a relevant action on the marketplace.
+Return your answer ONLY by calling the write_page tool.
+`.trim();
+}
 
 const TOOL_SCHEMA = {
   type: "function" as const,
@@ -57,36 +74,39 @@ const TOOL_SCHEMA = {
   },
 };
 
-async function assertAdmin(userId: string) {
-  const { data, error } = await supabaseAdmin
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userId)
-    .eq("role", "admin")
-    .maybeSingle();
-  if (error) throw new Error(error.message);
-  if (!data) throw new Error("Admin role required");
-}
-
 export const createQuickPage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => InputSchema.parse(data))
   .handler(async ({ data, context }) => {
-    await assertAdmin(context.userId);
+    const { workspaceId } = await requireFeatureAccess(
+      context.userId,
+      "content.quick_page",
+    );
 
     const apiKey = process.env.OPENROUTER_API_KEY;
     if (!apiKey) throw new Error("OPENROUTER_API_KEY not configured");
 
+    const sb = supabaseAdmin as any;
+    const { data: ws } = await sb
+      .from("workspaces")
+      .select("name, slug")
+      .eq("id", workspaceId)
+      .single();
+    const isPrnm = ws?.slug === "pool-rental-near-me";
+    const SYSTEM = isPrnm ? PRNM_SYSTEM : genericSystemPrompt(ws?.name ?? "your marketplace");
+
     const baseSlug = slugify(data.slug || data.title);
     if (!baseSlug) throw new Error("Could not derive slug from title");
 
-    // Find a unique slug
+    // Slug uniqueness is per-workspace — different customers can each have
+    // /p/hosting, /p/about, etc. without collision.
     let slug = baseSlug;
     let suffix = 1;
     while (true) {
-      const { data: existing } = await supabaseAdmin
+      const { data: existing } = await sb
         .from("content_pages")
         .select("id")
+        .eq("workspace_id", workspaceId)
         .eq("url_path", `/p/${slug}`)
         .maybeSingle();
       if (!existing) break;
@@ -95,7 +115,8 @@ export const createQuickPage = createServerFn({ method: "POST" })
       if (suffix > 50) throw new Error("Could not find a unique slug");
     }
 
-    const userPrompt = `Write a brand page for PRNM.
+    const subjectLabel = isPrnm ? "PRNM" : ws?.name ?? "your marketplace";
+    const userPrompt = `Write a brand page for ${subjectLabel}.
 
 Title (H1): "${data.title}"
 ${data.description ? `One-line summary the admin gave: "${data.description}"` : ""}
@@ -145,11 +166,16 @@ seo_title (≤60 chars) and seo_description (≤155 chars) optimized for the top
     }
 
     const url_path = `/p/${slug}`;
-    const { data: inserted, error: insErr } = await (supabaseAdmin as any)
+    const { data: inserted, error: insErr } = await sb
       .from("content_pages")
       .insert({
+        workspace_id: workspaceId,
         slug,
         url_path,
+        // source_url is required (NOT NULL UNIQUE) — synthesize one for
+        // newly authored pages. Includes workspace_id so different
+        // customers can each create /p/<same-slug>.
+        source_url: `quickpage://${workspaceId}${url_path}`,
         title: gen.title || data.title,
         seo_title: (gen.seo_title || data.title).slice(0, 70),
         seo_description: (gen.seo_description || data.description || "").slice(0, 160),

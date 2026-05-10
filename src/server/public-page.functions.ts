@@ -56,15 +56,20 @@ export const getPublicPage = createServerFn({ method: "GET" })
     const sb = supabaseAdmin as any;
     const host = readIncomingHost();
 
-    // 1) Resolve workspace from host (verified domain match).
+    // 1) Resolve workspace from host. Only VERIFIED domains match (internal
+    // workspaces like PRNM bypass verification — they're our own data). This
+    // mirrors workspace_for_host() in the DB but runs application-side so
+    // we can return rich workspace metadata in one query.
     let workspace: { id: string; slug: string; name: string } | null = null;
     if (host) {
       const { data: w } = await sb
         .from("workspaces")
-        .select("id, slug, name")
+        .select("id, slug, name, domain_verified_at, is_internal")
         .eq("marketplace_domain", host)
         .maybeSingle();
-      if (w) workspace = w;
+      if (w && (w.is_internal || w.domain_verified_at)) {
+        workspace = { id: w.id, slug: w.slug, name: w.name };
+      }
     }
 
     // 2) Fall back to PRNM workspace (covers founders.click's own host and

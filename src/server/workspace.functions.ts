@@ -27,6 +27,7 @@ export type CurrentWorkspace = {
   slug: string;
   name: string;
   marketplace_domain: string | null;
+  domain_verified_at: string | null;
   plan: Plan;
   subscription_status: string;
   trial_ends_at: string | null;
@@ -59,7 +60,7 @@ export const getCurrentWorkspace = createServerFn({ method: "POST" })
     const { data: memberships } = await sb
       .from("workspace_members")
       .select(
-        "role, created_at, workspaces!inner(id, slug, name, marketplace_domain, plan, subscription_status, trial_ends_at, current_period_end, is_internal)",
+        "role, created_at, workspaces!inner(id, slug, name, marketplace_domain, domain_verified_at, plan, subscription_status, trial_ends_at, current_period_end, is_internal)",
       )
       .eq("user_id", userId)
       .order("created_at", { ascending: false })
@@ -74,7 +75,7 @@ export const getCurrentWorkspace = createServerFn({ method: "POST" })
       const { data: prnm } = await sb
         .from("workspaces")
         .select(
-          "id, slug, name, marketplace_domain, plan, subscription_status, trial_ends_at, current_period_end, is_internal",
+          "id, slug, name, marketplace_domain, domain_verified_at, plan, subscription_status, trial_ends_at, current_period_end, is_internal",
         )
         .eq("slug", "pool-rental-near-me")
         .maybeSingle();
@@ -90,6 +91,7 @@ export const getCurrentWorkspace = createServerFn({ method: "POST" })
         slug: w.slug,
         name: w.name,
         marketplace_domain: w.marketplace_domain ?? null,
+        domain_verified_at: w.domain_verified_at ?? null,
         plan: w.plan as Plan,
         subscription_status: w.subscription_status,
         trial_ends_at: w.trial_ends_at,
