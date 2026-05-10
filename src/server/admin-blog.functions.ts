@@ -4,6 +4,10 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireFeatureAccess } from "@/server/workspace.functions";
 import { resolveWorkspaceApiKey } from "@/server/workspace-api-keys.functions";
+import {
+  assertWithinPageGenerationQuota,
+  recordPageGeneration,
+} from "@/server/workspace-usage.functions";
 
 export type AdminBlogRow = {
   slug: string;
@@ -48,7 +52,8 @@ export const adminExpandBlogPost = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => expandSchema.parse(d))
   .handler(async ({ data, context }) => {
-    const { workspaceId } = await requireFeatureAccess(context.userId, "content.blog");
+    const { workspaceId, plan, isInternal } = await requireFeatureAccess(context.userId, "content.blog");
+    await assertWithinPageGenerationQuota(workspaceId, plan, isInternal);
 
     const sb = supabaseAdmin as any;
 
@@ -134,6 +139,10 @@ Return ONLY valid JSON with this exact shape:
       .eq("slug", data.slug)
       .eq("workspace_id", workspaceId);
     if (upErr) throw new Error(upErr.message);
+
+    if (!isInternal) {
+      await recordPageGeneration(workspaceId).catch(() => {});
+    }
 
     const wc = String(update.content ?? "").split(/\s+/).filter(Boolean).length;
     return { ok: true, word_count: wc };

@@ -12,11 +12,18 @@ export const Route = createFileRoute("/admin")({
     // Fetch the user's workspace so the sidebar can show plan + lock badges.
     // Auth-failure path: fall back to "needs onboarding" rather than crashing
     // the whole admin shell. Each admin route still does its own auth check.
+    let result;
     try {
-      return await getCurrentWorkspace();
+      result = await getCurrentWorkspace();
     } catch {
-      return { workspace: null, needsOnboarding: true } as const;
+      result = { workspace: null, needsOnboarding: true } as const;
     }
+    // Authenticated user without a workspace can't usefully see /admin/*.
+    // Send them through onboarding instead of letting routes throw "No workspace".
+    if (result.needsOnboarding) {
+      throw redirect({ to: "/onboarding", search: { plan: "growth" } as never });
+    }
+    return result;
   },
   component: () => <Outlet />,
 });
