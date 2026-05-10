@@ -83,6 +83,29 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        try {
+          return await handlePost(request)
+        } catch (e) {
+          // TEMP: surface any unhandled error from inner steps so we can see
+          // what's failing. Without this Cloudflare just logs 'HTTPError 500'
+          // with no useful info.
+          const err = e as Error
+          console.error('[auth-webhook] UNHANDLED', {
+            name: err?.name,
+            message: err?.message,
+            stack: err?.stack?.slice(0, 800),
+          })
+          return Response.json(
+            { error: 'Internal error', detail: err?.message ?? String(err) },
+            { status: 500 }
+          )
+        }
+      },
+    },
+  },
+})
+
+async function handlePost(request: Request): Promise<Response> {
         const hookSecret = process.env.SEND_EMAIL_HOOK_SECRET
 
         if (!hookSecret) {
@@ -262,12 +285,9 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
 
         console.log('Auth email enqueued', {
           emailType,
-          email_redacted: redactEmail(payload.data.email),
+          email_redacted: redactEmail(recipientEmail),
           run_id,
         })
 
         return Response.json({ success: true, queued: true })
-      },
-    },
-  },
-})
+}
