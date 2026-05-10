@@ -10,70 +10,19 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
-import { Route as SmAmenitiesDotxmlRouteImport } from './routes/sm-amenities[.]xml'
-import { Route as Sm74buq58vDotxmlRouteImport } from './routes/sm-74buq58v[.]xml'
-import { Route as Sm74buq58vLsDotxmlRouteImport } from './routes/sm-74buq58v-ls[.]xml'
-import { Route as Sm74buq58vHoDotxmlRouteImport } from './routes/sm-74buq58v-ho[.]xml'
-import { Route as Sm74buq58vEvDotxmlRouteImport } from './routes/sm-74buq58v-ev[.]xml'
-import { Route as Sm74buq58vCrDotxmlRouteImport } from './routes/sm-74buq58v-cr[.]xml'
-import { Route as Sm74buq58vCnDotxmlRouteImport } from './routes/sm-74buq58v-cn[.]xml'
-import { Route as Sm74buq58vAdDotxmlRouteImport } from './routes/sm-74buq58v-ad[.]xml'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SitemapStaticDotxmlRouteImport } from './routes/sitemap-static[.]xml'
-import { Route as SitemapRecentPagesDotxmlRouteImport } from './routes/sitemap-recent-pages[.]xml'
-import { Route as SitemapPagesSwimInstructorDotxmlRouteImport } from './routes/sitemap-pages-swim-instructor[.]xml'
-import { Route as SitemapPagesSpanishDotxmlRouteImport } from './routes/sitemap-pages-spanish[.]xml'
-import { Route as SitemapPagesMoneyDotxmlRouteImport } from './routes/sitemap-pages-money[.]xml'
-import { Route as SitemapPagesHostAcquisitionDotxmlRouteImport } from './routes/sitemap-pages-host-acquisition[.]xml'
-import { Route as SitemapPagesEventGuidesDotxmlRouteImport } from './routes/sitemap-pages-event-guides[.]xml'
-import { Route as SitemapPagesComparisonsDotxmlRouteImport } from './routes/sitemap-pages-comparisons[.]xml'
-import { Route as SitemapPagesCitiesDotxmlRouteImport } from './routes/sitemap-pages-cities[.]xml'
-import { Route as SitemapPagesArticlesDotxmlRouteImport } from './routes/sitemap-pages-articles[.]xml'
-import { Route as SitemapPagesAdvocacyDotxmlRouteImport } from './routes/sitemap-pages-advocacy[.]xml'
-import { Route as SitemapPagesAcademyDotxmlRouteImport } from './routes/sitemap-pages-academy[.]xml'
 import { Route as SitemapIndexDotxmlRouteImport } from './routes/sitemap-index[.]xml'
-import { Route as SitemapHubDotxmlRouteImport } from './routes/sitemap-hub[.]xml'
-import { Route as SitemapDirectoryDotxmlRouteImport } from './routes/sitemap-directory[.]xml'
 import { Route as SitemapDefaultDotxmlRouteImport } from './routes/sitemap-default[.]xml'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as ReferralRouteImport } from './routes/referral'
-import { Route as ProvidersRouteImport } from './routes/providers'
 import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
-import { Route as PoolsDirectorySitemapDotxmlRouteImport } from './routes/pools-directory-sitemap[.]xml'
-import { Route as LandingPageRouteImport } from './routes/landing-page'
-import { Route as DirectoryRouteImport } from './routes/directory'
-import { Route as BlogRouteImport } from './routes/blog'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
-import { Route as AcademyRouteImport } from './routes/academy'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as PoolBuildersIndexRouteImport } from './routes/pool-builders.index'
-import { Route as HostToolsIndexRouteImport } from './routes/host-tools.index'
 import { Route as HelpCenterIndexRouteImport } from './routes/help-center.index'
-import { Route as AcademyIndexRouteImport } from './routes/academy.index'
 import { Route as VerifyUidRouteImport } from './routes/verify.$uid'
-import { Route as ProvidersSlugRouteImport } from './routes/providers.$slug'
-import { Route as PoolRentalCityRouteImport } from './routes/pool-rental.$city'
-import { Route as PoolRentalLawsCityRouteImport } from './routes/pool-rental-laws.$city'
-import { Route as PoolBuildersStateRouteImport } from './routes/pool-builders.$state'
-import { Route as PSwimplyAlternativeVsPoolRentalNearMeRouteImport } from './routes/p.swimply-alternative-vs-pool-rental-near-me'
-import { Route as PPeerspaceVsPoolRentalNearMeInCityRouteImport } from './routes/p.peerspace-vs-pool-rental-near-me-in-$city'
-import { Route as PPeerspaceVsPoolRentalNearMeRouteImport } from './routes/p.peerspace-vs-pool-rental-near-me'
-import { Route as PHowItWorksRouteImport } from './routes/p.how-it-works'
-import { Route as PHostingRouteImport } from './routes/p.hosting'
-import { Route as PGiggsterVsPoolRentalNearMeInCityRouteImport } from './routes/p.giggster-vs-pool-rental-near-me-in-$city'
-import { Route as PGiggsterVsPoolRentalNearMeRouteImport } from './routes/p.giggster-vs-pool-rental-near-me'
-import { Route as PFreeHostToolsRouteImport } from './routes/p.free-host-tools'
-import { Route as PEarningsCalculatorRouteImport } from './routes/p.earnings-calculator'
-import { Route as PAllLocationsRouteImport } from './routes/p.all-locations'
-import { Route as PSlugRouteImport } from './routes/p.$slug'
-import { Route as PSplatRouteImport } from './routes/p.$'
-import { Route as HostToolsSlugRouteImport } from './routes/host-tools.$slug'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
-import { Route as DirectoryListRouteImport } from './routes/directory.list'
-import { Route as DirectoryCategoryRouteImport } from './routes/directory.$category'
-import { Route as CategorySlugRouteImport } from './routes/category.$slug'
-import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth.reset-password'
 import { Route as AdminTeamRouteImport } from './routes/admin.team'
 import { Route as AdminSiteFooterRouteImport } from './routes/admin.site-footer'
@@ -105,22 +54,15 @@ import { Route as AdminClaimsRouteImport } from './routes/admin.claims'
 import { Route as AdminCitiesHeroesRouteImport } from './routes/admin.cities-heroes'
 import { Route as AdminBlogRouteImport } from './routes/admin.blog'
 import { Route as AccountLearningRouteImport } from './routes/account.learning'
-import { Route as AcademySlugRouteImport } from './routes/academy.$slug'
 import { Route as HelpCenterCategoryIndexRouteImport } from './routes/help-center.$category.index'
-import { Route as ProvidersSlugManageRouteImport } from './routes/providers.$slug.manage'
-import { Route as ProvidersSlugClaimRouteImport } from './routes/providers.$slug.claim'
-import { Route as PoolBuildersStateCityRouteImport } from './routes/pool-builders.$state.$city'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
-import { Route as LSlugIdRouteImport } from './routes/l.$slug.$id'
 import { Route as HelpCenterCategorySlugRouteImport } from './routes/help-center.$category.$slug'
-import { Route as DirectoryCategoryStateRouteImport } from './routes/directory.$category.$state'
 import { Route as ApiPublicTrackCityClickRouteImport } from './routes/api/public/track-city-click'
 import { Route as ApiPublicBackfillContentPagesRouteImport } from './routes/api/public/backfill-content-pages'
 import { Route as AdminLearningUserIdRouteImport } from './routes/admin.learning.$userId'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
-import { Route as DirectoryCategoryStateCityRouteImport } from './routes/directory.$category.$state.$city'
 import { Route as ApiPublicHooksSyncListingsRouteImport } from './routes/api/public/hooks.sync-listings'
 import { Route as ApiPublicHooksSeoSelfTestRouteImport } from './routes/api/public/hooks.seo-self-test'
 import { Route as ApiPublicHooksSeoFixWorkerRouteImport } from './routes/api/public/hooks/seo-fix-worker'
@@ -133,46 +75,6 @@ const UnsubscribeRoute = UnsubscribeRouteImport.update({
   path: '/unsubscribe',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SmAmenitiesDotxmlRoute = SmAmenitiesDotxmlRouteImport.update({
-  id: '/sm-amenities.xml',
-  path: '/sm-amenities.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const Sm74buq58vDotxmlRoute = Sm74buq58vDotxmlRouteImport.update({
-  id: '/sm-74buq58v.xml',
-  path: '/sm-74buq58v.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const Sm74buq58vLsDotxmlRoute = Sm74buq58vLsDotxmlRouteImport.update({
-  id: '/sm-74buq58v-ls.xml',
-  path: '/sm-74buq58v-ls.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const Sm74buq58vHoDotxmlRoute = Sm74buq58vHoDotxmlRouteImport.update({
-  id: '/sm-74buq58v-ho.xml',
-  path: '/sm-74buq58v-ho.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const Sm74buq58vEvDotxmlRoute = Sm74buq58vEvDotxmlRouteImport.update({
-  id: '/sm-74buq58v-ev.xml',
-  path: '/sm-74buq58v-ev.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const Sm74buq58vCrDotxmlRoute = Sm74buq58vCrDotxmlRouteImport.update({
-  id: '/sm-74buq58v-cr.xml',
-  path: '/sm-74buq58v-cr.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const Sm74buq58vCnDotxmlRoute = Sm74buq58vCnDotxmlRouteImport.update({
-  id: '/sm-74buq58v-cn.xml',
-  path: '/sm-74buq58v-cn.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const Sm74buq58vAdDotxmlRoute = Sm74buq58vAdDotxmlRouteImport.update({
-  id: '/sm-74buq58v-ad.xml',
-  path: '/sm-74buq58v-ad.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
@@ -183,84 +85,9 @@ const SitemapStaticDotxmlRoute = SitemapStaticDotxmlRouteImport.update({
   path: '/sitemap-static.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SitemapRecentPagesDotxmlRoute =
-  SitemapRecentPagesDotxmlRouteImport.update({
-    id: '/sitemap-recent-pages.xml',
-    path: '/sitemap-recent-pages.xml',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const SitemapPagesSwimInstructorDotxmlRoute =
-  SitemapPagesSwimInstructorDotxmlRouteImport.update({
-    id: '/sitemap-pages-swim-instructor.xml',
-    path: '/sitemap-pages-swim-instructor.xml',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const SitemapPagesSpanishDotxmlRoute =
-  SitemapPagesSpanishDotxmlRouteImport.update({
-    id: '/sitemap-pages-spanish.xml',
-    path: '/sitemap-pages-spanish.xml',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const SitemapPagesMoneyDotxmlRoute = SitemapPagesMoneyDotxmlRouteImport.update({
-  id: '/sitemap-pages-money.xml',
-  path: '/sitemap-pages-money.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SitemapPagesHostAcquisitionDotxmlRoute =
-  SitemapPagesHostAcquisitionDotxmlRouteImport.update({
-    id: '/sitemap-pages-host-acquisition.xml',
-    path: '/sitemap-pages-host-acquisition.xml',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const SitemapPagesEventGuidesDotxmlRoute =
-  SitemapPagesEventGuidesDotxmlRouteImport.update({
-    id: '/sitemap-pages-event-guides.xml',
-    path: '/sitemap-pages-event-guides.xml',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const SitemapPagesComparisonsDotxmlRoute =
-  SitemapPagesComparisonsDotxmlRouteImport.update({
-    id: '/sitemap-pages-comparisons.xml',
-    path: '/sitemap-pages-comparisons.xml',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const SitemapPagesCitiesDotxmlRoute =
-  SitemapPagesCitiesDotxmlRouteImport.update({
-    id: '/sitemap-pages-cities.xml',
-    path: '/sitemap-pages-cities.xml',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const SitemapPagesArticlesDotxmlRoute =
-  SitemapPagesArticlesDotxmlRouteImport.update({
-    id: '/sitemap-pages-articles.xml',
-    path: '/sitemap-pages-articles.xml',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const SitemapPagesAdvocacyDotxmlRoute =
-  SitemapPagesAdvocacyDotxmlRouteImport.update({
-    id: '/sitemap-pages-advocacy.xml',
-    path: '/sitemap-pages-advocacy.xml',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const SitemapPagesAcademyDotxmlRoute =
-  SitemapPagesAcademyDotxmlRouteImport.update({
-    id: '/sitemap-pages-academy.xml',
-    path: '/sitemap-pages-academy.xml',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const SitemapIndexDotxmlRoute = SitemapIndexDotxmlRouteImport.update({
   id: '/sitemap-index.xml',
   path: '/sitemap-index.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SitemapHubDotxmlRoute = SitemapHubDotxmlRouteImport.update({
-  id: '/sitemap-hub.xml',
-  path: '/sitemap-hub.xml',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SitemapDirectoryDotxmlRoute = SitemapDirectoryDotxmlRouteImport.update({
-  id: '/sitemap-directory.xml',
-  path: '/sitemap-directory.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDefaultDotxmlRoute = SitemapDefaultDotxmlRouteImport.update({
@@ -278,35 +105,9 @@ const ReferralRoute = ReferralRouteImport.update({
   path: '/referral',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProvidersRoute = ProvidersRouteImport.update({
-  id: '/providers',
-  path: '/providers',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const PrivacyPolicyRoute = PrivacyPolicyRouteImport.update({
   id: '/privacy-policy',
   path: '/privacy-policy',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PoolsDirectorySitemapDotxmlRoute =
-  PoolsDirectorySitemapDotxmlRouteImport.update({
-    id: '/pools-directory-sitemap.xml',
-    path: '/pools-directory-sitemap.xml',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const LandingPageRoute = LandingPageRouteImport.update({
-  id: '/landing-page',
-  path: '/landing-page',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DirectoryRoute = DirectoryRouteImport.update({
-  id: '/directory',
-  path: '/directory',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BlogRoute = BlogRouteImport.update({
-  id: '/blog',
-  path: '/blog',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -319,24 +120,9 @@ const AdminRoute = AdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AcademyRoute = AcademyRouteImport.update({
-  id: '/academy',
-  path: '/academy',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PoolBuildersIndexRoute = PoolBuildersIndexRouteImport.update({
-  id: '/pool-builders/',
-  path: '/pool-builders/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const HostToolsIndexRoute = HostToolsIndexRouteImport.update({
-  id: '/host-tools/',
-  path: '/host-tools/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HelpCenterIndexRoute = HelpCenterIndexRouteImport.update({
@@ -344,130 +130,15 @@ const HelpCenterIndexRoute = HelpCenterIndexRouteImport.update({
   path: '/help-center/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AcademyIndexRoute = AcademyIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AcademyRoute,
-} as any)
 const VerifyUidRoute = VerifyUidRouteImport.update({
   id: '/verify/$uid',
   path: '/verify/$uid',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProvidersSlugRoute = ProvidersSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => ProvidersRoute,
-} as any)
-const PoolRentalCityRoute = PoolRentalCityRouteImport.update({
-  id: '/pool-rental/$city',
-  path: '/pool-rental/$city',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PoolRentalLawsCityRoute = PoolRentalLawsCityRouteImport.update({
-  id: '/pool-rental-laws/$city',
-  path: '/pool-rental-laws/$city',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PoolBuildersStateRoute = PoolBuildersStateRouteImport.update({
-  id: '/pool-builders/$state',
-  path: '/pool-builders/$state',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PSwimplyAlternativeVsPoolRentalNearMeRoute =
-  PSwimplyAlternativeVsPoolRentalNearMeRouteImport.update({
-    id: '/p/swimply-alternative-vs-pool-rental-near-me',
-    path: '/p/swimply-alternative-vs-pool-rental-near-me',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const PPeerspaceVsPoolRentalNearMeInCityRoute =
-  PPeerspaceVsPoolRentalNearMeInCityRouteImport.update({
-    id: '/p/peerspace-vs-pool-rental-near-me-in-$city',
-    path: '/p/peerspace-vs-pool-rental-near-me-in-$city',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const PPeerspaceVsPoolRentalNearMeRoute =
-  PPeerspaceVsPoolRentalNearMeRouteImport.update({
-    id: '/p/peerspace-vs-pool-rental-near-me',
-    path: '/p/peerspace-vs-pool-rental-near-me',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const PHowItWorksRoute = PHowItWorksRouteImport.update({
-  id: '/p/how-it-works',
-  path: '/p/how-it-works',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PHostingRoute = PHostingRouteImport.update({
-  id: '/p/hosting',
-  path: '/p/hosting',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PGiggsterVsPoolRentalNearMeInCityRoute =
-  PGiggsterVsPoolRentalNearMeInCityRouteImport.update({
-    id: '/p/giggster-vs-pool-rental-near-me-in-$city',
-    path: '/p/giggster-vs-pool-rental-near-me-in-$city',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const PGiggsterVsPoolRentalNearMeRoute =
-  PGiggsterVsPoolRentalNearMeRouteImport.update({
-    id: '/p/giggster-vs-pool-rental-near-me',
-    path: '/p/giggster-vs-pool-rental-near-me',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const PFreeHostToolsRoute = PFreeHostToolsRouteImport.update({
-  id: '/p/free-host-tools',
-  path: '/p/free-host-tools',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PEarningsCalculatorRoute = PEarningsCalculatorRouteImport.update({
-  id: '/p/earnings-calculator',
-  path: '/p/earnings-calculator',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PAllLocationsRoute = PAllLocationsRouteImport.update({
-  id: '/p/all-locations',
-  path: '/p/all-locations',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PSlugRoute = PSlugRouteImport.update({
-  id: '/p/$slug',
-  path: '/p/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PSplatRoute = PSplatRouteImport.update({
-  id: '/p/$',
-  path: '/p/$',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const HostToolsSlugRoute = HostToolsSlugRouteImport.update({
-  id: '/host-tools/$slug',
-  path: '/host-tools/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
   id: '/email/unsubscribe',
   path: '/email/unsubscribe',
   getParentRoute: () => rootRouteImport,
-} as any)
-const DirectoryListRoute = DirectoryListRouteImport.update({
-  id: '/list',
-  path: '/list',
-  getParentRoute: () => DirectoryRoute,
-} as any)
-const DirectoryCategoryRoute = DirectoryCategoryRouteImport.update({
-  id: '/$category',
-  path: '/$category',
-  getParentRoute: () => DirectoryRoute,
-} as any)
-const CategorySlugRoute = CategorySlugRouteImport.update({
-  id: '/category/$slug',
-  path: '/category/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BlogSlugRoute = BlogSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => BlogRoute,
 } as any)
 const AuthResetPasswordRoute = AuthResetPasswordRouteImport.update({
   id: '/reset-password',
@@ -625,50 +296,20 @@ const AccountLearningRoute = AccountLearningRouteImport.update({
   path: '/account/learning',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AcademySlugRoute = AcademySlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => AcademyRoute,
-} as any)
 const HelpCenterCategoryIndexRoute = HelpCenterCategoryIndexRouteImport.update({
   id: '/help-center/$category/',
   path: '/help-center/$category/',
   getParentRoute: () => rootRouteImport,
-} as any)
-const ProvidersSlugManageRoute = ProvidersSlugManageRouteImport.update({
-  id: '/manage',
-  path: '/manage',
-  getParentRoute: () => ProvidersSlugRoute,
-} as any)
-const ProvidersSlugClaimRoute = ProvidersSlugClaimRouteImport.update({
-  id: '/claim',
-  path: '/claim',
-  getParentRoute: () => ProvidersSlugRoute,
-} as any)
-const PoolBuildersStateCityRoute = PoolBuildersStateCityRouteImport.update({
-  id: '/$city',
-  path: '/$city',
-  getParentRoute: () => PoolBuildersStateRoute,
 } as any)
 const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   id: '/lovable/email/suppression',
   path: '/lovable/email/suppression',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LSlugIdRoute = LSlugIdRouteImport.update({
-  id: '/l/$slug/$id',
-  path: '/l/$slug/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const HelpCenterCategorySlugRoute = HelpCenterCategorySlugRouteImport.update({
   id: '/help-center/$category/$slug',
   path: '/help-center/$category/$slug',
   getParentRoute: () => rootRouteImport,
-} as any)
-const DirectoryCategoryStateRoute = DirectoryCategoryStateRouteImport.update({
-  id: '/$state',
-  path: '/$state',
-  getParentRoute: () => DirectoryCategoryRoute,
 } as any)
 const ApiPublicTrackCityClickRoute = ApiPublicTrackCityClickRouteImport.update({
   id: '/api/public/track-city-click',
@@ -703,12 +344,6 @@ const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
   path: '/lovable/email/auth/webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DirectoryCategoryStateCityRoute =
-  DirectoryCategoryStateCityRouteImport.update({
-    id: '/$city',
-    path: '/$city',
-    getParentRoute: () => DirectoryCategoryStateRoute,
-  } as any)
 const ApiPublicHooksSyncListingsRoute =
   ApiPublicHooksSyncListingsRouteImport.update({
     id: '/api/public/hooks/sync-listings',
@@ -747,44 +382,16 @@ const ApiCertificatesUidPdfRoute = ApiCertificatesUidPdfRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/academy': typeof AcademyRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
-  '/blog': typeof BlogRouteWithChildren
-  '/directory': typeof DirectoryRouteWithChildren
-  '/landing-page': typeof LandingPageRoute
-  '/pools-directory-sitemap.xml': typeof PoolsDirectorySitemapDotxmlRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
-  '/providers': typeof ProvidersRouteWithChildren
   '/referral': typeof ReferralRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap-default.xml': typeof SitemapDefaultDotxmlRoute
-  '/sitemap-directory.xml': typeof SitemapDirectoryDotxmlRoute
-  '/sitemap-hub.xml': typeof SitemapHubDotxmlRoute
   '/sitemap-index.xml': typeof SitemapIndexDotxmlRoute
-  '/sitemap-pages-academy.xml': typeof SitemapPagesAcademyDotxmlRoute
-  '/sitemap-pages-advocacy.xml': typeof SitemapPagesAdvocacyDotxmlRoute
-  '/sitemap-pages-articles.xml': typeof SitemapPagesArticlesDotxmlRoute
-  '/sitemap-pages-cities.xml': typeof SitemapPagesCitiesDotxmlRoute
-  '/sitemap-pages-comparisons.xml': typeof SitemapPagesComparisonsDotxmlRoute
-  '/sitemap-pages-event-guides.xml': typeof SitemapPagesEventGuidesDotxmlRoute
-  '/sitemap-pages-host-acquisition.xml': typeof SitemapPagesHostAcquisitionDotxmlRoute
-  '/sitemap-pages-money.xml': typeof SitemapPagesMoneyDotxmlRoute
-  '/sitemap-pages-spanish.xml': typeof SitemapPagesSpanishDotxmlRoute
-  '/sitemap-pages-swim-instructor.xml': typeof SitemapPagesSwimInstructorDotxmlRoute
-  '/sitemap-recent-pages.xml': typeof SitemapRecentPagesDotxmlRoute
   '/sitemap-static.xml': typeof SitemapStaticDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/sm-74buq58v-ad.xml': typeof Sm74buq58vAdDotxmlRoute
-  '/sm-74buq58v-cn.xml': typeof Sm74buq58vCnDotxmlRoute
-  '/sm-74buq58v-cr.xml': typeof Sm74buq58vCrDotxmlRoute
-  '/sm-74buq58v-ev.xml': typeof Sm74buq58vEvDotxmlRoute
-  '/sm-74buq58v-ho.xml': typeof Sm74buq58vHoDotxmlRoute
-  '/sm-74buq58v-ls.xml': typeof Sm74buq58vLsDotxmlRoute
-  '/sm-74buq58v.xml': typeof Sm74buq58vDotxmlRoute
-  '/sm-amenities.xml': typeof SmAmenitiesDotxmlRoute
   '/unsubscribe': typeof UnsubscribeRoute
-  '/academy/$slug': typeof AcademySlugRoute
   '/account/learning': typeof AccountLearningRoute
   '/admin/blog': typeof AdminBlogRoute
   '/admin/cities-heroes': typeof AdminCitiesHeroesRoute
@@ -816,43 +423,14 @@ export interface FileRoutesByFullPath {
   '/admin/site-footer': typeof AdminSiteFooterRoute
   '/admin/team': typeof AdminTeamRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
-  '/blog/$slug': typeof BlogSlugRoute
-  '/category/$slug': typeof CategorySlugRoute
-  '/directory/$category': typeof DirectoryCategoryRouteWithChildren
-  '/directory/list': typeof DirectoryListRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
-  '/host-tools/$slug': typeof HostToolsSlugRoute
-  '/p/$': typeof PSplatRoute
-  '/p/$slug': typeof PSlugRoute
-  '/p/all-locations': typeof PAllLocationsRoute
-  '/p/earnings-calculator': typeof PEarningsCalculatorRoute
-  '/p/free-host-tools': typeof PFreeHostToolsRoute
-  '/p/giggster-vs-pool-rental-near-me': typeof PGiggsterVsPoolRentalNearMeRoute
-  '/p/giggster-vs-pool-rental-near-me-in-$city': typeof PGiggsterVsPoolRentalNearMeInCityRoute
-  '/p/hosting': typeof PHostingRoute
-  '/p/how-it-works': typeof PHowItWorksRoute
-  '/p/peerspace-vs-pool-rental-near-me': typeof PPeerspaceVsPoolRentalNearMeRoute
-  '/p/peerspace-vs-pool-rental-near-me-in-$city': typeof PPeerspaceVsPoolRentalNearMeInCityRoute
-  '/p/swimply-alternative-vs-pool-rental-near-me': typeof PSwimplyAlternativeVsPoolRentalNearMeRoute
-  '/pool-builders/$state': typeof PoolBuildersStateRouteWithChildren
-  '/pool-rental-laws/$city': typeof PoolRentalLawsCityRoute
-  '/pool-rental/$city': typeof PoolRentalCityRoute
-  '/providers/$slug': typeof ProvidersSlugRouteWithChildren
   '/verify/$uid': typeof VerifyUidRoute
-  '/academy/': typeof AcademyIndexRoute
   '/help-center/': typeof HelpCenterIndexRoute
-  '/host-tools/': typeof HostToolsIndexRoute
-  '/pool-builders/': typeof PoolBuildersIndexRoute
   '/admin/learning/$userId': typeof AdminLearningUserIdRoute
   '/api/public/backfill-content-pages': typeof ApiPublicBackfillContentPagesRoute
   '/api/public/track-city-click': typeof ApiPublicTrackCityClickRoute
-  '/directory/$category/$state': typeof DirectoryCategoryStateRouteWithChildren
   '/help-center/$category/$slug': typeof HelpCenterCategorySlugRoute
-  '/l/$slug/$id': typeof LSlugIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
-  '/pool-builders/$state/$city': typeof PoolBuildersStateCityRoute
-  '/providers/$slug/claim': typeof ProvidersSlugClaimRoute
-  '/providers/$slug/manage': typeof ProvidersSlugManageRoute
   '/help-center/$category/': typeof HelpCenterCategoryIndexRoute
   '/api/certificates/$uid/pdf': typeof ApiCertificatesUidPdfRoute
   '/api/public/hooks/competitor-radar-scan': typeof ApiPublicHooksCompetitorRadarScanRoute
@@ -860,7 +438,6 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/seo-fix-worker': typeof ApiPublicHooksSeoFixWorkerRoute
   '/api/public/hooks/seo-self-test': typeof ApiPublicHooksSeoSelfTestRoute
   '/api/public/hooks/sync-listings': typeof ApiPublicHooksSyncListingsRoute
-  '/directory/$category/$state/$city': typeof DirectoryCategoryStateCityRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -869,41 +446,14 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
-  '/blog': typeof BlogRouteWithChildren
-  '/directory': typeof DirectoryRouteWithChildren
-  '/landing-page': typeof LandingPageRoute
-  '/pools-directory-sitemap.xml': typeof PoolsDirectorySitemapDotxmlRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
-  '/providers': typeof ProvidersRouteWithChildren
   '/referral': typeof ReferralRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap-default.xml': typeof SitemapDefaultDotxmlRoute
-  '/sitemap-directory.xml': typeof SitemapDirectoryDotxmlRoute
-  '/sitemap-hub.xml': typeof SitemapHubDotxmlRoute
   '/sitemap-index.xml': typeof SitemapIndexDotxmlRoute
-  '/sitemap-pages-academy.xml': typeof SitemapPagesAcademyDotxmlRoute
-  '/sitemap-pages-advocacy.xml': typeof SitemapPagesAdvocacyDotxmlRoute
-  '/sitemap-pages-articles.xml': typeof SitemapPagesArticlesDotxmlRoute
-  '/sitemap-pages-cities.xml': typeof SitemapPagesCitiesDotxmlRoute
-  '/sitemap-pages-comparisons.xml': typeof SitemapPagesComparisonsDotxmlRoute
-  '/sitemap-pages-event-guides.xml': typeof SitemapPagesEventGuidesDotxmlRoute
-  '/sitemap-pages-host-acquisition.xml': typeof SitemapPagesHostAcquisitionDotxmlRoute
-  '/sitemap-pages-money.xml': typeof SitemapPagesMoneyDotxmlRoute
-  '/sitemap-pages-spanish.xml': typeof SitemapPagesSpanishDotxmlRoute
-  '/sitemap-pages-swim-instructor.xml': typeof SitemapPagesSwimInstructorDotxmlRoute
-  '/sitemap-recent-pages.xml': typeof SitemapRecentPagesDotxmlRoute
   '/sitemap-static.xml': typeof SitemapStaticDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/sm-74buq58v-ad.xml': typeof Sm74buq58vAdDotxmlRoute
-  '/sm-74buq58v-cn.xml': typeof Sm74buq58vCnDotxmlRoute
-  '/sm-74buq58v-cr.xml': typeof Sm74buq58vCrDotxmlRoute
-  '/sm-74buq58v-ev.xml': typeof Sm74buq58vEvDotxmlRoute
-  '/sm-74buq58v-ho.xml': typeof Sm74buq58vHoDotxmlRoute
-  '/sm-74buq58v-ls.xml': typeof Sm74buq58vLsDotxmlRoute
-  '/sm-74buq58v.xml': typeof Sm74buq58vDotxmlRoute
-  '/sm-amenities.xml': typeof SmAmenitiesDotxmlRoute
   '/unsubscribe': typeof UnsubscribeRoute
-  '/academy/$slug': typeof AcademySlugRoute
   '/account/learning': typeof AccountLearningRoute
   '/admin/blog': typeof AdminBlogRoute
   '/admin/cities-heroes': typeof AdminCitiesHeroesRoute
@@ -935,43 +485,14 @@ export interface FileRoutesByTo {
   '/admin/site-footer': typeof AdminSiteFooterRoute
   '/admin/team': typeof AdminTeamRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
-  '/blog/$slug': typeof BlogSlugRoute
-  '/category/$slug': typeof CategorySlugRoute
-  '/directory/$category': typeof DirectoryCategoryRouteWithChildren
-  '/directory/list': typeof DirectoryListRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
-  '/host-tools/$slug': typeof HostToolsSlugRoute
-  '/p/$': typeof PSplatRoute
-  '/p/$slug': typeof PSlugRoute
-  '/p/all-locations': typeof PAllLocationsRoute
-  '/p/earnings-calculator': typeof PEarningsCalculatorRoute
-  '/p/free-host-tools': typeof PFreeHostToolsRoute
-  '/p/giggster-vs-pool-rental-near-me': typeof PGiggsterVsPoolRentalNearMeRoute
-  '/p/giggster-vs-pool-rental-near-me-in-$city': typeof PGiggsterVsPoolRentalNearMeInCityRoute
-  '/p/hosting': typeof PHostingRoute
-  '/p/how-it-works': typeof PHowItWorksRoute
-  '/p/peerspace-vs-pool-rental-near-me': typeof PPeerspaceVsPoolRentalNearMeRoute
-  '/p/peerspace-vs-pool-rental-near-me-in-$city': typeof PPeerspaceVsPoolRentalNearMeInCityRoute
-  '/p/swimply-alternative-vs-pool-rental-near-me': typeof PSwimplyAlternativeVsPoolRentalNearMeRoute
-  '/pool-builders/$state': typeof PoolBuildersStateRouteWithChildren
-  '/pool-rental-laws/$city': typeof PoolRentalLawsCityRoute
-  '/pool-rental/$city': typeof PoolRentalCityRoute
-  '/providers/$slug': typeof ProvidersSlugRouteWithChildren
   '/verify/$uid': typeof VerifyUidRoute
-  '/academy': typeof AcademyIndexRoute
   '/help-center': typeof HelpCenterIndexRoute
-  '/host-tools': typeof HostToolsIndexRoute
-  '/pool-builders': typeof PoolBuildersIndexRoute
   '/admin/learning/$userId': typeof AdminLearningUserIdRoute
   '/api/public/backfill-content-pages': typeof ApiPublicBackfillContentPagesRoute
   '/api/public/track-city-click': typeof ApiPublicTrackCityClickRoute
-  '/directory/$category/$state': typeof DirectoryCategoryStateRouteWithChildren
   '/help-center/$category/$slug': typeof HelpCenterCategorySlugRoute
-  '/l/$slug/$id': typeof LSlugIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
-  '/pool-builders/$state/$city': typeof PoolBuildersStateCityRoute
-  '/providers/$slug/claim': typeof ProvidersSlugClaimRoute
-  '/providers/$slug/manage': typeof ProvidersSlugManageRoute
   '/help-center/$category': typeof HelpCenterCategoryIndexRoute
   '/api/certificates/$uid/pdf': typeof ApiCertificatesUidPdfRoute
   '/api/public/hooks/competitor-radar-scan': typeof ApiPublicHooksCompetitorRadarScanRoute
@@ -979,7 +500,6 @@ export interface FileRoutesByTo {
   '/api/public/hooks/seo-fix-worker': typeof ApiPublicHooksSeoFixWorkerRoute
   '/api/public/hooks/seo-self-test': typeof ApiPublicHooksSeoSelfTestRoute
   '/api/public/hooks/sync-listings': typeof ApiPublicHooksSyncListingsRoute
-  '/directory/$category/$state/$city': typeof DirectoryCategoryStateCityRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -987,44 +507,16 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/academy': typeof AcademyRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
-  '/blog': typeof BlogRouteWithChildren
-  '/directory': typeof DirectoryRouteWithChildren
-  '/landing-page': typeof LandingPageRoute
-  '/pools-directory-sitemap.xml': typeof PoolsDirectorySitemapDotxmlRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
-  '/providers': typeof ProvidersRouteWithChildren
   '/referral': typeof ReferralRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap-default.xml': typeof SitemapDefaultDotxmlRoute
-  '/sitemap-directory.xml': typeof SitemapDirectoryDotxmlRoute
-  '/sitemap-hub.xml': typeof SitemapHubDotxmlRoute
   '/sitemap-index.xml': typeof SitemapIndexDotxmlRoute
-  '/sitemap-pages-academy.xml': typeof SitemapPagesAcademyDotxmlRoute
-  '/sitemap-pages-advocacy.xml': typeof SitemapPagesAdvocacyDotxmlRoute
-  '/sitemap-pages-articles.xml': typeof SitemapPagesArticlesDotxmlRoute
-  '/sitemap-pages-cities.xml': typeof SitemapPagesCitiesDotxmlRoute
-  '/sitemap-pages-comparisons.xml': typeof SitemapPagesComparisonsDotxmlRoute
-  '/sitemap-pages-event-guides.xml': typeof SitemapPagesEventGuidesDotxmlRoute
-  '/sitemap-pages-host-acquisition.xml': typeof SitemapPagesHostAcquisitionDotxmlRoute
-  '/sitemap-pages-money.xml': typeof SitemapPagesMoneyDotxmlRoute
-  '/sitemap-pages-spanish.xml': typeof SitemapPagesSpanishDotxmlRoute
-  '/sitemap-pages-swim-instructor.xml': typeof SitemapPagesSwimInstructorDotxmlRoute
-  '/sitemap-recent-pages.xml': typeof SitemapRecentPagesDotxmlRoute
   '/sitemap-static.xml': typeof SitemapStaticDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/sm-74buq58v-ad.xml': typeof Sm74buq58vAdDotxmlRoute
-  '/sm-74buq58v-cn.xml': typeof Sm74buq58vCnDotxmlRoute
-  '/sm-74buq58v-cr.xml': typeof Sm74buq58vCrDotxmlRoute
-  '/sm-74buq58v-ev.xml': typeof Sm74buq58vEvDotxmlRoute
-  '/sm-74buq58v-ho.xml': typeof Sm74buq58vHoDotxmlRoute
-  '/sm-74buq58v-ls.xml': typeof Sm74buq58vLsDotxmlRoute
-  '/sm-74buq58v.xml': typeof Sm74buq58vDotxmlRoute
-  '/sm-amenities.xml': typeof SmAmenitiesDotxmlRoute
   '/unsubscribe': typeof UnsubscribeRoute
-  '/academy/$slug': typeof AcademySlugRoute
   '/account/learning': typeof AccountLearningRoute
   '/admin/blog': typeof AdminBlogRoute
   '/admin/cities-heroes': typeof AdminCitiesHeroesRoute
@@ -1056,43 +548,14 @@ export interface FileRoutesById {
   '/admin/site-footer': typeof AdminSiteFooterRoute
   '/admin/team': typeof AdminTeamRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
-  '/blog/$slug': typeof BlogSlugRoute
-  '/category/$slug': typeof CategorySlugRoute
-  '/directory/$category': typeof DirectoryCategoryRouteWithChildren
-  '/directory/list': typeof DirectoryListRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
-  '/host-tools/$slug': typeof HostToolsSlugRoute
-  '/p/$': typeof PSplatRoute
-  '/p/$slug': typeof PSlugRoute
-  '/p/all-locations': typeof PAllLocationsRoute
-  '/p/earnings-calculator': typeof PEarningsCalculatorRoute
-  '/p/free-host-tools': typeof PFreeHostToolsRoute
-  '/p/giggster-vs-pool-rental-near-me': typeof PGiggsterVsPoolRentalNearMeRoute
-  '/p/giggster-vs-pool-rental-near-me-in-$city': typeof PGiggsterVsPoolRentalNearMeInCityRoute
-  '/p/hosting': typeof PHostingRoute
-  '/p/how-it-works': typeof PHowItWorksRoute
-  '/p/peerspace-vs-pool-rental-near-me': typeof PPeerspaceVsPoolRentalNearMeRoute
-  '/p/peerspace-vs-pool-rental-near-me-in-$city': typeof PPeerspaceVsPoolRentalNearMeInCityRoute
-  '/p/swimply-alternative-vs-pool-rental-near-me': typeof PSwimplyAlternativeVsPoolRentalNearMeRoute
-  '/pool-builders/$state': typeof PoolBuildersStateRouteWithChildren
-  '/pool-rental-laws/$city': typeof PoolRentalLawsCityRoute
-  '/pool-rental/$city': typeof PoolRentalCityRoute
-  '/providers/$slug': typeof ProvidersSlugRouteWithChildren
   '/verify/$uid': typeof VerifyUidRoute
-  '/academy/': typeof AcademyIndexRoute
   '/help-center/': typeof HelpCenterIndexRoute
-  '/host-tools/': typeof HostToolsIndexRoute
-  '/pool-builders/': typeof PoolBuildersIndexRoute
   '/admin/learning/$userId': typeof AdminLearningUserIdRoute
   '/api/public/backfill-content-pages': typeof ApiPublicBackfillContentPagesRoute
   '/api/public/track-city-click': typeof ApiPublicTrackCityClickRoute
-  '/directory/$category/$state': typeof DirectoryCategoryStateRouteWithChildren
   '/help-center/$category/$slug': typeof HelpCenterCategorySlugRoute
-  '/l/$slug/$id': typeof LSlugIdRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
-  '/pool-builders/$state/$city': typeof PoolBuildersStateCityRoute
-  '/providers/$slug/claim': typeof ProvidersSlugClaimRoute
-  '/providers/$slug/manage': typeof ProvidersSlugManageRoute
   '/help-center/$category/': typeof HelpCenterCategoryIndexRoute
   '/api/certificates/$uid/pdf': typeof ApiCertificatesUidPdfRoute
   '/api/public/hooks/competitor-radar-scan': typeof ApiPublicHooksCompetitorRadarScanRoute
@@ -1100,7 +563,6 @@ export interface FileRoutesById {
   '/api/public/hooks/seo-fix-worker': typeof ApiPublicHooksSeoFixWorkerRoute
   '/api/public/hooks/seo-self-test': typeof ApiPublicHooksSeoSelfTestRoute
   '/api/public/hooks/sync-listings': typeof ApiPublicHooksSyncListingsRoute
-  '/directory/$category/$state/$city': typeof DirectoryCategoryStateCityRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -1109,44 +571,16 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/academy'
     | '/admin'
     | '/auth'
-    | '/blog'
-    | '/directory'
-    | '/landing-page'
-    | '/pools-directory-sitemap.xml'
     | '/privacy-policy'
-    | '/providers'
     | '/referral'
     | '/robots.txt'
     | '/sitemap-default.xml'
-    | '/sitemap-directory.xml'
-    | '/sitemap-hub.xml'
     | '/sitemap-index.xml'
-    | '/sitemap-pages-academy.xml'
-    | '/sitemap-pages-advocacy.xml'
-    | '/sitemap-pages-articles.xml'
-    | '/sitemap-pages-cities.xml'
-    | '/sitemap-pages-comparisons.xml'
-    | '/sitemap-pages-event-guides.xml'
-    | '/sitemap-pages-host-acquisition.xml'
-    | '/sitemap-pages-money.xml'
-    | '/sitemap-pages-spanish.xml'
-    | '/sitemap-pages-swim-instructor.xml'
-    | '/sitemap-recent-pages.xml'
     | '/sitemap-static.xml'
     | '/sitemap.xml'
-    | '/sm-74buq58v-ad.xml'
-    | '/sm-74buq58v-cn.xml'
-    | '/sm-74buq58v-cr.xml'
-    | '/sm-74buq58v-ev.xml'
-    | '/sm-74buq58v-ho.xml'
-    | '/sm-74buq58v-ls.xml'
-    | '/sm-74buq58v.xml'
-    | '/sm-amenities.xml'
     | '/unsubscribe'
-    | '/academy/$slug'
     | '/account/learning'
     | '/admin/blog'
     | '/admin/cities-heroes'
@@ -1178,43 +612,14 @@ export interface FileRouteTypes {
     | '/admin/site-footer'
     | '/admin/team'
     | '/auth/reset-password'
-    | '/blog/$slug'
-    | '/category/$slug'
-    | '/directory/$category'
-    | '/directory/list'
     | '/email/unsubscribe'
-    | '/host-tools/$slug'
-    | '/p/$'
-    | '/p/$slug'
-    | '/p/all-locations'
-    | '/p/earnings-calculator'
-    | '/p/free-host-tools'
-    | '/p/giggster-vs-pool-rental-near-me'
-    | '/p/giggster-vs-pool-rental-near-me-in-$city'
-    | '/p/hosting'
-    | '/p/how-it-works'
-    | '/p/peerspace-vs-pool-rental-near-me'
-    | '/p/peerspace-vs-pool-rental-near-me-in-$city'
-    | '/p/swimply-alternative-vs-pool-rental-near-me'
-    | '/pool-builders/$state'
-    | '/pool-rental-laws/$city'
-    | '/pool-rental/$city'
-    | '/providers/$slug'
     | '/verify/$uid'
-    | '/academy/'
     | '/help-center/'
-    | '/host-tools/'
-    | '/pool-builders/'
     | '/admin/learning/$userId'
     | '/api/public/backfill-content-pages'
     | '/api/public/track-city-click'
-    | '/directory/$category/$state'
     | '/help-center/$category/$slug'
-    | '/l/$slug/$id'
     | '/lovable/email/suppression'
-    | '/pool-builders/$state/$city'
-    | '/providers/$slug/claim'
-    | '/providers/$slug/manage'
     | '/help-center/$category/'
     | '/api/certificates/$uid/pdf'
     | '/api/public/hooks/competitor-radar-scan'
@@ -1222,7 +627,6 @@ export interface FileRouteTypes {
     | '/api/public/hooks/seo-fix-worker'
     | '/api/public/hooks/seo-self-test'
     | '/api/public/hooks/sync-listings'
-    | '/directory/$category/$state/$city'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/send'
@@ -1231,41 +635,14 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/auth'
-    | '/blog'
-    | '/directory'
-    | '/landing-page'
-    | '/pools-directory-sitemap.xml'
     | '/privacy-policy'
-    | '/providers'
     | '/referral'
     | '/robots.txt'
     | '/sitemap-default.xml'
-    | '/sitemap-directory.xml'
-    | '/sitemap-hub.xml'
     | '/sitemap-index.xml'
-    | '/sitemap-pages-academy.xml'
-    | '/sitemap-pages-advocacy.xml'
-    | '/sitemap-pages-articles.xml'
-    | '/sitemap-pages-cities.xml'
-    | '/sitemap-pages-comparisons.xml'
-    | '/sitemap-pages-event-guides.xml'
-    | '/sitemap-pages-host-acquisition.xml'
-    | '/sitemap-pages-money.xml'
-    | '/sitemap-pages-spanish.xml'
-    | '/sitemap-pages-swim-instructor.xml'
-    | '/sitemap-recent-pages.xml'
     | '/sitemap-static.xml'
     | '/sitemap.xml'
-    | '/sm-74buq58v-ad.xml'
-    | '/sm-74buq58v-cn.xml'
-    | '/sm-74buq58v-cr.xml'
-    | '/sm-74buq58v-ev.xml'
-    | '/sm-74buq58v-ho.xml'
-    | '/sm-74buq58v-ls.xml'
-    | '/sm-74buq58v.xml'
-    | '/sm-amenities.xml'
     | '/unsubscribe'
-    | '/academy/$slug'
     | '/account/learning'
     | '/admin/blog'
     | '/admin/cities-heroes'
@@ -1297,43 +674,14 @@ export interface FileRouteTypes {
     | '/admin/site-footer'
     | '/admin/team'
     | '/auth/reset-password'
-    | '/blog/$slug'
-    | '/category/$slug'
-    | '/directory/$category'
-    | '/directory/list'
     | '/email/unsubscribe'
-    | '/host-tools/$slug'
-    | '/p/$'
-    | '/p/$slug'
-    | '/p/all-locations'
-    | '/p/earnings-calculator'
-    | '/p/free-host-tools'
-    | '/p/giggster-vs-pool-rental-near-me'
-    | '/p/giggster-vs-pool-rental-near-me-in-$city'
-    | '/p/hosting'
-    | '/p/how-it-works'
-    | '/p/peerspace-vs-pool-rental-near-me'
-    | '/p/peerspace-vs-pool-rental-near-me-in-$city'
-    | '/p/swimply-alternative-vs-pool-rental-near-me'
-    | '/pool-builders/$state'
-    | '/pool-rental-laws/$city'
-    | '/pool-rental/$city'
-    | '/providers/$slug'
     | '/verify/$uid'
-    | '/academy'
     | '/help-center'
-    | '/host-tools'
-    | '/pool-builders'
     | '/admin/learning/$userId'
     | '/api/public/backfill-content-pages'
     | '/api/public/track-city-click'
-    | '/directory/$category/$state'
     | '/help-center/$category/$slug'
-    | '/l/$slug/$id'
     | '/lovable/email/suppression'
-    | '/pool-builders/$state/$city'
-    | '/providers/$slug/claim'
-    | '/providers/$slug/manage'
     | '/help-center/$category'
     | '/api/certificates/$uid/pdf'
     | '/api/public/hooks/competitor-radar-scan'
@@ -1341,51 +689,22 @@ export interface FileRouteTypes {
     | '/api/public/hooks/seo-fix-worker'
     | '/api/public/hooks/seo-self-test'
     | '/api/public/hooks/sync-listings'
-    | '/directory/$category/$state/$city'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/send'
   id:
     | '__root__'
     | '/'
-    | '/academy'
     | '/admin'
     | '/auth'
-    | '/blog'
-    | '/directory'
-    | '/landing-page'
-    | '/pools-directory-sitemap.xml'
     | '/privacy-policy'
-    | '/providers'
     | '/referral'
     | '/robots.txt'
     | '/sitemap-default.xml'
-    | '/sitemap-directory.xml'
-    | '/sitemap-hub.xml'
     | '/sitemap-index.xml'
-    | '/sitemap-pages-academy.xml'
-    | '/sitemap-pages-advocacy.xml'
-    | '/sitemap-pages-articles.xml'
-    | '/sitemap-pages-cities.xml'
-    | '/sitemap-pages-comparisons.xml'
-    | '/sitemap-pages-event-guides.xml'
-    | '/sitemap-pages-host-acquisition.xml'
-    | '/sitemap-pages-money.xml'
-    | '/sitemap-pages-spanish.xml'
-    | '/sitemap-pages-swim-instructor.xml'
-    | '/sitemap-recent-pages.xml'
     | '/sitemap-static.xml'
     | '/sitemap.xml'
-    | '/sm-74buq58v-ad.xml'
-    | '/sm-74buq58v-cn.xml'
-    | '/sm-74buq58v-cr.xml'
-    | '/sm-74buq58v-ev.xml'
-    | '/sm-74buq58v-ho.xml'
-    | '/sm-74buq58v-ls.xml'
-    | '/sm-74buq58v.xml'
-    | '/sm-amenities.xml'
     | '/unsubscribe'
-    | '/academy/$slug'
     | '/account/learning'
     | '/admin/blog'
     | '/admin/cities-heroes'
@@ -1417,43 +736,14 @@ export interface FileRouteTypes {
     | '/admin/site-footer'
     | '/admin/team'
     | '/auth/reset-password'
-    | '/blog/$slug'
-    | '/category/$slug'
-    | '/directory/$category'
-    | '/directory/list'
     | '/email/unsubscribe'
-    | '/host-tools/$slug'
-    | '/p/$'
-    | '/p/$slug'
-    | '/p/all-locations'
-    | '/p/earnings-calculator'
-    | '/p/free-host-tools'
-    | '/p/giggster-vs-pool-rental-near-me'
-    | '/p/giggster-vs-pool-rental-near-me-in-$city'
-    | '/p/hosting'
-    | '/p/how-it-works'
-    | '/p/peerspace-vs-pool-rental-near-me'
-    | '/p/peerspace-vs-pool-rental-near-me-in-$city'
-    | '/p/swimply-alternative-vs-pool-rental-near-me'
-    | '/pool-builders/$state'
-    | '/pool-rental-laws/$city'
-    | '/pool-rental/$city'
-    | '/providers/$slug'
     | '/verify/$uid'
-    | '/academy/'
     | '/help-center/'
-    | '/host-tools/'
-    | '/pool-builders/'
     | '/admin/learning/$userId'
     | '/api/public/backfill-content-pages'
     | '/api/public/track-city-click'
-    | '/directory/$category/$state'
     | '/help-center/$category/$slug'
-    | '/l/$slug/$id'
     | '/lovable/email/suppression'
-    | '/pool-builders/$state/$city'
-    | '/providers/$slug/claim'
-    | '/providers/$slug/manage'
     | '/help-center/$category/'
     | '/api/certificates/$uid/pdf'
     | '/api/public/hooks/competitor-radar-scan'
@@ -1461,7 +751,6 @@ export interface FileRouteTypes {
     | '/api/public/hooks/seo-fix-worker'
     | '/api/public/hooks/seo-self-test'
     | '/api/public/hooks/sync-listings'
-    | '/directory/$category/$state/$city'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/send'
@@ -1469,70 +758,23 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AcademyRoute: typeof AcademyRouteWithChildren
   AdminRoute: typeof AdminRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
-  BlogRoute: typeof BlogRouteWithChildren
-  DirectoryRoute: typeof DirectoryRouteWithChildren
-  LandingPageRoute: typeof LandingPageRoute
-  PoolsDirectorySitemapDotxmlRoute: typeof PoolsDirectorySitemapDotxmlRoute
   PrivacyPolicyRoute: typeof PrivacyPolicyRoute
-  ProvidersRoute: typeof ProvidersRouteWithChildren
   ReferralRoute: typeof ReferralRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapDefaultDotxmlRoute: typeof SitemapDefaultDotxmlRoute
-  SitemapDirectoryDotxmlRoute: typeof SitemapDirectoryDotxmlRoute
-  SitemapHubDotxmlRoute: typeof SitemapHubDotxmlRoute
   SitemapIndexDotxmlRoute: typeof SitemapIndexDotxmlRoute
-  SitemapPagesAcademyDotxmlRoute: typeof SitemapPagesAcademyDotxmlRoute
-  SitemapPagesAdvocacyDotxmlRoute: typeof SitemapPagesAdvocacyDotxmlRoute
-  SitemapPagesArticlesDotxmlRoute: typeof SitemapPagesArticlesDotxmlRoute
-  SitemapPagesCitiesDotxmlRoute: typeof SitemapPagesCitiesDotxmlRoute
-  SitemapPagesComparisonsDotxmlRoute: typeof SitemapPagesComparisonsDotxmlRoute
-  SitemapPagesEventGuidesDotxmlRoute: typeof SitemapPagesEventGuidesDotxmlRoute
-  SitemapPagesHostAcquisitionDotxmlRoute: typeof SitemapPagesHostAcquisitionDotxmlRoute
-  SitemapPagesMoneyDotxmlRoute: typeof SitemapPagesMoneyDotxmlRoute
-  SitemapPagesSpanishDotxmlRoute: typeof SitemapPagesSpanishDotxmlRoute
-  SitemapPagesSwimInstructorDotxmlRoute: typeof SitemapPagesSwimInstructorDotxmlRoute
-  SitemapRecentPagesDotxmlRoute: typeof SitemapRecentPagesDotxmlRoute
   SitemapStaticDotxmlRoute: typeof SitemapStaticDotxmlRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
-  Sm74buq58vAdDotxmlRoute: typeof Sm74buq58vAdDotxmlRoute
-  Sm74buq58vCnDotxmlRoute: typeof Sm74buq58vCnDotxmlRoute
-  Sm74buq58vCrDotxmlRoute: typeof Sm74buq58vCrDotxmlRoute
-  Sm74buq58vEvDotxmlRoute: typeof Sm74buq58vEvDotxmlRoute
-  Sm74buq58vHoDotxmlRoute: typeof Sm74buq58vHoDotxmlRoute
-  Sm74buq58vLsDotxmlRoute: typeof Sm74buq58vLsDotxmlRoute
-  Sm74buq58vDotxmlRoute: typeof Sm74buq58vDotxmlRoute
-  SmAmenitiesDotxmlRoute: typeof SmAmenitiesDotxmlRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
   AccountLearningRoute: typeof AccountLearningRoute
-  CategorySlugRoute: typeof CategorySlugRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
-  HostToolsSlugRoute: typeof HostToolsSlugRoute
-  PSplatRoute: typeof PSplatRoute
-  PSlugRoute: typeof PSlugRoute
-  PAllLocationsRoute: typeof PAllLocationsRoute
-  PEarningsCalculatorRoute: typeof PEarningsCalculatorRoute
-  PFreeHostToolsRoute: typeof PFreeHostToolsRoute
-  PGiggsterVsPoolRentalNearMeRoute: typeof PGiggsterVsPoolRentalNearMeRoute
-  PGiggsterVsPoolRentalNearMeInCityRoute: typeof PGiggsterVsPoolRentalNearMeInCityRoute
-  PHostingRoute: typeof PHostingRoute
-  PHowItWorksRoute: typeof PHowItWorksRoute
-  PPeerspaceVsPoolRentalNearMeRoute: typeof PPeerspaceVsPoolRentalNearMeRoute
-  PPeerspaceVsPoolRentalNearMeInCityRoute: typeof PPeerspaceVsPoolRentalNearMeInCityRoute
-  PSwimplyAlternativeVsPoolRentalNearMeRoute: typeof PSwimplyAlternativeVsPoolRentalNearMeRoute
-  PoolBuildersStateRoute: typeof PoolBuildersStateRouteWithChildren
-  PoolRentalLawsCityRoute: typeof PoolRentalLawsCityRoute
-  PoolRentalCityRoute: typeof PoolRentalCityRoute
   VerifyUidRoute: typeof VerifyUidRoute
   HelpCenterIndexRoute: typeof HelpCenterIndexRoute
-  HostToolsIndexRoute: typeof HostToolsIndexRoute
-  PoolBuildersIndexRoute: typeof PoolBuildersIndexRoute
   ApiPublicBackfillContentPagesRoute: typeof ApiPublicBackfillContentPagesRoute
   ApiPublicTrackCityClickRoute: typeof ApiPublicTrackCityClickRoute
   HelpCenterCategorySlugRoute: typeof HelpCenterCategorySlugRoute
-  LSlugIdRoute: typeof LSlugIdRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   HelpCenterCategoryIndexRoute: typeof HelpCenterCategoryIndexRoute
   ApiCertificatesUidPdfRoute: typeof ApiCertificatesUidPdfRoute
@@ -1555,62 +797,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UnsubscribeRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/sm-amenities.xml': {
-      id: '/sm-amenities.xml'
-      path: '/sm-amenities.xml'
-      fullPath: '/sm-amenities.xml'
-      preLoaderRoute: typeof SmAmenitiesDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sm-74buq58v.xml': {
-      id: '/sm-74buq58v.xml'
-      path: '/sm-74buq58v.xml'
-      fullPath: '/sm-74buq58v.xml'
-      preLoaderRoute: typeof Sm74buq58vDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sm-74buq58v-ls.xml': {
-      id: '/sm-74buq58v-ls.xml'
-      path: '/sm-74buq58v-ls.xml'
-      fullPath: '/sm-74buq58v-ls.xml'
-      preLoaderRoute: typeof Sm74buq58vLsDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sm-74buq58v-ho.xml': {
-      id: '/sm-74buq58v-ho.xml'
-      path: '/sm-74buq58v-ho.xml'
-      fullPath: '/sm-74buq58v-ho.xml'
-      preLoaderRoute: typeof Sm74buq58vHoDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sm-74buq58v-ev.xml': {
-      id: '/sm-74buq58v-ev.xml'
-      path: '/sm-74buq58v-ev.xml'
-      fullPath: '/sm-74buq58v-ev.xml'
-      preLoaderRoute: typeof Sm74buq58vEvDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sm-74buq58v-cr.xml': {
-      id: '/sm-74buq58v-cr.xml'
-      path: '/sm-74buq58v-cr.xml'
-      fullPath: '/sm-74buq58v-cr.xml'
-      preLoaderRoute: typeof Sm74buq58vCrDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sm-74buq58v-cn.xml': {
-      id: '/sm-74buq58v-cn.xml'
-      path: '/sm-74buq58v-cn.xml'
-      fullPath: '/sm-74buq58v-cn.xml'
-      preLoaderRoute: typeof Sm74buq58vCnDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sm-74buq58v-ad.xml': {
-      id: '/sm-74buq58v-ad.xml'
-      path: '/sm-74buq58v-ad.xml'
-      fullPath: '/sm-74buq58v-ad.xml'
-      preLoaderRoute: typeof Sm74buq58vAdDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/sitemap.xml': {
       id: '/sitemap.xml'
       path: '/sitemap.xml'
@@ -1625,102 +811,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SitemapStaticDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/sitemap-recent-pages.xml': {
-      id: '/sitemap-recent-pages.xml'
-      path: '/sitemap-recent-pages.xml'
-      fullPath: '/sitemap-recent-pages.xml'
-      preLoaderRoute: typeof SitemapRecentPagesDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap-pages-swim-instructor.xml': {
-      id: '/sitemap-pages-swim-instructor.xml'
-      path: '/sitemap-pages-swim-instructor.xml'
-      fullPath: '/sitemap-pages-swim-instructor.xml'
-      preLoaderRoute: typeof SitemapPagesSwimInstructorDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap-pages-spanish.xml': {
-      id: '/sitemap-pages-spanish.xml'
-      path: '/sitemap-pages-spanish.xml'
-      fullPath: '/sitemap-pages-spanish.xml'
-      preLoaderRoute: typeof SitemapPagesSpanishDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap-pages-money.xml': {
-      id: '/sitemap-pages-money.xml'
-      path: '/sitemap-pages-money.xml'
-      fullPath: '/sitemap-pages-money.xml'
-      preLoaderRoute: typeof SitemapPagesMoneyDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap-pages-host-acquisition.xml': {
-      id: '/sitemap-pages-host-acquisition.xml'
-      path: '/sitemap-pages-host-acquisition.xml'
-      fullPath: '/sitemap-pages-host-acquisition.xml'
-      preLoaderRoute: typeof SitemapPagesHostAcquisitionDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap-pages-event-guides.xml': {
-      id: '/sitemap-pages-event-guides.xml'
-      path: '/sitemap-pages-event-guides.xml'
-      fullPath: '/sitemap-pages-event-guides.xml'
-      preLoaderRoute: typeof SitemapPagesEventGuidesDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap-pages-comparisons.xml': {
-      id: '/sitemap-pages-comparisons.xml'
-      path: '/sitemap-pages-comparisons.xml'
-      fullPath: '/sitemap-pages-comparisons.xml'
-      preLoaderRoute: typeof SitemapPagesComparisonsDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap-pages-cities.xml': {
-      id: '/sitemap-pages-cities.xml'
-      path: '/sitemap-pages-cities.xml'
-      fullPath: '/sitemap-pages-cities.xml'
-      preLoaderRoute: typeof SitemapPagesCitiesDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap-pages-articles.xml': {
-      id: '/sitemap-pages-articles.xml'
-      path: '/sitemap-pages-articles.xml'
-      fullPath: '/sitemap-pages-articles.xml'
-      preLoaderRoute: typeof SitemapPagesArticlesDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap-pages-advocacy.xml': {
-      id: '/sitemap-pages-advocacy.xml'
-      path: '/sitemap-pages-advocacy.xml'
-      fullPath: '/sitemap-pages-advocacy.xml'
-      preLoaderRoute: typeof SitemapPagesAdvocacyDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap-pages-academy.xml': {
-      id: '/sitemap-pages-academy.xml'
-      path: '/sitemap-pages-academy.xml'
-      fullPath: '/sitemap-pages-academy.xml'
-      preLoaderRoute: typeof SitemapPagesAcademyDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/sitemap-index.xml': {
       id: '/sitemap-index.xml'
       path: '/sitemap-index.xml'
       fullPath: '/sitemap-index.xml'
       preLoaderRoute: typeof SitemapIndexDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap-hub.xml': {
-      id: '/sitemap-hub.xml'
-      path: '/sitemap-hub.xml'
-      fullPath: '/sitemap-hub.xml'
-      preLoaderRoute: typeof SitemapHubDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap-directory.xml': {
-      id: '/sitemap-directory.xml'
-      path: '/sitemap-directory.xml'
-      fullPath: '/sitemap-directory.xml'
-      preLoaderRoute: typeof SitemapDirectoryDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap-default.xml': {
@@ -1744,46 +839,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReferralRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/providers': {
-      id: '/providers'
-      path: '/providers'
-      fullPath: '/providers'
-      preLoaderRoute: typeof ProvidersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/privacy-policy': {
       id: '/privacy-policy'
       path: '/privacy-policy'
       fullPath: '/privacy-policy'
       preLoaderRoute: typeof PrivacyPolicyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/pools-directory-sitemap.xml': {
-      id: '/pools-directory-sitemap.xml'
-      path: '/pools-directory-sitemap.xml'
-      fullPath: '/pools-directory-sitemap.xml'
-      preLoaderRoute: typeof PoolsDirectorySitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/landing-page': {
-      id: '/landing-page'
-      path: '/landing-page'
-      fullPath: '/landing-page'
-      preLoaderRoute: typeof LandingPageRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/directory': {
-      id: '/directory'
-      path: '/directory'
-      fullPath: '/directory'
-      preLoaderRoute: typeof DirectoryRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/blog': {
-      id: '/blog'
-      path: '/blog'
-      fullPath: '/blog'
-      preLoaderRoute: typeof BlogRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -1800,32 +860,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/academy': {
-      id: '/academy'
-      path: '/academy'
-      fullPath: '/academy'
-      preLoaderRoute: typeof AcademyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/pool-builders/': {
-      id: '/pool-builders/'
-      path: '/pool-builders'
-      fullPath: '/pool-builders/'
-      preLoaderRoute: typeof PoolBuildersIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/host-tools/': {
-      id: '/host-tools/'
-      path: '/host-tools'
-      fullPath: '/host-tools/'
-      preLoaderRoute: typeof HostToolsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/help-center/': {
@@ -1835,137 +874,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HelpCenterIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/academy/': {
-      id: '/academy/'
-      path: '/'
-      fullPath: '/academy/'
-      preLoaderRoute: typeof AcademyIndexRouteImport
-      parentRoute: typeof AcademyRoute
-    }
     '/verify/$uid': {
       id: '/verify/$uid'
       path: '/verify/$uid'
       fullPath: '/verify/$uid'
       preLoaderRoute: typeof VerifyUidRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/providers/$slug': {
-      id: '/providers/$slug'
-      path: '/$slug'
-      fullPath: '/providers/$slug'
-      preLoaderRoute: typeof ProvidersSlugRouteImport
-      parentRoute: typeof ProvidersRoute
-    }
-    '/pool-rental/$city': {
-      id: '/pool-rental/$city'
-      path: '/pool-rental/$city'
-      fullPath: '/pool-rental/$city'
-      preLoaderRoute: typeof PoolRentalCityRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/pool-rental-laws/$city': {
-      id: '/pool-rental-laws/$city'
-      path: '/pool-rental-laws/$city'
-      fullPath: '/pool-rental-laws/$city'
-      preLoaderRoute: typeof PoolRentalLawsCityRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/pool-builders/$state': {
-      id: '/pool-builders/$state'
-      path: '/pool-builders/$state'
-      fullPath: '/pool-builders/$state'
-      preLoaderRoute: typeof PoolBuildersStateRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/p/swimply-alternative-vs-pool-rental-near-me': {
-      id: '/p/swimply-alternative-vs-pool-rental-near-me'
-      path: '/p/swimply-alternative-vs-pool-rental-near-me'
-      fullPath: '/p/swimply-alternative-vs-pool-rental-near-me'
-      preLoaderRoute: typeof PSwimplyAlternativeVsPoolRentalNearMeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/p/peerspace-vs-pool-rental-near-me-in-$city': {
-      id: '/p/peerspace-vs-pool-rental-near-me-in-$city'
-      path: '/p/peerspace-vs-pool-rental-near-me-in-$city'
-      fullPath: '/p/peerspace-vs-pool-rental-near-me-in-$city'
-      preLoaderRoute: typeof PPeerspaceVsPoolRentalNearMeInCityRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/p/peerspace-vs-pool-rental-near-me': {
-      id: '/p/peerspace-vs-pool-rental-near-me'
-      path: '/p/peerspace-vs-pool-rental-near-me'
-      fullPath: '/p/peerspace-vs-pool-rental-near-me'
-      preLoaderRoute: typeof PPeerspaceVsPoolRentalNearMeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/p/how-it-works': {
-      id: '/p/how-it-works'
-      path: '/p/how-it-works'
-      fullPath: '/p/how-it-works'
-      preLoaderRoute: typeof PHowItWorksRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/p/hosting': {
-      id: '/p/hosting'
-      path: '/p/hosting'
-      fullPath: '/p/hosting'
-      preLoaderRoute: typeof PHostingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/p/giggster-vs-pool-rental-near-me-in-$city': {
-      id: '/p/giggster-vs-pool-rental-near-me-in-$city'
-      path: '/p/giggster-vs-pool-rental-near-me-in-$city'
-      fullPath: '/p/giggster-vs-pool-rental-near-me-in-$city'
-      preLoaderRoute: typeof PGiggsterVsPoolRentalNearMeInCityRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/p/giggster-vs-pool-rental-near-me': {
-      id: '/p/giggster-vs-pool-rental-near-me'
-      path: '/p/giggster-vs-pool-rental-near-me'
-      fullPath: '/p/giggster-vs-pool-rental-near-me'
-      preLoaderRoute: typeof PGiggsterVsPoolRentalNearMeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/p/free-host-tools': {
-      id: '/p/free-host-tools'
-      path: '/p/free-host-tools'
-      fullPath: '/p/free-host-tools'
-      preLoaderRoute: typeof PFreeHostToolsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/p/earnings-calculator': {
-      id: '/p/earnings-calculator'
-      path: '/p/earnings-calculator'
-      fullPath: '/p/earnings-calculator'
-      preLoaderRoute: typeof PEarningsCalculatorRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/p/all-locations': {
-      id: '/p/all-locations'
-      path: '/p/all-locations'
-      fullPath: '/p/all-locations'
-      preLoaderRoute: typeof PAllLocationsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/p/$slug': {
-      id: '/p/$slug'
-      path: '/p/$slug'
-      fullPath: '/p/$slug'
-      preLoaderRoute: typeof PSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/p/$': {
-      id: '/p/$'
-      path: '/p/$'
-      fullPath: '/p/$'
-      preLoaderRoute: typeof PSplatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/host-tools/$slug': {
-      id: '/host-tools/$slug'
-      path: '/host-tools/$slug'
-      fullPath: '/host-tools/$slug'
-      preLoaderRoute: typeof HostToolsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/email/unsubscribe': {
@@ -1974,34 +887,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/email/unsubscribe'
       preLoaderRoute: typeof EmailUnsubscribeRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/directory/list': {
-      id: '/directory/list'
-      path: '/list'
-      fullPath: '/directory/list'
-      preLoaderRoute: typeof DirectoryListRouteImport
-      parentRoute: typeof DirectoryRoute
-    }
-    '/directory/$category': {
-      id: '/directory/$category'
-      path: '/$category'
-      fullPath: '/directory/$category'
-      preLoaderRoute: typeof DirectoryCategoryRouteImport
-      parentRoute: typeof DirectoryRoute
-    }
-    '/category/$slug': {
-      id: '/category/$slug'
-      path: '/category/$slug'
-      fullPath: '/category/$slug'
-      preLoaderRoute: typeof CategorySlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/blog/$slug': {
-      id: '/blog/$slug'
-      path: '/$slug'
-      fullPath: '/blog/$slug'
-      preLoaderRoute: typeof BlogSlugRouteImport
-      parentRoute: typeof BlogRoute
     }
     '/auth/reset-password': {
       id: '/auth/reset-password'
@@ -2220,40 +1105,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountLearningRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/academy/$slug': {
-      id: '/academy/$slug'
-      path: '/$slug'
-      fullPath: '/academy/$slug'
-      preLoaderRoute: typeof AcademySlugRouteImport
-      parentRoute: typeof AcademyRoute
-    }
     '/help-center/$category/': {
       id: '/help-center/$category/'
       path: '/help-center/$category'
       fullPath: '/help-center/$category/'
       preLoaderRoute: typeof HelpCenterCategoryIndexRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/providers/$slug/manage': {
-      id: '/providers/$slug/manage'
-      path: '/manage'
-      fullPath: '/providers/$slug/manage'
-      preLoaderRoute: typeof ProvidersSlugManageRouteImport
-      parentRoute: typeof ProvidersSlugRoute
-    }
-    '/providers/$slug/claim': {
-      id: '/providers/$slug/claim'
-      path: '/claim'
-      fullPath: '/providers/$slug/claim'
-      preLoaderRoute: typeof ProvidersSlugClaimRouteImport
-      parentRoute: typeof ProvidersSlugRoute
-    }
-    '/pool-builders/$state/$city': {
-      id: '/pool-builders/$state/$city'
-      path: '/$city'
-      fullPath: '/pool-builders/$state/$city'
-      preLoaderRoute: typeof PoolBuildersStateCityRouteImport
-      parentRoute: typeof PoolBuildersStateRoute
     }
     '/lovable/email/suppression': {
       id: '/lovable/email/suppression'
@@ -2262,26 +1119,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailSuppressionRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/l/$slug/$id': {
-      id: '/l/$slug/$id'
-      path: '/l/$slug/$id'
-      fullPath: '/l/$slug/$id'
-      preLoaderRoute: typeof LSlugIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/help-center/$category/$slug': {
       id: '/help-center/$category/$slug'
       path: '/help-center/$category/$slug'
       fullPath: '/help-center/$category/$slug'
       preLoaderRoute: typeof HelpCenterCategorySlugRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/directory/$category/$state': {
-      id: '/directory/$category/$state'
-      path: '/$state'
-      fullPath: '/directory/$category/$state'
-      preLoaderRoute: typeof DirectoryCategoryStateRouteImport
-      parentRoute: typeof DirectoryCategoryRoute
     }
     '/api/public/track-city-click': {
       id: '/api/public/track-city-click'
@@ -2324,13 +1167,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/lovable/email/auth/webhook'
       preLoaderRoute: typeof LovableEmailAuthWebhookRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/directory/$category/$state/$city': {
-      id: '/directory/$category/$state/$city'
-      path: '/$city'
-      fullPath: '/directory/$category/$state/$city'
-      preLoaderRoute: typeof DirectoryCategoryStateCityRouteImport
-      parentRoute: typeof DirectoryCategoryStateRoute
     }
     '/api/public/hooks/sync-listings': {
       id: '/api/public/hooks/sync-listings'
@@ -2376,19 +1212,6 @@ declare module '@tanstack/react-router' {
     }
   }
 }
-
-interface AcademyRouteChildren {
-  AcademySlugRoute: typeof AcademySlugRoute
-  AcademyIndexRoute: typeof AcademyIndexRoute
-}
-
-const AcademyRouteChildren: AcademyRouteChildren = {
-  AcademySlugRoute: AcademySlugRoute,
-  AcademyIndexRoute: AcademyIndexRoute,
-}
-
-const AcademyRouteWithChildren =
-  AcademyRoute._addFileChildren(AcademyRouteChildren)
 
 interface AdminLearningRouteChildren {
   AdminLearningUserIdRoute: typeof AdminLearningUserIdRoute
@@ -2478,162 +1301,25 @@ const AuthRouteChildren: AuthRouteChildren = {
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
-interface BlogRouteChildren {
-  BlogSlugRoute: typeof BlogSlugRoute
-}
-
-const BlogRouteChildren: BlogRouteChildren = {
-  BlogSlugRoute: BlogSlugRoute,
-}
-
-const BlogRouteWithChildren = BlogRoute._addFileChildren(BlogRouteChildren)
-
-interface DirectoryCategoryStateRouteChildren {
-  DirectoryCategoryStateCityRoute: typeof DirectoryCategoryStateCityRoute
-}
-
-const DirectoryCategoryStateRouteChildren: DirectoryCategoryStateRouteChildren =
-  {
-    DirectoryCategoryStateCityRoute: DirectoryCategoryStateCityRoute,
-  }
-
-const DirectoryCategoryStateRouteWithChildren =
-  DirectoryCategoryStateRoute._addFileChildren(
-    DirectoryCategoryStateRouteChildren,
-  )
-
-interface DirectoryCategoryRouteChildren {
-  DirectoryCategoryStateRoute: typeof DirectoryCategoryStateRouteWithChildren
-}
-
-const DirectoryCategoryRouteChildren: DirectoryCategoryRouteChildren = {
-  DirectoryCategoryStateRoute: DirectoryCategoryStateRouteWithChildren,
-}
-
-const DirectoryCategoryRouteWithChildren =
-  DirectoryCategoryRoute._addFileChildren(DirectoryCategoryRouteChildren)
-
-interface DirectoryRouteChildren {
-  DirectoryCategoryRoute: typeof DirectoryCategoryRouteWithChildren
-  DirectoryListRoute: typeof DirectoryListRoute
-}
-
-const DirectoryRouteChildren: DirectoryRouteChildren = {
-  DirectoryCategoryRoute: DirectoryCategoryRouteWithChildren,
-  DirectoryListRoute: DirectoryListRoute,
-}
-
-const DirectoryRouteWithChildren = DirectoryRoute._addFileChildren(
-  DirectoryRouteChildren,
-)
-
-interface ProvidersSlugRouteChildren {
-  ProvidersSlugClaimRoute: typeof ProvidersSlugClaimRoute
-  ProvidersSlugManageRoute: typeof ProvidersSlugManageRoute
-}
-
-const ProvidersSlugRouteChildren: ProvidersSlugRouteChildren = {
-  ProvidersSlugClaimRoute: ProvidersSlugClaimRoute,
-  ProvidersSlugManageRoute: ProvidersSlugManageRoute,
-}
-
-const ProvidersSlugRouteWithChildren = ProvidersSlugRoute._addFileChildren(
-  ProvidersSlugRouteChildren,
-)
-
-interface ProvidersRouteChildren {
-  ProvidersSlugRoute: typeof ProvidersSlugRouteWithChildren
-}
-
-const ProvidersRouteChildren: ProvidersRouteChildren = {
-  ProvidersSlugRoute: ProvidersSlugRouteWithChildren,
-}
-
-const ProvidersRouteWithChildren = ProvidersRoute._addFileChildren(
-  ProvidersRouteChildren,
-)
-
-interface PoolBuildersStateRouteChildren {
-  PoolBuildersStateCityRoute: typeof PoolBuildersStateCityRoute
-}
-
-const PoolBuildersStateRouteChildren: PoolBuildersStateRouteChildren = {
-  PoolBuildersStateCityRoute: PoolBuildersStateCityRoute,
-}
-
-const PoolBuildersStateRouteWithChildren =
-  PoolBuildersStateRoute._addFileChildren(PoolBuildersStateRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AcademyRoute: AcademyRouteWithChildren,
   AdminRoute: AdminRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
-  BlogRoute: BlogRouteWithChildren,
-  DirectoryRoute: DirectoryRouteWithChildren,
-  LandingPageRoute: LandingPageRoute,
-  PoolsDirectorySitemapDotxmlRoute: PoolsDirectorySitemapDotxmlRoute,
   PrivacyPolicyRoute: PrivacyPolicyRoute,
-  ProvidersRoute: ProvidersRouteWithChildren,
   ReferralRoute: ReferralRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapDefaultDotxmlRoute: SitemapDefaultDotxmlRoute,
-  SitemapDirectoryDotxmlRoute: SitemapDirectoryDotxmlRoute,
-  SitemapHubDotxmlRoute: SitemapHubDotxmlRoute,
   SitemapIndexDotxmlRoute: SitemapIndexDotxmlRoute,
-  SitemapPagesAcademyDotxmlRoute: SitemapPagesAcademyDotxmlRoute,
-  SitemapPagesAdvocacyDotxmlRoute: SitemapPagesAdvocacyDotxmlRoute,
-  SitemapPagesArticlesDotxmlRoute: SitemapPagesArticlesDotxmlRoute,
-  SitemapPagesCitiesDotxmlRoute: SitemapPagesCitiesDotxmlRoute,
-  SitemapPagesComparisonsDotxmlRoute: SitemapPagesComparisonsDotxmlRoute,
-  SitemapPagesEventGuidesDotxmlRoute: SitemapPagesEventGuidesDotxmlRoute,
-  SitemapPagesHostAcquisitionDotxmlRoute:
-    SitemapPagesHostAcquisitionDotxmlRoute,
-  SitemapPagesMoneyDotxmlRoute: SitemapPagesMoneyDotxmlRoute,
-  SitemapPagesSpanishDotxmlRoute: SitemapPagesSpanishDotxmlRoute,
-  SitemapPagesSwimInstructorDotxmlRoute: SitemapPagesSwimInstructorDotxmlRoute,
-  SitemapRecentPagesDotxmlRoute: SitemapRecentPagesDotxmlRoute,
   SitemapStaticDotxmlRoute: SitemapStaticDotxmlRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
-  Sm74buq58vAdDotxmlRoute: Sm74buq58vAdDotxmlRoute,
-  Sm74buq58vCnDotxmlRoute: Sm74buq58vCnDotxmlRoute,
-  Sm74buq58vCrDotxmlRoute: Sm74buq58vCrDotxmlRoute,
-  Sm74buq58vEvDotxmlRoute: Sm74buq58vEvDotxmlRoute,
-  Sm74buq58vHoDotxmlRoute: Sm74buq58vHoDotxmlRoute,
-  Sm74buq58vLsDotxmlRoute: Sm74buq58vLsDotxmlRoute,
-  Sm74buq58vDotxmlRoute: Sm74buq58vDotxmlRoute,
-  SmAmenitiesDotxmlRoute: SmAmenitiesDotxmlRoute,
   UnsubscribeRoute: UnsubscribeRoute,
   AccountLearningRoute: AccountLearningRoute,
-  CategorySlugRoute: CategorySlugRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
-  HostToolsSlugRoute: HostToolsSlugRoute,
-  PSplatRoute: PSplatRoute,
-  PSlugRoute: PSlugRoute,
-  PAllLocationsRoute: PAllLocationsRoute,
-  PEarningsCalculatorRoute: PEarningsCalculatorRoute,
-  PFreeHostToolsRoute: PFreeHostToolsRoute,
-  PGiggsterVsPoolRentalNearMeRoute: PGiggsterVsPoolRentalNearMeRoute,
-  PGiggsterVsPoolRentalNearMeInCityRoute:
-    PGiggsterVsPoolRentalNearMeInCityRoute,
-  PHostingRoute: PHostingRoute,
-  PHowItWorksRoute: PHowItWorksRoute,
-  PPeerspaceVsPoolRentalNearMeRoute: PPeerspaceVsPoolRentalNearMeRoute,
-  PPeerspaceVsPoolRentalNearMeInCityRoute:
-    PPeerspaceVsPoolRentalNearMeInCityRoute,
-  PSwimplyAlternativeVsPoolRentalNearMeRoute:
-    PSwimplyAlternativeVsPoolRentalNearMeRoute,
-  PoolBuildersStateRoute: PoolBuildersStateRouteWithChildren,
-  PoolRentalLawsCityRoute: PoolRentalLawsCityRoute,
-  PoolRentalCityRoute: PoolRentalCityRoute,
   VerifyUidRoute: VerifyUidRoute,
   HelpCenterIndexRoute: HelpCenterIndexRoute,
-  HostToolsIndexRoute: HostToolsIndexRoute,
-  PoolBuildersIndexRoute: PoolBuildersIndexRoute,
   ApiPublicBackfillContentPagesRoute: ApiPublicBackfillContentPagesRoute,
   ApiPublicTrackCityClickRoute: ApiPublicTrackCityClickRoute,
   HelpCenterCategorySlugRoute: HelpCenterCategorySlugRoute,
-  LSlugIdRoute: LSlugIdRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   HelpCenterCategoryIndexRoute: HelpCenterCategoryIndexRoute,
   ApiCertificatesUidPdfRoute: ApiCertificatesUidPdfRoute,
