@@ -12,13 +12,13 @@ import { toast } from "sonner";
 // Rejects "//evil.com", "/\\evil.com", and any value containing "://".
 const SAFE_PATH = /^\/(?!\/|\\)[^\s]*$/;
 const safeRedirect = (v: unknown): string => {
-  if (typeof v !== "string") return "/account/learning";
-  if (!SAFE_PATH.test(v) || v.includes("://")) return "/account/learning";
+  if (typeof v !== "string") return "/admin/dashboard";
+  if (!SAFE_PATH.test(v) || v.includes("://")) return "/admin/dashboard";
   return v;
 };
 
 const SearchSchema = z.object({
-  redirect: z.preprocess(safeRedirect, z.string()).default("/account/learning"),
+  redirect: z.preprocess(safeRedirect, z.string()).default("/admin/dashboard"),
   mode: z.enum(["signin", "signup"]).optional().default("signin"),
 });
 
@@ -33,11 +33,11 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
   head: () => ({
     meta: [
-      { title: "Sign in or create an account — Pool Rental Near Me Academy" },
+      { title: "Sign in or create an account — founders.click" },
       {
         name: "description",
         content:
-          "Sign in to track your Pool Rental Near Me Academy progress and earn certificates.",
+          "Sign in to founders.click — the AI growth engine for Sharetribe marketplace founders.",
       },
     ],
   }),
@@ -75,7 +75,7 @@ function AuthPage() {
     try {
       if (mode === "signup") {
         if (!fullName.trim()) {
-          toast.error("Please enter your full name (used on your certificate).");
+          toast.error("Please enter your full name.");
           return;
         }
         const { error } = await supabase.auth.signUp({
@@ -158,11 +158,11 @@ function AuthPage() {
           </div>
 
           <h1 className="text-2xl font-bold tracking-tight text-foreground">
-            {mode === "signup" ? "Start learning" : "Welcome back"}
+            {mode === "signup" ? "Start your free trial" : "Welcome back"}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             {mode === "signup"
-              ? "Track your progress and earn verifiable certificates."
+              ? "14 days free, no credit card. Generate your first 100 pages before you decide whether to pay us a dollar."
               : "Pick up where you left off."}
           </p>
 
@@ -196,7 +196,7 @@ function AuthPage() {
                   required
                 />
                 <p className="text-xs text-muted-foreground">
-                  This is the name printed on your certificate.
+                  Used in your account profile and email greetings.
                 </p>
               </div>
             )}
