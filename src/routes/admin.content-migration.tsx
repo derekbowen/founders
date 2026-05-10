@@ -6,6 +6,8 @@ import {
   scrapeContentPage,
   scrapeProgress,
   listTemplateTypes,
+  previewSitemap,
+  importSitemapUrls,
 } from "@/server/content-scrape.functions";
 import { AdminLayout } from "@/components/admin-layout";
 
@@ -120,6 +122,14 @@ function AdminContentMigration() {
           Pulls one pending row at a time via Firecrawl so you can review
           before bulk-running.
         </p>
+
+        <SitemapImporter
+          onImported={() => {
+            void loadNext();
+            void loadProgress();
+            listTemplateTypes().then((r) => setTemplateTypes(r.types)).catch(() => {});
+          }}
+        />
 
         <div className="mt-6 flex items-center gap-3">
           <label className="text-sm font-medium">template_type:</label>
@@ -251,5 +261,140 @@ function AdminContentMigration() {
           </div>
         )}
       </AdminLayout>
+  );
+}
+
+function SitemapImporter({ onImported }: { onImported: () => void }) {
+  const [sitemapUrl, setSitemapUrl] = React.useState("");
+  const [templateType, setTemplateType] = React.useState("imported");
+  const [urls, setUrls] = React.useState<string[]>([]);
+  const [selected, setSelected] = React.useState<Set<string>>(new Set());
+  const [busy, setBusy] = React.useState(false);
+  const [msg, setMsg] = React.useState<string | null>(null);
+  const [err, setErr] = React.useState<string | null>(null);
+  const [open, setOpen] = React.useState(false);
+
+  const preview = async () => {
+    if (!sitemapUrl.trim()) return;
+    setBusy(true); setErr(null); setMsg(null); setUrls([]); setSelected(new Set());
+    try {
+      const r = await previewSitemap({ data: { sitemap_url: sitemapUrl.trim() } });
+      setUrls(r.urls);
+      setSelected(new Set(r.urls));
+      setMsg(`Found ${r.total} URL${r.total === 1 ? "" : "s"}.`);
+    } catch (e: any) {
+      setErr(e?.message ?? "Preview failed");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const importNow = async () => {
+    if (selected.size === 0) return;
+    setBusy(true); setErr(null); setMsg(null);
+    try {
+      const r = await importSitemapUrls({
+        data: {
+          urls: Array.from(selected),
+          template_type: templateType.trim() || "imported",
+        },
+      });
+      setMsg(`Imported ${r.inserted} of ${r.attempted} URLs as pending pages.`);
+      setUrls([]); setSelected(new Set()); setSitemapUrl("");
+      onImported();
+    } catch (e: any) {
+      setErr(e?.message ?? "Import failed");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const toggleAll = () => {
+    setSelected(selected.size === urls.length ? new Set() : new Set(urls));
+  };
+
+  const toggle = (u: string) => {
+    const next = new Set(selected);
+    if (next.has(u)) next.delete(u); else next.add(u);
+    setSelected(next);
+  };
+
+  return (
+    <div className="mt-6 rounded-2xl border border-border">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-semibold hover:bg-muted/50"
+      >
+        <span>Import from sitemap</span>
+        <span className="text-xs text-muted-foreground">{open ? "Hide" : "Show"}</span>
+      </button>
+      {open && (
+        <div className="border-t border-border p-4">
+          <p className="text-xs text-muted-foreground">
+            Paste your existing site's sitemap URL — we'll discover pages and queue them as
+            pending rows for the scraper. Sitemap indexes are followed automatically.
+          </p>
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+            <input
+              value={sitemapUrl}
+              onChange={(e) => setSitemapUrl(e.target.value)}
+              placeholder="https://example.com/sitemap.xml"
+              className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm"
+            />
+            <input
+              value={templateType}
+              onChange={(e) => setTemplateType(e.target.value)}
+              placeholder="template_type (e.g. landing)"
+              className="rounded-lg border border-border bg-background px-3 py-2 text-sm sm:w-56"
+            />
+            <button
+              onClick={preview}
+              disabled={busy || !sitemapUrl.trim()}
+              className="rounded-full border border-border px-4 py-2 text-sm disabled:opacity-50"
+            >
+              {busy && urls.length === 0 ? "Fetching…" : "Preview"}
+            </button>
+          </div>
+          {err && <p className="mt-3 text-xs text-destructive">{err}</p>}
+          {msg && <p className="mt-3 text-xs text-muted-foreground">{msg}</p>}
+
+          {urls.length > 0 && (
+            <div className="mt-4">
+              <div className="mb-2 flex items-center justify-between">
+                <button onClick={toggleAll} className="text-xs font-medium underline">
+                  {selected.size === urls.length ? "Deselect all" : "Select all"}
+                </button>
+                <span className="text-xs text-muted-foreground">
+                  {selected.size} of {urls.length} selected
+                </span>
+              </div>
+              <div className="max-h-64 overflow-y-auto rounded-lg border border-border bg-card">
+                {urls.map((u) => (
+                  <label
+                    key={u}
+                    className="flex cursor-pointer items-center gap-2 border-b border-border px-3 py-1.5 text-xs last:border-b-0 hover:bg-muted/50"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selected.has(u)}
+                      onChange={() => toggle(u)}
+                      className="shrink-0"
+                    />
+                    <span className="truncate font-mono">{u}</span>
+                  </label>
+                ))}
+              </div>
+              <button
+                onClick={importNow}
+                disabled={busy || selected.size === 0}
+                className="mt-3 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+              >
+                {busy ? "Importing…" : `Import ${selected.size} URL${selected.size === 1 ? "" : "s"}`}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 }

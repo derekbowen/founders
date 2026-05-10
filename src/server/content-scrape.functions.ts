@@ -176,3 +176,81 @@ export const scrapeProgress = createServerFn({ method: "GET" })
       total: totalRes.count ?? 0,
     };
   });
+
+/**
+ * Fetch a sitemap (or sitemap index) and return a flat list of URLs.
+ * Follows up to 50 child sitemaps for indexes; returns at most 1000 URLs.
+ * No DB writes — UI calls this for preview, then commits via importSitemapUrls.
+ */
+async function fetchSitemap(url: string, depth = 0): Promise<string[]> {
+  if (depth > 2) return [];
+  const res = await fetch(url, { headers: { "User-Agent": "founders.click sitemap importer" } });
+  if (!res.ok) throw new Error(`Sitemap fetch failed [${res.status}] for ${url}`);
+  const xml = await res.text();
+  const isIndex = /<sitemapindex[\s>]/i.test(xml);
+  const locs = Array.from(xml.matchAll(/<loc>\s*([^<]+?)\s*<\/loc>/gi)).map((m) => m[1].trim());
+  if (!isIndex) return locs;
+  const out: string[] = [];
+  for (const child of locs.slice(0, 50)) {
+    try {
+      const inner = await fetchSitemap(child, depth + 1);
+      out.push(...inner);
+      if (out.length >= 1000) break;
+    } catch { /* skip broken child sitemaps */ }
+  }
+  return out;
+}
+
+export const previewSitemap = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({ sitemap_url: z.string().url() }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await requireFeatureAccess(context.userId, "content.migration");
+    const urls = await fetchSitemap(data.sitemap_url);
+    const unique = [...new Set(urls)].slice(0, 1000);
+    return { urls: unique, total: unique.length };
+  });
+
+export const importSitemapUrls = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        urls: z.array(z.string().url()).min(1).max(1000),
+        template_type: z.string().min(1).max(64),
+        category: z.string().min(1).max(120).default("imported"),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const { workspaceId } = await requireFeatureAccess(context.userId, "content.migration");
+    const sb = supabaseAdmin as any;
+
+    const rows = data.urls.map((u) => {
+      const url = new URL(u);
+      const pathname = url.pathname || "/";
+      const slug = pathname.split("/").filter(Boolean).pop() ?? "";
+      return {
+        workspace_id: workspaceId,
+        source_url: u,
+        url_path: pathname,
+        slug,
+        category: data.category,
+        template_type: data.template_type,
+        status: "pending",
+        in_sitemap: true,
+        sitemap_source: "user_import",
+      };
+    });
+
+    // Upsert on source_url so re-imports are idempotent.
+    const { data: inserted, error } = await sb
+      .from("content_pages")
+      .upsert(rows, { onConflict: "source_url", ignoreDuplicates: true })
+      .select("id");
+    if (error) throw new Error(error.message);
+
+    return { inserted: (inserted ?? []).length, attempted: rows.length };
+  });
