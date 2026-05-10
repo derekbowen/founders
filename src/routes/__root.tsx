@@ -49,12 +49,15 @@ export const Route = createRootRoute({
     }
   },
   head: () => {
+    // Root-level defaults. Individual routes override title/description via
+    // their own head() function — these are the fallbacks for any route that
+    // doesn't set them.
     const meta = buildMeta({
-      title: "Pool Rental Near Me - Starting at $25 hour - Rent a pool now",
+      title: "founders.click — AI Growth Engine for Sharetribe Marketplace Founders",
       description:
-        "Rent a private pool by the hour or become a pool host. 10% flat fee, $2M liability coverage, 5,100+ pages across the US.",
+        "Custom-coded SEO, AI content generation, and ops tools — without the agency price tag. Built for Sharetribe marketplace founders.",
       path: "/",
-      image: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/c756e8fe-7c1e-4f71-8c20-05980f90b6f7",
+      image: null,
     });
     return {
       meta: [

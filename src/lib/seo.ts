@@ -2,20 +2,13 @@
  * SEO helpers for building meta tags and JSON-LD structured data.
  */
 
-export const SITE_URL = "https://www.poolrentalnearme.com";
-export const SITE_NAME = "Pool Rental Near Me";
+export const SITE_URL = "https://founders.click";
+export const SITE_NAME = "founders.click";
 export const DEFAULT_OG_IMAGE = `${SITE_URL}/og-default.jpg`;
 export const SITE_LOGO = `${SITE_URL}/og-default.jpg`;
 
-export const SOCIAL_PROFILES = [
-  "https://www.facebook.com/poolrentalnearme",
-  "https://x.com/poolrentalnearme",
-  "https://www.youtube.com/@poolrentalnearme",
-  "https://www.linkedin.com/company/poolrentalnearme",
-  "https://www.instagram.com/poolrentalnearme",
-  "https://www.tiktok.com/@poolrentalnearme",
-  "https://www.pinterest.com/poolrentalnearme",
-];
+// Social profiles will be added once the founders.click handles are claimed.
+export const SOCIAL_PROFILES: string[] = [];
 
 export interface SeoMetaInput {
   title: string;
@@ -133,17 +126,7 @@ export function organizationJsonLd() {
     name: SITE_NAME,
     url: SITE_URL,
     logo: SITE_LOGO,
-    sameAs: SOCIAL_PROFILES,
-    contactPoint: [
-      {
-        "@type": "ContactPoint",
-        telephone: "+1-888-940-4247",
-        contactType: "customer service",
-        email: "support@poolrentalnearme.com",
-        areaServed: "US",
-        availableLanguage: ["English", "Spanish"],
-      },
-    ],
+    ...(SOCIAL_PROFILES.length ? { sameAs: SOCIAL_PROFILES } : {}),
   };
 }
 
@@ -153,14 +136,6 @@ export function websiteJsonLd() {
     "@type": "WebSite",
     name: SITE_NAME,
     url: SITE_URL,
-    potentialAction: {
-      "@type": "SearchAction",
-      target: {
-        "@type": "EntryPoint",
-        urlTemplate: `${SITE_URL}/s?q={search_term_string}`,
-      },
-      "query-input": "required name=search_term_string",
-    },
   };
 }
 
