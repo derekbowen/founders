@@ -2,17 +2,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-
-async function requireAdmin(userId: string) {
-  const { data, error } = await supabaseAdmin
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userId)
-    .eq("role", "admin")
-    .maybeSingle();
-  if (error) throw new Error(error.message);
-  if (!data) throw new Error("Forbidden: admin only");
-}
+import { requireFeatureAccess } from "@/server/workspace.functions";
+import { resolveWorkspaceApiKey } from "@/server/workspace-api-keys.functions";
 
 export type AdminBlogRow = {
   slug: string;
@@ -26,12 +17,12 @@ export type AdminBlogRow = {
 export const adminListBlogPosts = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<{ rows: AdminBlogRow[] }> => {
-    const { userId } = context as { userId: string };
-    await requireAdmin(userId);
+    const { workspaceId } = await requireFeatureAccess(context.userId, "content.blog");
 
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await (supabaseAdmin as any)
       .from("blog_posts")
       .select("slug, title, topic, is_published, content, updated_at")
+      .eq("workspace_id", workspaceId)
       .order("topic", { ascending: true })
       .order("title", { ascending: true })
       .limit(500);
@@ -57,28 +48,38 @@ export const adminExpandBlogPost = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => expandSchema.parse(d))
   .handler(async ({ data, context }) => {
-    const { userId } = context as { userId: string };
-    await requireAdmin(userId);
+    const { workspaceId } = await requireFeatureAccess(context.userId, "content.blog");
 
-    const { data: post, error } = await supabaseAdmin
+    const sb = supabaseAdmin as any;
+
+    const { data: ws } = await sb
+      .from("workspaces")
+      .select("name, site_url")
+      .eq("id", workspaceId)
+      .maybeSingle();
+    const siteName: string = ws?.name ?? "our marketplace";
+    const siteUrl: string = ws?.site_url ?? "";
+
+    const { data: post, error } = await sb
       .from("blog_posts")
       .select("slug, title, topic")
       .eq("slug", data.slug)
+      .eq("workspace_id", workspaceId)
       .maybeSingle();
     if (error) throw new Error(error.message);
     if (!post) throw new Error("Post not found");
 
-    const apiKey = process.env.OPENROUTER_API_KEY;
-    if (!apiKey) throw new Error("OPENROUTER_API_KEY is not configured");
+    const apiKey = await resolveWorkspaceApiKey(workspaceId, "openrouter");
+    if (!apiKey) throw new Error("OpenRouter API key not configured — add it in Workspace Settings.");
 
     const model = data.model || "google/gemini-3-flash-preview";
     const system =
-      "You are an expert SEO content writer for a pool rental marketplace called 'Pool Rental Near Me'. Write authoritative, useful, original articles in clear American English. Avoid fluff. Prefer concrete numbers, steps, and lists.";
+      `You are an expert SEO content writer for a marketplace called "${siteName}"${siteUrl ? ` (${siteUrl})` : ""}. Write authoritative, useful, original articles in clear American English. Avoid fluff. Prefer concrete numbers, steps, and lists.`;
     const userPrompt = `Write a comprehensive 800-1000 word SEO blog post.
 Title: ${post.title}
 Category: ${post.topic ?? "General"}
-Audience: pool owners and people interested in renting/hosting pools.
-Structure: H1 matching the title, 4-6 H2 sections, end with an FAQ (3-5 Q/A) and a short call-to-action mentioning Pool Rental Near Me.
+Audience: potential customers of ${siteName}.
+Structure: H1 matching the title, 4-6 H2 sections, end with an FAQ (3-5 Q/A) and a short call-to-action mentioning ${siteName}.
 No external links.
 
 Return ONLY valid JSON with this exact shape:
@@ -112,7 +113,6 @@ Return ONLY valid JSON with this exact shape:
     try {
       parsed = JSON.parse(text);
     } catch {
-      // model returned non-JSON; treat whole text as content
       parsed = { content_markdown: text };
     }
 
@@ -128,10 +128,11 @@ Return ONLY valid JSON with this exact shape:
     if (parsed.seo_title) update.seo_title = String(parsed.seo_title).slice(0, 60);
     if (parsed.seo_description) update.seo_description = String(parsed.seo_description).slice(0, 160);
 
-    const { error: upErr } = await supabaseAdmin
+    const { error: upErr } = await sb
       .from("blog_posts")
       .update(update)
-      .eq("slug", data.slug);
+      .eq("slug", data.slug)
+      .eq("workspace_id", workspaceId);
     if (upErr) throw new Error(upErr.message);
 
     const wc = String(update.content ?? "").split(/\s+/).filter(Boolean).length;

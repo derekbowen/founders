@@ -7,15 +7,12 @@ import {
   scrapeProgress,
   listTemplateTypes,
 } from "@/server/content-scrape.functions";
-import { checkAdminRole } from "@/server/admin-auth.functions";
 import { AdminLayout } from "@/components/admin-layout";
 
 export const Route = createFileRoute("/admin/content-migration")({
   beforeLoad: async () => {
     const { data, error } = await supabase.auth.getUser();
     if (error || !data.user) throw redirect({ to: "/auth", search: { redirect: "/admin/content-migration", mode: "signin" } });
-    const { isAdmin } = await checkAdminRole();
-    if (!isAdmin) throw redirect({ to: "/admin/no-access" });
   },
   component: AdminContentMigration,
 });
