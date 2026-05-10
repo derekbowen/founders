@@ -105,6 +105,20 @@ export async function verifyStandardWebhook(
   });
 
   if (!matched) {
+    // TEMPORARY DEBUG: log non-secret diagnostics so we can see why signature
+    // verification is failing in the live worker. Remove once stable.
+    console.error("[standard-webhook] signature mismatch", {
+      id,
+      timestamp,
+      signatureHeaderLength: sigHeader.length,
+      providedCount: provided.length,
+      providedFirstPrefix: provided[0]?.slice(0, 4) ?? null,
+      bodyLength: rawBody.length,
+      bodyFirstChars: rawBody.slice(0, 80),
+      expectedSigLength: expectedSig.length,
+      cleanedSecretLength: cleanedSecret.length,
+      secretBytesLength: secretBytes.length,
+    });
     throw new StandardWebhookError("invalid_signature", "No signature matched");
   }
 
