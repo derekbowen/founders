@@ -3,6 +3,7 @@ import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireFeatureAccess } from "@/server/workspace.functions";
+import { resolveWorkspaceApiKey } from "@/server/workspace-api-keys.functions";
 
 async function assertAdmin(userId: string) {
   const { data } = await supabaseAdmin
@@ -562,8 +563,8 @@ export const auditPage = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { workspaceId } = await requireFeatureAccess((context as any).userId, "seo.page_auditor");
-    const lovKey = process.env.OPENROUTER_API_KEY;
-    if (!lovKey) return { ok: false, error: "OPENROUTER_API_KEY not configured" };
+    const lovKey = await resolveWorkspaceApiKey(workspaceId, "openrouter");
+    if (!lovKey) return { ok: false, error: "OpenRouter key not configured" };
 
     const { data: page } = await sb()
       .from("content_pages")

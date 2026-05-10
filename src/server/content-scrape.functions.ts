@@ -3,6 +3,7 @@ import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireFeatureAccess } from "@/server/workspace.functions";
+import { resolveWorkspaceApiKey } from "@/server/workspace-api-keys.functions";
 
 /**
  * Scrape a single content_pages row via Firecrawl and store raw_html +
@@ -15,9 +16,8 @@ import { requireFeatureAccess } from "@/server/workspace.functions";
 
 const FIRECRAWL_URL = "https://api.firecrawl.dev/v2/scrape";
 
-async function firecrawlScrape(url: string) {
-  const apiKey = process.env.FIRECRAWL_API_KEY;
-  if (!apiKey) throw new Error("FIRECRAWL_API_KEY is not configured");
+async function firecrawlScrape(url: string, apiKey: string) {
+  if (!apiKey) throw new Error("Firecrawl API key is not configured");
 
   const res = await fetch(FIRECRAWL_URL, {
     method: "POST",
@@ -57,6 +57,8 @@ export const scrapeContentPage = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { workspaceId } = await requireFeatureAccess(context.userId, "seo.scrape_import");
+    const apiKey = await resolveWorkspaceApiKey(workspaceId, "firecrawl");
+    if (!apiKey) throw new Error("Firecrawl API key is not configured");
 
     const { data: row, error: fetchErr } = await (supabaseAdmin as any)
       .from("content_pages")
@@ -69,6 +71,7 @@ export const scrapeContentPage = createServerFn({ method: "POST" })
 
     const { markdown, html, metadata } = await firecrawlScrape(
       (row as any).source_url,
+      apiKey,
     );
 
     const meta = (metadata ?? {}) as { title?: string; description?: string };

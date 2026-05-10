@@ -3,6 +3,7 @@ import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { requireFeatureAccess } from "@/server/workspace.functions";
+import { resolveWorkspaceApiKey } from "@/server/workspace-api-keys.functions";
 
 /**
  * Admin "quick page" creator. The user types a title, optional short
@@ -83,8 +84,8 @@ export const createQuickPage = createServerFn({ method: "POST" })
       "content.quick_page",
     );
 
-    const apiKey = process.env.OPENROUTER_API_KEY;
-    if (!apiKey) throw new Error("OPENROUTER_API_KEY not configured");
+    const apiKey = await resolveWorkspaceApiKey(workspaceId, "openrouter");
+    if (!apiKey) throw new Error("OpenRouter API key not configured — add it in Workspace Settings or contact support.");
 
     const sb = supabaseAdmin as any;
     const { data: ws } = await sb

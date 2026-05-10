@@ -4,7 +4,7 @@ import {
   LayoutDashboard, FileText, Wand2, Database, AlertTriangle, Newspaper,
   GraduationCap, Image as ImageIcon, MousePointerClick, Building2, ShieldCheck,
   CreditCard, Search, Bot, Mail, Activity, ChevronLeft, Menu, X, Home, LinkIcon,
-  TrendingUp, Swords, Network, Radar, Sparkles, Lock,
+  TrendingUp, Swords, Network, Radar, Sparkles, Lock, Settings,
 } from "lucide-react";
 import { SiteHeader } from "@/components/site-layout";
 import { useCurrentWorkspace } from "@/hooks/use-current-workspace";
@@ -56,6 +56,13 @@ const GROUPS: Array<{ label: string; items: Item[] }> = [
       { to: "/admin/gsc-import", label: "GSC import", icon: Search, feature: "seo.gsc_import" },
       { to: "/admin/scrape-import", label: "Scrape import", icon: Database, feature: "seo.scrape_import" },
       { to: "/admin/click-report", label: "Click report", icon: MousePointerClick, feature: "seo.click_report" },
+    ],
+  },
+  {
+    label: "Account",
+    items: [
+      { to: "/account/billing", label: "Billing & plans", icon: CreditCard },
+      { to: "/account/settings", label: "Workspace settings", icon: Settings },
     ],
   },
   {
