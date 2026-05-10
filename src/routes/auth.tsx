@@ -2,7 +2,6 @@ import { createFileRoute, useNavigate, redirect, Link } from "@tanstack/react-ro
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 import { SiteHeader, SiteFooter } from "@/components/site-layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -113,17 +112,16 @@ function AuthPage() {
       const callbackUrl = new URL("/auth", window.location.origin);
       callbackUrl.searchParams.set("redirect", search.redirect);
       callbackUrl.searchParams.set("mode", "signin");
-      const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: callbackUrl.toString(),
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: callbackUrl.toString() },
       });
-      if ("error" in result && result.error) {
-        toast.error(result.error.message ?? "Google sign-in failed.");
+      if (error) {
+        toast.error(error.message ?? "Google sign-in failed.");
         return;
       }
-      if (!result.redirected) {
-        toast.success("Signed in.");
-        navigate({ to: search.redirect as never });
-      }
+      // Supabase redirects the browser to Google; this code only runs if
+      // the redirect was suppressed, in which case we have nothing more to do.
     } finally {
       setBusy(false);
     }

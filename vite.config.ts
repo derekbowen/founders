@@ -1,33 +1,66 @@
-// @lovable.dev/vite-tanstack-config already includes the following — do NOT add them manually
-// or the app will break with duplicate plugins:
-//   - tanstackStart, viteReact, tailwindcss, tsConfigPaths, cloudflare (build-only),
-//     componentTagger (dev-only), VITE_* env injection, @ path alias, React/TanStack dedupe,
-//     error logger plugins, and sandbox detection (port/host/strictPort).
-// You can pass additional config via defineConfig({ vite: { ... } }) if needed.
-import { defineConfig } from "@lovable.dev/vite-tanstack-config";
+import { defineConfig } from "vite";
+import tailwindcss from "@tailwindcss/vite";
+import tsConfigPaths from "vite-tsconfig-paths";
+import { tanstackStart } from "@tanstack/react-start/plugin/vite";
+import viteReact from "@vitejs/plugin-react";
 
-export default defineConfig({
-  tanstackStart: {
-    importProtection: {
-      behavior: "error",
-      client: {
-        // Allow `.functions.ts(x)` files under src/server to be imported from
-        // client code — they are transformed into RPC stubs at build time.
-        excludeFiles: [
-          "**/server/*.functions.ts",
-          "**/server/*.functions.tsx",
-          "**/server/**/*.functions.ts",
-          "**/server/**/*.functions.tsx",
-        ],
+export default defineConfig(async ({ command }) => {
+  // Lazy dynamic import so dev mode doesn't pull in workerd.
+  const cloudflarePlugin =
+    command === "build"
+      ? [
+          (await import("@cloudflare/vite-plugin")).cloudflare({
+            viteEnvironment: { name: "ssr" },
+          }),
+        ]
+      : [];
+
+  return {
+    plugins: [
+      tailwindcss(),
+      tsConfigPaths({ projects: ["./tsconfig.json"] }),
+      ...cloudflarePlugin,
+      tanstackStart({
+        importProtection: {
+          behavior: "error",
+          client: {
+            files: ["**/server/**"],
+            specifiers: ["server-only"],
+            // `.functions.ts(x)` files under src/server are RPC stubs —
+            // they're transformed at build time so client imports are allowed.
+            excludeFiles: [
+              "**/server/*.functions.ts",
+              "**/server/*.functions.tsx",
+              "**/server/**/*.functions.ts",
+              "**/server/**/*.functions.tsx",
+            ],
+          },
+        },
+      }),
+      viteReact(),
+    ],
+    resolve: {
+      alias: {
+        "@": `${process.cwd()}/src`,
       },
+      dedupe: [
+        "react",
+        "react-dom",
+        "react/jsx-runtime",
+        "react/jsx-dev-runtime",
+        "@tanstack/react-query",
+        "@tanstack/query-core",
+      ],
     },
-  },
-  vite: {
+    server: {
+      host: "::",
+      port: Number(process.env.PORT) || 8080,
+      strictPort: true,
+    },
     build: {
-      // Serve built JS/CSS under /fw-assets/ instead of the default /assets/
-      // so the EC2 nginx reverse proxy can route this app's static assets
-      // without colliding with other Lovable apps on the same domain.
+      // Serve built JS/CSS under /fw-assets/ so the reverse proxy can route
+      // this app's static assets without colliding with other apps on the same domain.
       assetsDir: "fw-assets",
     },
-  },
+  };
 });

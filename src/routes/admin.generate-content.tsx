@@ -63,7 +63,7 @@ function GenerateContentPageInner() {
     pages?: PageSummary[];
     edgeFunction?: string;
     adminAuth?: string;
-    lovableApiKey?: string;
+    openrouterApiKey?: string;
     aiGateway?: string;
     aiError?: string | null;
     pendingPlanRows?: number;
@@ -475,8 +475,8 @@ function GenerateContentPageInner() {
                   <span className="font-mono">{preflight.details.adminAuth ?? "unknown"}</span>
                 </li>
                 <li>
-                  LOVABLE_API_KEY:{" "}
-                  <span className="font-mono">{preflight.details.lovableApiKey ?? "missing"}</span>
+                  OPENROUTER_API_KEY:{" "}
+                  <span className="font-mono">{preflight.details.openrouterApiKey ?? "missing"}</span>
                 </li>
                 <li>
                   AI gateway:{" "}

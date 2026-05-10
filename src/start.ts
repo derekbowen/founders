@@ -2,9 +2,9 @@ import { createStart, createMiddleware } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 
 // Baseline security headers applied to every response (HTML, server fns, server routes).
-// CSP is intentionally permissive enough to allow Supabase, Lovable assets, embedded
-// course iframes, and inline styles used by the design system — but blocks unknown
-// script origins so any future XSS cannot exfiltrate to attacker-controlled hosts.
+// CSP is permissive enough to allow Supabase, embedded course iframes, and inline
+// styles used by the design system — but blocks unknown script origins so any
+// future XSS cannot exfiltrate to attacker-controlled hosts.
 const SECURITY_HEADERS: Record<string, string> = {
   "X-Content-Type-Options": "nosniff",
   "Referrer-Policy": "strict-origin-when-cross-origin",
@@ -13,7 +13,7 @@ const SECURITY_HEADERS: Record<string, string> = {
   "Content-Security-Policy": [
     "default-src 'self'",
     "base-uri 'self'",
-    "frame-ancestors 'self' https://lovable.dev https://*.lovable.dev https://gptengineer.app https://*.gptengineer.app https://*.lovableproject.com https://*.lovable.app",
+    "frame-ancestors 'self'",
     "object-src 'none'",
     "img-src 'self' data: blob: https:",
     "font-src 'self' data: https:",
@@ -26,15 +26,13 @@ const SECURITY_HEADERS: Record<string, string> = {
   ].join("; "),
 };
 
-// Production is served through the EC2 nginx reverse proxy on
-// poolrentalnearme.com. The Lovable preview / published mirrors
-// (*.lovable.app, *.lovable.dev, *.lovableproject.com, *.gptengineer.app) are
-// internal-only and must NEVER be indexed — otherwise Google sees duplicate
-// content competing with prod. We send X-Robots-Tag: noindex, nofollow on
-// every response when the request host is not the canonical production host.
-// nginx is configured to forward the original Host as X-Forwarded-Host, so
-// requests proxied through prod will have the canonical host and stay
-// indexable.
+// Production is served through the canonical host(s). Any other host (preview
+// deploys, staging, raw worker URLs) is internal-only and must NEVER be
+// indexed — otherwise Google sees duplicate content competing with prod.
+// We send X-Robots-Tag: noindex, nofollow on every response when the request
+// host is not the canonical production host. The reverse proxy is configured
+// to forward the original Host as X-Forwarded-Host, so requests proxied
+// through prod will have the canonical host and stay indexable.
 const PRODUCTION_HOSTS = new Set([
   "poolrentalnearme.com",
   "www.poolrentalnearme.com",

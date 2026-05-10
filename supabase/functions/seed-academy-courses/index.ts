@@ -4,13 +4,13 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 import seed from "./seed.json" with { type: "json" };
 
 const ALLOWED_ORIGINS = new Set([
-  "https://fresh-web.lovable.app",
+  "https://founders.click",
   "https://www.poolrentalnearme.com",
   "https://poolrentalnearme.com",
 ]);
 
 function corsHeaders(origin: string | null) {
-  const allow = origin && ALLOWED_ORIGINS.has(origin) ? origin : "https://fresh-web.lovable.app";
+  const allow = origin && ALLOWED_ORIGINS.has(origin) ? origin : "https://founders.click";
   return {
     "Access-Control-Allow-Origin": allow,
     "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",

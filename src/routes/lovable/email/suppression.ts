@@ -1,32 +1,54 @@
 import { createClient } from '@supabase/supabase-js'
-import { WebhookError, verifyWebhookRequest } from '@lovable.dev/webhooks-js'
+import {
+  EmailitVerifyError,
+  verifyEmailitWebhook,
+} from '@/integrations/emailit/verify'
 import { createFileRoute } from '@tanstack/react-router'
 
-// Suppression event payload sent by the Go API when Mailgun reports
-// a bounce, complaint, or unsubscribe.
-interface SuppressionPayload {
-  email: string
-  reason: 'bounce' | 'complaint' | 'unsubscribe'
-  message_id?: string
-  metadata?: Record<string, unknown>
-  is_retry: boolean
-  retry_count: number
+type SuppressionReason = 'bounce' | 'complaint' | 'unsubscribe'
+
+// Emailit webhook event envelope
+// (https://emailit.com/docs/webhooks — type: email.bounced / email.complained / email.suppressed)
+interface EmailitWebhookEvent {
+  event_id?: string
+  type: string
+  data: {
+    object: {
+      id?: string
+      to?: string | string[]
+      message_id?: string
+      reason?: string
+      bounce_type?: string
+      [key: string]: unknown
+    }
+  }
 }
 
-function parseSuppressionPayload(body: string): SuppressionPayload {
-  const parsed = JSON.parse(body)
-  if (!parsed.data) {
-    throw new Error('Missing data field in payload')
+// Map Emailit's event type → our internal reason.
+function eventTypeToReason(type: string): SuppressionReason | null {
+  switch (type) {
+    case 'email.bounced':
+      return 'bounce'
+    case 'email.complained':
+      return 'complaint'
+    case 'email.suppressed':
+      // Emailit fires email.suppressed for unsubscribes AND repeated bounces.
+      // We treat it as unsubscribe; a prior bounce event would already have
+      // upserted the row with reason='bounce'.
+      return 'unsubscribe'
+    default:
+      return null
   }
-  const data = parsed.data as SuppressionPayload
-  if (!data.email || !data.reason) {
-    throw new Error('Missing required fields: email, reason')
-  }
-  return data
+}
+
+function extractRecipient(obj: EmailitWebhookEvent['data']['object']): string | null {
+  if (typeof obj.to === 'string') return obj.to
+  if (Array.isArray(obj.to) && obj.to.length > 0 && typeof obj.to[0] === 'string') return obj.to[0]
+  return null
 }
 
 function mapReasonToStatus(
-  reason: string,
+  reason: SuppressionReason,
 ): 'bounced' | 'complained' | 'suppressed' {
   switch (reason) {
     case 'bounce':
@@ -38,7 +60,7 @@ function mapReasonToStatus(
   }
 }
 
-function mapReasonToMessage(reason: string): string {
+function mapReasonToMessage(reason: SuppressionReason): string {
   switch (reason) {
     case 'bounce':
       return 'Permanent bounce — email address is invalid or rejected'
@@ -46,8 +68,6 @@ function mapReasonToMessage(reason: string): string {
       return 'Spam complaint — recipient marked email as spam'
     case 'unsubscribe':
       return 'Recipient unsubscribed'
-    default:
-      return 'Email suppressed'
   }
 }
 
@@ -55,26 +75,22 @@ export const Route = createFileRoute("/lovable/email/suppression")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const apiKey = process.env.LOVABLE_API_KEY
+        const webhookSecret = process.env.EMAILIT_WEBHOOK_SECRET
         const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
         const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-        if (!apiKey || !supabaseUrl || !supabaseServiceKey) {
+        if (!webhookSecret || !supabaseUrl || !supabaseServiceKey) {
           console.error('Missing required environment variables')
           return Response.json({ error: 'Server configuration error' }, { status: 500 })
         }
 
-        // Verify HMAC signature using the Lovable API Key (same as auth-email-hook)
-        let payload: SuppressionPayload
+        // Verify Emailit's HMAC signature, then parse the event envelope.
+        let event: EmailitWebhookEvent
         try {
-          const verified = await verifyWebhookRequest({
-            req: request,
-            secret: apiKey,
-            parser: parseSuppressionPayload,
-          })
-          payload = verified.payload
+          const rawBody = await verifyEmailitWebhook(request, webhookSecret)
+          event = JSON.parse(rawBody) as EmailitWebhookEvent
         } catch (error) {
-          if (error instanceof WebhookError) {
+          if (error instanceof EmailitVerifyError) {
             switch (error.code) {
               case 'invalid_signature':
                 console.error('Invalid webhook signature')
@@ -82,24 +98,40 @@ export const Route = createFileRoute("/lovable/email/suppression")({
               case 'stale_timestamp':
                 console.error('Stale webhook timestamp')
                 return Response.json({ error: 'Stale timestamp' }, { status: 401 })
-              case 'invalid_payload':
-              case 'invalid_json':
-                console.error('Invalid payload', { code: error.code })
-                return Response.json({ error: 'Invalid payload' }, { status: 400 })
-              default:
-                console.error('Webhook verification failed', {
-                  code: error.code,
-                  message: error.message,
-                })
-                return Response.json({ error: 'Verification failed' }, { status: 401 })
+              case 'missing_headers':
+              case 'invalid_timestamp':
+                console.error('Invalid webhook headers', { code: error.code })
+                return Response.json({ error: 'Invalid headers' }, { status: 400 })
             }
+          }
+          if (error instanceof SyntaxError) {
+            console.error('Invalid webhook JSON')
+            return Response.json({ error: 'Invalid payload' }, { status: 400 })
           }
           console.error('Unexpected error during verification', { error })
           return Response.json({ error: 'Internal error' }, { status: 500 })
         }
 
+        // Ignore events we don't handle (delivered, opened, clicked, etc.) —
+        // 200 OK so Emailit doesn't retry them.
+        const reason = eventTypeToReason(event.type)
+        if (!reason) {
+          return Response.json({ ignored: true, type: event.type })
+        }
+
+        const recipient = extractRecipient(event.data?.object ?? {})
+        if (!recipient) {
+          console.warn('Suppression event missing recipient', {
+            type: event.type,
+            event_id: event.event_id,
+          })
+          return Response.json({ ignored: true, reason: 'missing_recipient' })
+        }
+
         const supabase = createClient(supabaseUrl, supabaseServiceKey)
-        const normalizedEmail = payload.email.toLowerCase()
+        const normalizedEmail = recipient.toLowerCase()
+        const messageId =
+          typeof event.data.object.message_id === 'string' ? event.data.object.message_id : null
 
         // 1. Upsert to suppressed_emails (idempotent — safe for retries)
         const { error: suppressError } = await supabase
@@ -107,8 +139,8 @@ export const Route = createFileRoute("/lovable/email/suppression")({
           .upsert(
             {
               email: normalizedEmail,
-              reason: payload.reason,
-              metadata: payload.metadata ?? null,
+              reason,
+              metadata: event.data.object as Record<string, unknown>,
             },
             { onConflict: 'email' },
           )
@@ -122,18 +154,18 @@ export const Route = createFileRoute("/lovable/email/suppression")({
         }
 
         // 2. Append a new log entry for the suppression event (never update existing rows)
-        const sendLogStatus = mapReasonToStatus(payload.reason)
-        const sendLogMessage = mapReasonToMessage(payload.reason)
+        const sendLogStatus = mapReasonToStatus(reason)
+        const sendLogMessage = mapReasonToMessage(reason)
 
         const { error: insertError } = await supabase
           .from('email_send_log')
           .insert({
-            message_id: payload.message_id ?? null,
+            message_id: messageId,
             template_name: 'system',
             recipient_email: normalizedEmail,
             status: sendLogStatus,
             error_message: sendLogMessage,
-            metadata: payload.metadata ?? null,
+            metadata: event.data.object as Record<string, unknown>,
           })
 
         if (insertError) {
@@ -145,10 +177,10 @@ export const Route = createFileRoute("/lovable/email/suppression")({
 
         console.log('Suppression processed', {
           email_redacted: normalizedEmail[0] + '***@' + normalizedEmail.split('@')[1],
-          reason: payload.reason,
-          is_retry: payload.is_retry,
-          retry_count: payload.retry_count,
-          has_message_id: !!payload.message_id,
+          reason,
+          type: event.type,
+          event_id: event.event_id,
+          has_message_id: !!messageId,
         })
 
         return Response.json({ success: true })

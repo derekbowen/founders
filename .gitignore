@@ -16,9 +16,18 @@ dist-ssr
 .nitro
 *.local
 
+# Environment files — NEVER commit secrets.
+# .env.example is the only checked-in template (no real values).
+.env
+.env.*
+!.env.example
+
 # Wrangler / Cloudflare
 .wrangler/
 .dev.vars
+
+# Claude Code session config (machine-specific cwd)
+.claude/launch.json
 
 # Editor directories and files
 .vscode/*

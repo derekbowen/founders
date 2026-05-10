@@ -1,7 +1,9 @@
 import * as React from 'react'
 import { render } from '@react-email/components'
-import { parseEmailWebhookPayload } from '@lovable.dev/email-js'
-import { WebhookError, verifyWebhookRequest } from '@lovable.dev/webhooks-js'
+import {
+  StandardWebhookError,
+  verifyStandardWebhook,
+} from '@/integrations/webhooks/standard'
 import { createClient } from '@supabase/supabase-js'
 import { createFileRoute } from '@tanstack/react-router'
 import { SignupEmail } from '@/lib/email-templates/signup'
@@ -31,11 +33,31 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
   reauthentication: ReauthenticationEmail,
 }
 
-// Configuration
-const SITE_NAME = "fresh-web"
-const SENDER_DOMAIN = "notify.poolfriends.poolrentalnearme.com"
-const ROOT_DOMAIN = "poolfriends.poolrentalnearme.com"
-const FROM_DOMAIN = "notify.poolfriends.poolrentalnearme.com"
+// Sending domain — overridable per environment so we can flip the brand
+// (poolrentalnearme.online → notify.founders.click) without a code change.
+const SENDER_DOMAIN =
+  process.env.EMAILIT_SENDER_DOMAIN ?? 'notify.poolrentalnearme.online'
+const ROOT_DOMAIN = process.env.SITE_ROOT_DOMAIN ?? 'poolrentalnearme.online'
+const FROM_DOMAIN = SENDER_DOMAIN
+
+// Shape of the Supabase Auth send-email hook payload (v1).
+// https://supabase.com/docs/guides/auth/auth-hooks/send-email-hook
+interface SupabaseAuthEmailPayload {
+  version: '1'
+  run_id?: string
+  type: 'auth'
+  data: {
+    action_type: string
+    email: string
+    url?: string
+    token?: string
+    token_hash?: string
+    redirect_to?: string
+    old_email?: string
+    new_email?: string
+    user?: { email?: string; id?: string }
+  }
+}
 
 function redactEmail(email: string | null | undefined): string {
   if (!email) return '***'
@@ -48,47 +70,44 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const apiKey = process.env.LOVABLE_API_KEY
+        const hookSecret = process.env.SEND_EMAIL_HOOK_SECRET
 
-        if (!apiKey) {
-          console.error('LOVABLE_API_KEY not configured')
+        if (!hookSecret) {
+          console.error('SEND_EMAIL_HOOK_SECRET not configured')
           return Response.json(
             { error: 'Server configuration error' },
             { status: 500 }
           )
         }
 
-        // Verify signature + timestamp, then parse payload.
-        let payload: any
+        // Verify Supabase Auth's standard-webhooks signature, then parse payload.
+        let payload: SupabaseAuthEmailPayload
         let run_id = ''
         try {
-          const verified = await verifyWebhookRequest({
-            req: request,
-            secret: apiKey,
-            parser: parseEmailWebhookPayload,
-          })
-          payload = verified.payload
-          run_id = payload.run_id
+          const rawBody = await verifyStandardWebhook(request, hookSecret)
+          payload = JSON.parse(rawBody) as SupabaseAuthEmailPayload
+          run_id = payload.run_id ?? ''
         } catch (error) {
-          if (error instanceof WebhookError) {
+          if (error instanceof StandardWebhookError) {
             switch (error.code) {
               case 'invalid_signature':
-              case 'missing_timestamp':
+              case 'missing_headers':
               case 'invalid_timestamp':
               case 'stale_timestamp':
-                console.error('Invalid webhook signature', { error: error.message })
+              case 'invalid_secret':
+                console.error('Invalid webhook signature', { code: error.code, message: error.message })
                 return Response.json(
                   { error: 'Invalid signature' },
                   { status: 401 }
                 )
-              case 'invalid_payload':
-              case 'invalid_json':
-                console.error('Invalid webhook payload', { error: error.message })
-                return Response.json(
-                  { error: 'Invalid webhook payload' },
-                  { status: 400 }
-                )
             }
+          }
+          if (error instanceof SyntaxError) {
+            console.error('Invalid webhook JSON', { error: error.message })
+            return Response.json(
+              { error: 'Invalid webhook payload' },
+              { status: 400 }
+            )
           }
 
           console.error('Webhook verification failed', { error })
@@ -98,8 +117,8 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
           )
         }
 
-        if (!run_id) {
-          console.error('Webhook payload missing run_id')
+        if (!payload?.data?.action_type || !payload?.data?.email) {
+          console.error('Webhook payload missing required fields')
           return Response.json(
             { error: 'Invalid webhook payload' },
             { status: 400 }

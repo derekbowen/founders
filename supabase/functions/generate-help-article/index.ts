@@ -2,13 +2,13 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const ALLOWED_ORIGINS = new Set([
-  "https://fresh-web.lovable.app",
+  "https://founders.click",
   "https://www.poolrentalnearme.com",
   "https://poolrentalnearme.com",
 ]);
 
 function buildCorsHeaders(origin: string | null) {
-  const allow = origin && ALLOWED_ORIGINS.has(origin) ? origin : "https://fresh-web.lovable.app";
+  const allow = origin && ALLOWED_ORIGINS.has(origin) ? origin : "https://founders.click";
   return {
     "Access-Control-Allow-Origin": allow,
     "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -62,11 +62,11 @@ serve(async (req) => {
     }
 
     const { prompt } = await req.json();
-    const key = Deno.env.get("LOVABLE_API_KEY");
-    if (!key) throw new Error("LOVABLE_API_KEY missing");
+    const key = Deno.env.get("OPENROUTER_API_KEY");
+    if (!key) throw new Error("OPENROUTER_API_KEY missing");
     if (!prompt) throw new Error("prompt required");
 
-    const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const r = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
       body: JSON.stringify({

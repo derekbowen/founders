@@ -1,20 +1,25 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
+// Production / staging origins allowed to call this edge function.
+// Authentication is enforced separately via the Authorization header,
+// so this allowlist is just defense-in-depth for browser-driven calls.
 const ALLOWED_ORIGINS = new Set([
-  "https://fresh-web.lovable.app",
   "https://www.poolrentalnearme.com",
   "https://poolrentalnearme.com",
+  "https://founders.click",
+  "https://www.founders.click",
+  "http://localhost:8080",
 ]);
 
 function corsHeaders(origin: string | null) {
   const allowed =
     origin &&
     (ALLOWED_ORIGINS.has(origin) ||
-      origin.endsWith(".lovable.app") ||
-      origin.endsWith(".lovableproject.com"));
+      origin.endsWith(".workers.dev") || // Cloudflare staging URLs
+      origin.endsWith(".pages.dev"));
   return {
-    "Access-Control-Allow-Origin": allowed && origin ? origin : "https://fresh-web.lovable.app",
+    "Access-Control-Allow-Origin": allowed && origin ? origin : "https://founders.click",
     "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     Vary: "Origin",
@@ -391,7 +396,7 @@ async function generateOne(
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 115_000);
   try {
-    const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const resp = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       signal: controller.signal,
@@ -624,9 +629,9 @@ Deno.serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    const apiKey = Deno.env.get("LOVABLE_API_KEY");
+    const apiKey = Deno.env.get("OPENROUTER_API_KEY");
     if (!supabaseUrl || !serviceKey) throw new Error("Backend is not configured");
-    if (!apiKey) throw new Error("LOVABLE_API_KEY missing in backend function environment");
+    if (!apiKey) throw new Error("OPENROUTER_API_KEY missing in backend function environment");
 
     const supabase = createClient(supabaseUrl, serviceKey);
 
@@ -674,7 +679,7 @@ Deno.serve(async (req) => {
       let aiOk = false;
       let aiError: string | null = null;
       try {
-        const probe = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        const probe = await fetch("https://openrouter.ai/api/v1/chat/completions", {
           method: "POST",
           headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -703,7 +708,7 @@ Deno.serve(async (req) => {
           ok: aiOk,
           edgeFunction: "reachable",
           adminAuth: "ok",
-          lovableApiKey: "configured",
+          openrouterApiKey: "configured",
           aiGateway: aiOk ? "ok" : "failed",
           aiError,
           pendingPlanRows: pendingCount ?? 0,
