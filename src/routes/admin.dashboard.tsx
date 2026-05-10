@@ -2,8 +2,16 @@ import * as React from "react";
 import { createFileRoute, redirect, Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { checkAdminRole } from "@/server/admin-auth.functions";
-import { getDashboardStats, type DashboardStats } from "@/server/admin-dashboard.functions";
+import {
+  getDashboardStats,
+  getWorkspaceDashboard,
+  type DashboardStats,
+  type WorkspaceDashboard,
+} from "@/server/admin-dashboard.functions";
 import { AdminLayout, ADMIN_NAV_GROUPS } from "@/components/admin-layout";
+import { useCurrentWorkspace } from "@/hooks/use-current-workspace";
+import { PLAN_FEATURES, type Plan } from "@/lib/plans";
+import { type CurrentWorkspace } from "@/server/workspace.functions";
 
 export const Route = createFileRoute("/admin/dashboard")({
   beforeLoad: async () => {
@@ -38,6 +46,16 @@ function StatCard({ label, value, hint, tone }: { label: string; value: React.Re
 }
 
 function AdminDashboard() {
+  const { workspace } = useCurrentWorkspace();
+
+  if (workspace && !workspace.is_internal && !workspace.is_super_admin) {
+    return <CustomerDashboard workspace={workspace} />;
+  }
+
+  return <PrnmDashboard />;
+}
+
+function PrnmDashboard() {
   const [authorized, setAuthorized] = React.useState(false);
   const [stats, setStats] = React.useState<DashboardStats | null>(null);
   const [loading, setLoading] = React.useState(true);
@@ -283,5 +301,132 @@ function AdminDashboard() {
         </>
       )}
     </AdminLayout>
+  );
+}
+
+function CustomerDashboard({ workspace }: { workspace: CurrentWorkspace }) {
+  const [dash, setDash] = React.useState<WorkspaceDashboard | null>(null);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    getWorkspaceDashboard()
+      .then(setDash)
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  const planName = PLAN_FEATURES[workspace.plan as Plan]?.name ?? workspace.plan;
+  const isTrialing = workspace.subscription_status === "trialing";
+  const trialEnd = workspace.trial_ends_at
+    ? new Date(workspace.trial_ends_at).toLocaleDateString()
+    : null;
+
+  return (
+    <AdminLayout title="Dashboard">
+      {/* Header */}
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">{workspace.name}</h1>
+          <p className="text-sm text-muted-foreground">
+            {planName} plan
+            {isTrialing && trialEnd && (
+              <span className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                Trial ends {trialEnd}
+              </span>
+            )}
+          </p>
+        </div>
+        <Link
+          to="/admin/quick-page"
+          className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+        >
+          + New page
+        </Link>
+      </div>
+
+      {/* Stats row */}
+      {!loading && dash && (
+        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <StatCard label="Total pages" value={dash.totalPages} />
+          <StatCard label="Published" value={dash.publishedPages} tone={dash.publishedPages > 0 ? "ok" : undefined} />
+          <StatCard label="Created this week" value={dash.last7dPages} hint="last 7 days" />
+        </div>
+      )}
+      {loading && <div className="mt-6 h-24 animate-pulse rounded-xl bg-muted" />}
+
+      {/* First-run empty state */}
+      {!loading && dash?.totalPages === 0 && (
+        <div className="mt-8 rounded-xl border-2 border-dashed border-border p-8 text-center">
+          <div className="text-4xl mb-3">📄</div>
+          <h2 className="text-lg font-semibold">Create your first page</h2>
+          <p className="mt-1 text-sm text-muted-foreground max-w-sm mx-auto">
+            Use the Quick page builder to generate SEO-optimised content for your marketplace
+            in under 60 seconds.
+          </p>
+          <Link
+            to="/admin/quick-page"
+            className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+          >
+            Build your first page →
+          </Link>
+        </div>
+      )}
+
+      {/* Recent pages (when they have some) */}
+      {!loading && dash && dash.totalPages > 0 && dash.recentPages.length > 0 && (
+        <section className="mt-8">
+          <h2 className="text-base font-semibold mb-3">Recent pages</h2>
+          <ul className="divide-y divide-border rounded-xl border border-border">
+            {dash.recentPages.map((p) => (
+              <li key={p.url_path} className="flex items-center justify-between gap-4 px-4 py-3 text-sm">
+                <span className="truncate font-medium">{p.title || p.url_path}</span>
+                <span className="shrink-0 text-xs text-muted-foreground">
+                  {new Date(p.updated_at).toLocaleDateString()}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {/* Quick actions */}
+      <section className="mt-8">
+        <h2 className="text-base font-semibold mb-3">Quick actions</h2>
+        <div className="grid gap-3 sm:grid-cols-3">
+          <QuickActionCard
+            icon="✍️"
+            title="Build a page"
+            desc="AI-generated SEO content in 60 seconds"
+            to="/admin/quick-page"
+          />
+          <QuickActionCard
+            icon="📈"
+            title="SEO health"
+            desc="Scan for thin content and missing metadata"
+            to="/admin/seo-health"
+          />
+          <QuickActionCard
+            icon="🌐"
+            title="Domain & billing"
+            desc="Verify your domain and manage your plan"
+            to="/account/billing"
+          />
+        </div>
+      </section>
+    </AdminLayout>
+  );
+}
+
+function QuickActionCard({ icon, title, desc, to }: { icon: string; title: string; desc: string; to: string }) {
+  return (
+    <Link
+      to={to as never}
+      search={{} as never}
+      className="group flex flex-col gap-1.5 rounded-xl border border-border bg-card p-4 hover:border-primary hover:bg-primary/5 transition-colors"
+    >
+      <span className="text-2xl">{icon}</span>
+      <span className="font-semibold text-sm group-hover:text-primary">{title}</span>
+      <span className="text-xs text-muted-foreground">{desc}</span>
+    </Link>
   );
 }

@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { requireFeatureAccess } from "@/server/workspace.functions";
 
 export type DashboardStats = {
   contentPages: {
@@ -212,5 +213,40 @@ export const getDashboardStats = createServerFn({ method: "GET" })
       missing404s: { total: missingTotal, unresolved: missingUnresolved },
       quality: { siteIssues, byTemplate: qualityByTemplate },
       generatedAt: new Date().toISOString(),
+    };
+  });
+
+export type WorkspaceDashboard = {
+  totalPages: number;
+  publishedPages: number;
+  last7dPages: number;
+  recentPages: Array<{ url_path: string; title: string | null; updated_at: string }>;
+};
+
+export const getWorkspaceDashboard = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<WorkspaceDashboard> => {
+    const { workspaceId } = await requireFeatureAccess(
+      (context as any).userId,
+      "content.quick_page",
+    );
+    const sb = supabaseAdmin as any;
+    const week = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    const [{ count: total }, { count: published }, { count: last7d }, { data: recent }] =
+      await Promise.all([
+        sb.from("content_pages").select("*", { count: "exact", head: true }).eq("workspace_id", workspaceId),
+        sb.from("content_pages").select("*", { count: "exact", head: true }).eq("workspace_id", workspaceId).eq("status", "published"),
+        sb.from("content_pages").select("*", { count: "exact", head: true }).eq("workspace_id", workspaceId).gte("updated_at", week),
+        sb.from("content_pages")
+          .select("url_path, title, updated_at")
+          .eq("workspace_id", workspaceId)
+          .order("updated_at", { ascending: false })
+          .limit(5),
+      ]);
+    return {
+      totalPages: (total as number) ?? 0,
+      publishedPages: (published as number) ?? 0,
+      last7dPages: (last7d as number) ?? 0,
+      recentPages: (recent ?? []) as Array<{ url_path: string; title: string | null; updated_at: string }>,
     };
   });

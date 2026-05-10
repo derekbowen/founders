@@ -21,6 +21,7 @@ type Item = {
   icon: React.ComponentType<{ className?: string }>;
   /** Plan feature this tool requires. Omit for tools available to every workspace (e.g. Dashboard). */
   feature?: Feature;
+  internalOnly?: boolean;  // hide entirely for non-internal workspaces
 };
 
 const GROUPS: Array<{ label: string; items: Item[] }> = [
@@ -35,9 +36,9 @@ const GROUPS: Array<{ label: string; items: Item[] }> = [
       { to: "/admin/generate-content", label: "Generate content", icon: Bot, feature: "content.generate" },
       { to: "/admin/content-migration", label: "Content migration", icon: Database, feature: "content.migration" },
       { to: "/admin/content-pages", label: "Bulk page editor", icon: FileText, feature: "content.bulk_editor" },
-      { to: "/admin/blog", label: "Blog admin", icon: Newspaper, feature: "content.blog" },
-      { to: "/admin/learning", label: "Learning admin", icon: GraduationCap, feature: "content.learning" },
-      { to: "/admin/cities-heroes", label: "City heroes", icon: ImageIcon, feature: "content.city_heroes" },
+      { to: "/admin/blog", label: "Blog admin", icon: Newspaper, feature: "content.blog", internalOnly: true },
+      { to: "/admin/learning", label: "Learning admin", icon: GraduationCap, feature: "content.learning", internalOnly: true },
+      { to: "/admin/cities-heroes", label: "City heroes", icon: ImageIcon, feature: "content.city_heroes", internalOnly: true },
     ],
   },
   {
@@ -71,9 +72,9 @@ const GROUPS: Array<{ label: string; items: Item[] }> = [
       { to: "/admin/leads", label: "Lead inbox", icon: Mail, feature: "ops.leads" },
       { to: "/admin/email-branding", label: "Email branding", icon: Mail, feature: "ops.email_branding" },
       { to: "/admin/site-footer", label: "Site footer", icon: LinkIcon, feature: "ops.site_footer" },
-      { to: "/admin/directory", label: "Directory moderation", icon: Building2, feature: "ops.directory" },
-      { to: "/admin/claims", label: "Listing claims", icon: ShieldCheck, feature: "ops.claims" },
-      { to: "/admin/plan-requests", label: "Plan requests", icon: CreditCard, feature: "ops.plan_requests" },
+      { to: "/admin/directory", label: "Directory moderation", icon: Building2, feature: "ops.directory", internalOnly: true },
+      { to: "/admin/claims", label: "Listing claims", icon: ShieldCheck, feature: "ops.claims", internalOnly: true },
+      { to: "/admin/plan-requests", label: "Plan requests", icon: CreditCard, feature: "ops.plan_requests", internalOnly: true },
       { to: "/admin/team", label: "Admin team", icon: ShieldCheck, feature: "ops.team" },
     ],
   },
@@ -124,6 +125,10 @@ function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: {
               )}
               <ul className="space-y-0.5">
                 {g.items.map((it) => {
+                  // For non-internal, non-admin workspaces: hide PRNM-only tools and
+                  // hide locked tools (show them via the upgrade CTA instead).
+                  if (!bypassGating && it.internalOnly) return null;
+                  if (!bypassGating && it.feature && !featureUnlocked(plan ?? "starter", it.feature)) return null;
                   const active = path === it.to || path.startsWith(it.to + "/");
                   const locked =
                     !bypassGating &&
@@ -172,6 +177,22 @@ function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: {
               </ul>
             </div>
           ))}
+          {!bypassGating && (() => {
+            const lockedCount = GROUPS.flatMap((g) => g.items).filter(
+              (it) => !it.internalOnly && it.feature && !featureUnlocked(plan ?? "starter", it.feature)
+            ).length;
+            if (lockedCount === 0) return null;
+            return (
+              <Link
+                to="/account/billing"
+                search={{} as never}
+                className="mt-3 flex items-center gap-1.5 rounded-lg border border-dashed border-border px-2 py-2 text-xs text-muted-foreground hover:border-primary hover:text-primary"
+              >
+                <Lock className="h-3 w-3 shrink-0" />
+                {!collapsed && <span className="truncate">{lockedCount} more tools — Upgrade</span>}
+              </Link>
+            );
+          })()}
         </nav>
       </aside>
     </>
