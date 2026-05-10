@@ -39,10 +39,6 @@ function rel(path: string): string {
   return path.startsWith("/") ? `${base}${path}` : `${base}/${path}`;
 }
 
-const MARKETPLACE_ORIGIN = "https://www.poolrentalnearme.com";
-const marketplace = (path: string): string =>
-  `${MARKETPLACE_ORIGIN}${path.startsWith("/") ? path : `/${path}`}`;
-
 export function SiteHeader() {
   if (useSuppressChrome()) return null;
   return <SiteHeaderInner />;
@@ -50,10 +46,10 @@ export function SiteHeader() {
 
 const HEADER_LINKS: Array<{ label: string; href: string; internal?: boolean; exact?: boolean }> = [
   { label: "Home", href: "/", internal: true, exact: true },
-  { label: "Public Pools", href: "https://www.poolrentalnearme.com/public-pools" },
-  { label: "Pool Pros", href: "/p/pool-pros" },
-  { label: "How It Works", href: "/p/how-it-works" },
-  { label: "Search", href: "https://www.poolrentalnearme.com/s" },
+  { label: "Features", href: "/#features" },
+  { label: "Pricing", href: "/#pricing" },
+  { label: "FAQ", href: "/#faq" },
+  { label: "Help Center", href: "/help-center", internal: true },
 ];
 
 function SiteHeaderInner() {
@@ -83,11 +79,12 @@ function SiteHeaderInner() {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
         <Link to="/" className="flex items-center gap-2" onClick={close}>
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5" aria-hidden="true">
-              <path d="M2 18c1.5 0 2.5-1 4-1s2.5 1 4 1 2.5-1 4-1 2.5 1 4 1 2.5-1 4-1v3c-1.5 0-2.5 1-4 1s-2.5-1-4-1-2.5 1-4 1-2.5-1-4-1-2.5 1-4 1v-3zM6 14V5a3 3 0 0 1 6 0v9M12 9h6a3 3 0 0 1 0 6" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5" aria-hidden="true">
+              <polyline points="8 6 4 12 8 18" />
+              <polyline points="16 6 20 12 16 18" />
             </svg>
           </div>
-          <span className="text-base font-bold tracking-tight text-foreground sm:text-lg">Pool Rental Near Me</span>
+          <span className="text-base font-bold tracking-tight text-foreground sm:text-lg">founders.click</span>
         </Link>
 
         <nav className="hidden items-center gap-6 md:flex">
@@ -111,12 +108,13 @@ function SiteHeaderInner() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <a
-            href={marketplace("/l/draft/00000000-0000-0000-0000-000000000000/new/details")}
-            className="hidden h-9 items-center justify-center rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary-glow sm:inline-flex"
+          <Link
+            to="/auth"
+            search={{ redirect: "/admin/dashboard", mode: "signup" } as never}
+            className="hidden h-9 items-center justify-center rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:opacity-90 sm:inline-flex"
           >
-            List Your Pool
-          </a>
+            Start free trial
+          </Link>
           <button
             type="button"
             aria-label="Open menu"
@@ -192,13 +190,14 @@ function SiteHeaderInner() {
             </ul>
           </nav>
           <div className="border-t border-border p-4">
-            <a
-              href={marketplace("/l/draft/00000000-0000-0000-0000-000000000000/new/details")}
+            <Link
+              to="/auth"
+              search={{ redirect: "/admin/dashboard", mode: "signup" } as never}
               onClick={close}
-              className="inline-flex h-11 w-full items-center justify-center rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:bg-primary-glow"
+              className="inline-flex h-11 w-full items-center justify-center rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:opacity-90"
             >
-              List Your Pool
-            </a>
+              Start free trial
+            </Link>
           </div>
         </aside>
       </div>
@@ -230,103 +229,32 @@ export function SiteFooter() {
 }
 
 function SiteFooterInner() {
-  const data = React.useContext(FooterDataContext);
   return (
     <footer className="border-t border-border bg-background">
-      <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-        <div className="grid gap-10 lg:grid-cols-12">
-          <div className="lg:col-span-3">
-            <Link to="/" aria-label="Pool Rental Near Me" className="inline-flex">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-7 w-7" aria-hidden="true">
-                  <path d="M2 18c1.5 0 2.5-1 4-1s2.5 1 4 1 2.5-1 4-1 2.5 1 4 1 2.5-1 4-1v3c-1.5 0-2.5 1-4 1s-2.5-1-4-1-2.5 1-4 1-2.5-1-4-1-2.5 1-4 1v-3z" />
-                </svg>
-              </div>
-            </Link>
-            {data.contact_phone_label && (
-              <p className="mt-5 text-sm text-foreground">
-                {data.contact_phone ? (
-                  <a href={data.contact_phone} className="hover:text-primary">{data.contact_phone_label}</a>
-                ) : (
-                  <span>{data.contact_phone_label}</span>
-                )}
-                {data.contact_phone_hours && <span className="text-muted-foreground"> {data.contact_phone_hours}</span>}
-              </p>
-            )}
-            {data.contact_email && (
-              <p className="mt-2 text-sm">
-                <a href={`mailto:${data.contact_email}`} className="text-foreground hover:text-primary">
-                  {data.contact_email}
-                </a>
-              </p>
-            )}
-            {data.socials.length > 0 && (
-              <ul className="mt-5 flex flex-wrap items-center gap-3 text-muted-foreground">
-                {data.socials.map((s) => (
-                  <li key={s.label + s.href}>
-                    <a
-                      href={s.href}
-                      aria-label={s.label}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-full transition-colors hover:bg-secondary hover:text-primary"
-                    >
-                      {socialIcon(s.icon)}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            )}
+      <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 py-10 text-sm text-muted-foreground sm:flex-row">
+        <Link to="/" className="flex items-center gap-2">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+              <polyline points="8 6 4 12 8 18" />
+              <polyline points="16 6 20 12 16 18" />
+            </svg>
           </div>
-
-          <FooterColumn title="Explore" items={data.explore_links} />
-          <FooterColumn title="Become a Host" items={data.host_links} />
-          <FooterColumn title="Company" items={data.company_links} />
-
-          <div className="lg:col-span-2">
-            <h4 className="text-base font-semibold text-foreground">Popular Markets</h4>
-            <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-              {data.popular_markets.map((mkt: FooterMarket) => (
-                <li key={mkt.slug}>
-                  <a href={marketplace(`/s?address=${encodeURIComponent(mkt.name)}`)} className="hover:text-primary">
-                    {mkt.name}
-                  </a>
-                </li>
-              ))}
-              <li>
-                <a href={rel("/p/all-locations")} className="hover:text-primary">All Locations</a>
-              </li>
-            </ul>
-          </div>
+          <span>founders.click</span>
+        </Link>
+        <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+          <Link to="/" hash="features" className="hover:text-foreground">Features</Link>
+          <Link to="/" hash="pricing" className="hover:text-foreground">Pricing</Link>
+          <Link to="/" hash="faq" className="hover:text-foreground">FAQ</Link>
+          <Link to="/help-center" className="hover:text-foreground">Help Center</Link>
+          <Link to="/privacy-policy" className="hover:text-foreground">Privacy</Link>
         </div>
-
-        <div className="mt-12 border-t border-border pt-10">
-          <div className="flex flex-col items-center gap-5 text-center sm:flex-row sm:items-center sm:justify-between sm:text-left">
-            <div>
-              <h4 className="text-lg font-semibold text-foreground">Get the Pool Rental Near Me app</h4>
-              <p className="mt-1 text-sm text-muted-foreground">Book pools, message hosts, and manage trips on the go.</p>
-            </div>
-            <div className="flex w-full flex-col items-stretch gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-4">
-              <a dir="ltr" href="https://apps.apple.com/app/pool-rental-near-me/id6502249246" target="_blank" rel="noopener noreferrer" aria-label="Download on the App Store" className="inline-flex h-14 w-full items-center justify-center gap-2.5 rounded-xl bg-foreground px-5 text-background shadow-sm transition-transform hover:scale-[1.03] sm:h-16 sm:w-auto sm:justify-start sm:gap-3 sm:rounded-2xl sm:px-6">
-                <svg viewBox="0 0 24 24" fill="currentColor" className="h-7 w-7 shrink-0 sm:h-9 sm:w-9" aria-hidden="true"><path d="M16.365 1.43c0 1.14-.42 2.22-1.18 3.04-.83.9-2.16 1.6-3.27 1.51-.14-1.12.4-2.27 1.16-3.06.83-.86 2.27-1.5 3.29-1.49zM20.5 17.36c-.56 1.29-.83 1.87-1.55 3.01-1 1.59-2.41 3.57-4.16 3.59-1.55.01-1.95-1.01-4.06-1-2.11.01-2.55 1.02-4.1 1-1.75-.02-3.09-1.81-4.09-3.4C0 17.86-.34 13.61 1.4 11.27c1.23-1.66 3.18-2.63 5-2.63 1.86 0 3.03 1.02 4.57 1.02 1.5 0 2.41-1.02 4.56-1.02 1.62 0 3.34.88 4.56 2.41-4.01 2.2-3.36 7.93.41 9.31z" /></svg>
-                <div className="flex flex-col leading-tight text-start"><span className="text-[10px] uppercase tracking-wide opacity-80">Download on the</span><span className="text-base font-semibold sm:text-xl">App Store</span></div>
-              </a>
-              <a dir="ltr" href="https://play.google.com/store/apps/details?id=com.poolrentalnearme.app.prod" target="_blank" rel="noopener noreferrer" aria-label="Get it on Google Play" className="inline-flex h-14 w-full items-center justify-center gap-2.5 rounded-xl bg-foreground px-5 text-background shadow-sm transition-transform hover:scale-[1.03] sm:h-16 sm:w-auto sm:justify-start sm:gap-3 sm:rounded-2xl sm:px-6">
-                <svg viewBox="0 0 24 24" className="h-7 w-7 shrink-0 sm:h-9 sm:w-9" aria-hidden="true"><path d="M3.6 1.6c-.4.3-.6.8-.6 1.5v17.8c0 .7.2 1.2.6 1.5l10.1-10.4L3.6 1.6z" fill="#34A853" /><path d="M17.5 8.6 13.7 12l3.8 3.4 4.5-2.6c1.3-.7 1.3-2.7 0-3.4l-4.5-2.8z" fill="#FBBC04" /><path d="m3.6 22.4 10.1-10.4L17.5 15.4 5.4 22.7c-.7.4-1.4.2-1.8-.3z" fill="#EA4335" /><path d="M3.6 1.6c.4-.5 1.1-.7 1.8-.3l12.1 7.3-3.8 3.4L3.6 1.6z" fill="#4285F4" /></svg>
-                <div className="flex flex-col leading-tight text-start"><span className="text-[10px] uppercase tracking-wide opacity-80">GET IT ON</span><span className="text-base font-semibold sm:text-xl">Google Play</span></div>
-              </a>
-            </div>
-          </div>
-          <div className="mt-8 text-xs text-muted-foreground">
-            {data.bottom_text || `© ${FOOTER_YEAR} PRNM CORP`}
-          </div>
-        </div>
+        <div className="text-xs">© {FOOTER_YEAR} founders.click</div>
       </div>
     </footer>
   );
 }
 
-function FooterColumn({ title, items }: { title: string; items: FooterLink[] }) {
+function _FooterColumn({ title, items }: { title: string; items: FooterLink[] }) {
   return (
     <div className="lg:col-span-2">
       <h4 className="text-base font-semibold text-foreground">{title}</h4>
