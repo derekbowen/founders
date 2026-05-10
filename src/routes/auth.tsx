@@ -105,27 +105,8 @@ function AuthPage() {
     }
   }
 
-  async function handleGoogle() {
-    if (busy) return;
-    setBusy(true);
-    try {
-      const callbackUrl = new URL("/auth", window.location.origin);
-      callbackUrl.searchParams.set("redirect", search.redirect);
-      callbackUrl.searchParams.set("mode", "signin");
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: { redirectTo: callbackUrl.toString() },
-      });
-      if (error) {
-        toast.error(error.message ?? "Google sign-in failed.");
-        return;
-      }
-      // Supabase redirects the browser to Google; this code only runs if
-      // the redirect was suppressed, in which case we have nothing more to do.
-    } finally {
-      setBusy(false);
-    }
-  }
+  // Google OAuth deferred — provider not enabled in Supabase. Email/password
+  // and magic-link via Supabase Auth are the supported methods for now.
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -166,23 +147,7 @@ function AuthPage() {
               : "Pick up where you left off."}
           </p>
 
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleGoogle}
-            disabled={busy}
-            className="mt-6 w-full"
-          >
-            Continue with Google
-          </Button>
-
-          <div className="my-5 flex items-center gap-3">
-            <span className="h-px flex-1 bg-border" />
-            <span className="text-xs uppercase tracking-wide text-muted-foreground">or</span>
-            <span className="h-px flex-1 bg-border" />
-          </div>
-
-          <form onSubmit={handleEmail} className="space-y-4">
+          <form onSubmit={handleEmail} className="space-y-4 mt-6">
             {mode === "signup" && (
               <div className="space-y-1.5">
                 <Label htmlFor="fullName">Full name</Label>

@@ -40,22 +40,35 @@ const SENDER_DOMAIN =
 const ROOT_DOMAIN = process.env.SITE_ROOT_DOMAIN ?? 'poolrentalnearme.online'
 const FROM_DOMAIN = SENDER_DOMAIN
 
-// Shape of the Supabase Auth send-email hook payload (v1).
+// Shape of the Supabase Auth Send Email hook payload.
 // https://supabase.com/docs/guides/auth/auth-hooks/send-email-hook
-interface SupabaseAuthEmailPayload {
-  version: '1'
-  run_id?: string
-  type: 'auth'
-  data: {
-    action_type: string
+//
+// Supabase fires an HTTPS webhook to our endpoint each time it needs to
+// send a transactional email (signup confirm, magic link, password reset,
+// email change, reauthentication, invite). Payload shape:
+interface SupabaseSendEmailPayload {
+  user: {
+    id: string
     email: string
-    url?: string
-    token?: string
-    token_hash?: string
-    redirect_to?: string
-    old_email?: string
+    user_metadata?: Record<string, unknown>
+  }
+  email_data: {
+    token: string
+    token_hash: string
+    redirect_to: string
+    email_action_type:
+      | 'signup'
+      | 'invite'
+      | 'magiclink'
+      | 'recovery'
+      | 'email_change'
+      | 'reauthentication'
+    site_url: string
+    /** Present only on email_change — the proposed new email's verification token */
+    token_new?: string
+    token_hash_new?: string
+    /** Present only on email_change — the user's prior email address */
     new_email?: string
-    user?: { email?: string; id?: string }
   }
 }
 
@@ -81,12 +94,14 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
         }
 
         // Verify Supabase Auth's standard-webhooks signature, then parse payload.
-        let payload: SupabaseAuthEmailPayload
+        let payload: SupabaseSendEmailPayload
         let run_id = ''
         try {
           const rawBody = await verifyStandardWebhook(request, hookSecret)
-          payload = JSON.parse(rawBody) as SupabaseAuthEmailPayload
-          run_id = payload.run_id ?? ''
+          payload = JSON.parse(rawBody) as SupabaseSendEmailPayload
+          // The webhook-id header doubles as our run_id for tracing — Supabase
+          // doesn't include a run_id in the payload itself.
+          run_id = request.headers.get('webhook-id') ?? ''
         } catch (error) {
           if (error instanceof StandardWebhookError) {
             switch (error.code) {
@@ -117,28 +132,23 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
           )
         }
 
-        if (!payload?.data?.action_type || !payload?.data?.email) {
-          console.error('Webhook payload missing required fields')
+        if (!payload?.email_data?.email_action_type || !payload?.user?.email) {
+          console.error('Webhook payload missing required fields', {
+            hasEmailData: !!payload?.email_data,
+            hasUser: !!payload?.user,
+            run_id,
+          })
           return Response.json(
             { error: 'Invalid webhook payload' },
             { status: 400 }
           )
         }
 
-        if (payload.version !== '1') {
-          console.error('Unsupported payload version', { version: payload.version, run_id })
-          return Response.json(
-            { error: `Unsupported payload version: ${payload.version}` },
-            { status: 400 }
-          )
-        }
-
-        // The email action type is in payload.data.action_type (e.g., "signup", "recovery")
-        // payload.type is the hook event type ("auth")
-        const emailType = payload.data.action_type
+        const emailType = payload.email_data.email_action_type
+        const recipientEmail = payload.user.email
         console.log('Received auth event', {
           emailType,
-          email_redacted: redactEmail(payload.data.email),
+          email_redacted: redactEmail(recipientEmail),
           run_id,
         })
 
@@ -162,16 +172,31 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
           footerText: brandingRow.footer_text,
         }
 
-        // Build template props from payload.data (HookData structure)
+        // Build the confirmation URL Supabase doesn't give us directly. Pattern:
+        //   ${site_url}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${redirect_to}
+        // (https://supabase.com/docs/guides/auth/auth-hooks/send-email-hook)
+        const confirmationUrl = (() => {
+          const base = payload.email_data.site_url.replace(/\/$/, '')
+          const params = new URLSearchParams({
+            token: payload.email_data.token_hash,
+            type: emailType,
+            redirect_to: payload.email_data.redirect_to,
+          })
+          return `${base}/auth/v1/verify?${params.toString()}`
+        })()
+
+        // Build template props from Supabase's send-email payload.
         const templateProps = {
           siteName: branding.siteName,
           siteUrl: `https://${ROOT_DOMAIN}`,
-          recipient: payload.data.email,
-          confirmationUrl: payload.data.url,
-          token: payload.data.token,
-          email: payload.data.email,
-          oldEmail: payload.data.old_email,
-          newEmail: payload.data.new_email,
+          recipient: recipientEmail,
+          confirmationUrl,
+          token: payload.email_data.token,
+          email: recipientEmail,
+          // Email-change action puts the user's prior email in the user object
+          // and the proposed new email in email_data.new_email.
+          oldEmail: emailType === 'email_change' ? recipientEmail : undefined,
+          newEmail: payload.email_data.new_email,
           branding,
         }
 
@@ -199,7 +224,7 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
         await supabase.from('email_send_log').insert({
           message_id: messageId,
           template_name: emailType,
-          recipient_email: payload.data.email,
+          recipient_email: recipientEmail,
           status: 'pending',
         })
 
@@ -208,7 +233,7 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
           payload: {
             run_id,
             message_id: messageId,
-            to: payload.data.email,
+            to: recipientEmail,
             from: `${branding.senderName} <noreply@${FROM_DOMAIN}>`,
             sender_domain: SENDER_DOMAIN,
             subject: EMAIL_SUBJECTS[emailType] || 'Notification',
@@ -225,7 +250,7 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
           await supabase.from('email_send_log').insert({
             message_id: messageId,
             template_name: emailType,
-            recipient_email: payload.data.email,
+            recipient_email: recipientEmail,
             status: 'failed',
             error_message: 'Failed to enqueue email',
           })
