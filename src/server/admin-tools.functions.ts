@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireFeatureAccess } from "@/server/workspace.functions";
 import { z } from "zod";
 
 async function assertAdmin(userId: string) {
@@ -30,10 +31,11 @@ export const listSeoIssues = createServerFn({ method: "POST" })
     }).parse(d),
   )
   .handler(async ({ data, context }): Promise<{ rows: SeoIssueRow[] }> => {
-    await assertAdmin((context as any).userId);
+    const { workspaceId } = await requireFeatureAccess((context as any).userId, "seo.health");
     let q = (supabaseAdmin as any)
       .from("content_pages")
       .select("id, url_path, title, template_type, body_markdown, seo_description, updated_at, slug, status")
+      .eq("workspace_id", workspaceId)
       .eq("status", "published")
       .like("url_path", "/p/%")
       .order("updated_at", { ascending: false })
@@ -111,8 +113,8 @@ export const listContentPages = createServerFn({ method: "POST" })
     }).parse(d ?? {}),
   )
   .handler(async ({ data, context }): Promise<{ rows: ContentPageRow[]; total: number }> => {
-    await assertAdmin((context as any).userId);
-    let base: any = (supabaseAdmin as any).from("content_pages").select("id, url_path, title, template_type, status, body_markdown, updated_at", { count: "exact" }).like("url_path", "/p/%");
+    const { workspaceId } = await requireFeatureAccess((context as any).userId, "content.bulk_editor");
+    let base: any = (supabaseAdmin as any).from("content_pages").select("id, url_path, title, template_type, status, body_markdown, updated_at", { count: "exact" }).eq("workspace_id", workspaceId).like("url_path", "/p/%");
     if (data.status !== "all") base = base.eq("status", data.status);
     if (data.template) base = base.eq("template_type", data.template);
     if (data.q) base = base.or(`url_path.ilike.%${data.q}%,title.ilike.%${data.q}%`);
@@ -135,13 +137,13 @@ export const bulkUpdateContentPages = createServerFn({ method: "POST" })
     }).parse(d),
   )
   .handler(async ({ data, context }) => {
-    await assertAdmin((context as any).userId);
+    const { workspaceId } = await requireFeatureAccess((context as any).userId, "content.bulk_editor");
     if (data.action === "delete") {
-      const { error } = await (supabaseAdmin as any).from("content_pages").delete().in("id", data.ids);
+      const { error } = await (supabaseAdmin as any).from("content_pages").delete().eq("workspace_id", workspaceId).in("id", data.ids);
       return error ? { ok: false, error: error.message } : { ok: true, count: data.ids.length };
     }
     const status = data.action === "publish" ? "published" : "pending";
-    const { error } = await (supabaseAdmin as any).from("content_pages").update({ status, updated_at: new Date().toISOString() }).in("id", data.ids);
+    const { error } = await (supabaseAdmin as any).from("content_pages").update({ status, updated_at: new Date().toISOString() }).eq("workspace_id", workspaceId).in("id", data.ids);
     return error ? { ok: false, error: error.message } : { ok: true, count: data.ids.length };
   });
 
@@ -156,15 +158,15 @@ export type IndexingStats = {
 export const getIndexingStats = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<IndexingStats> => {
-    await assertAdmin((context as any).userId);
+    const { workspaceId } = await requireFeatureAccess((context as any).userId, "seo.indexing");
     const sb = supabaseAdmin as any;
     const day = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     const [{ count: totalPub }, { data: tpl }, { data: r404 }, { count: unres }, { count: recent }] = await Promise.all([
-      sb.from("content_pages").select("*", { count: "exact", head: true }).eq("status", "published").like("url_path", "/p/%"),
-      sb.from("content_pages").select("template_type, status").eq("status", "published").like("url_path", "/p/%").limit(5000),
+      sb.from("content_pages").select("*", { count: "exact", head: true }).eq("workspace_id", workspaceId).eq("status", "published").like("url_path", "/p/%"),
+      sb.from("content_pages").select("template_type, status").eq("workspace_id", workspaceId).eq("status", "published").like("url_path", "/p/%").limit(5000),
       sb.from("content_404_log").select("id, url_path, hit_count, last_seen_at").is("resolved_at", null).order("hit_count", { ascending: false }).limit(20),
       sb.from("content_404_log").select("*", { count: "exact", head: true }).is("resolved_at", null),
-      sb.from("content_pages").select("*", { count: "exact", head: true }).eq("status", "published").like("url_path", "/p/%").gte("updated_at", day),
+      sb.from("content_pages").select("*", { count: "exact", head: true }).eq("workspace_id", workspaceId).eq("status", "published").like("url_path", "/p/%").gte("updated_at", day),
     ]);
     const tplMap = new Map<string, number>();
     for (const r of tpl || []) {

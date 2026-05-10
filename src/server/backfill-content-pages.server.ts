@@ -19,6 +19,9 @@ type Row = {
   url_path: string;
   category: string;
   template_type: string | null;
+  body_markdown?: string | null;
+  status?: string;
+  priority?: number | null;
 };
 
 type Generated = {
@@ -272,23 +275,34 @@ export async function runBackfillContentPages(input: BackfillInput) {
     throw new Error("Unauthorized");
   }
   {
+    // Scope to the internal (PRNM) workspace so this batch tool never touches
+    // customer pages.
+    const { data: prnmWs } = await (supabaseAdmin as any)
+      .from("workspaces")
+      .select("id")
+      .eq("is_internal", true)
+      .limit(1)
+      .maybeSingle();
+    const prnmWorkspaceId: string | null = prnmWs?.id ?? null;
 
     // Pull a wider candidate set, sort in JS by our composite rank.
-    const { data: rows, error } = await supabaseAdmin
+    let q = (supabaseAdmin as any)
       .from("content_pages")
       .select("id, slug, url_path, category, template_type, body_markdown, status, priority")
       .like("url_path", "/p/%")
       .neq("status", "published")
       .order("priority", { ascending: false, nullsFirst: false })
       .limit(300);
+    if (prnmWorkspaceId) q = q.eq("workspace_id", prnmWorkspaceId);
+    const { data: rows, error } = await q as { data: Row[] | null; error: any };
 
     if (error) throw new Error(`select failed: ${error.message}`);
 
     const candidates = (rows || [])
-      .filter((r) => !!r.url_path && (!r.body_markdown || (r.body_markdown as string).length < 200))
-      .sort((a, b) => {
-        const pa = (a.priority as number) ?? 0;
-        const pb = (b.priority as number) ?? 0;
+      .filter((r: Row) => !!r.url_path && (!r.body_markdown || r.body_markdown.length < 200))
+      .sort((a: Row, b: Row) => {
+        const pa = (a.priority ?? 0) as number;
+        const pb = (b.priority ?? 0) as number;
         if (pa !== pb) return pb - pa;
         const ca = CATEGORY_ORDER[a.category] ?? 99;
         const cb = CATEGORY_ORDER[b.category] ?? 99;
@@ -313,7 +327,7 @@ export async function runBackfillContentPages(input: BackfillInput) {
     for (const row of candidates) {
       try {
         const gen = await callAI(row as Row, data.model);
-        const { error: upErr } = await supabaseAdmin
+        let upQ = (supabaseAdmin as any)
           .from("content_pages")
           .update({
             title: gen.title,
@@ -324,6 +338,8 @@ export async function runBackfillContentPages(input: BackfillInput) {
             updated_at: new Date().toISOString(),
           })
           .eq("id", row.id);
+        if (prnmWorkspaceId) upQ = upQ.eq("workspace_id", prnmWorkspaceId);
+        const { error: upErr } = await upQ;
         if (upErr) throw new Error(upErr.message);
         results.push({
           url_path: row.url_path ?? "",

@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireFeatureAccess } from "@/server/workspace.functions";
 import { z } from "zod";
 
 async function assertAdmin(userId: string) {
@@ -209,10 +210,10 @@ export const compareCompetitorToPage = createServerFn({ method: "POST" })
     }).parse(d),
   )
   .handler(async ({ data, context }) => {
-    await assertAdmin((context as any).userId);
+    const { workspaceId } = await requireFeatureAccess((context as any).userId, "seo.competitor_tracker");
     const [{ data: comp }, { data: ours }] = await Promise.all([
       sb().from("competitor_pages").select("url, title, h1, word_count, headings, markdown").eq("id", data.competitor_id).maybeSingle(),
-      sb().from("content_pages").select("url_path, title, body_markdown").eq("url_path", data.our_url_path).maybeSingle(),
+      sb().from("content_pages").select("url_path, title, body_markdown").eq("workspace_id", workspaceId).eq("url_path", data.our_url_path).maybeSingle(),
     ]);
     if (!comp) return { ok: false, error: "Competitor page not found" };
     if (!ours) return { ok: false, error: "Our page not found" };
@@ -290,10 +291,11 @@ export const generateLinkSuggestions = createServerFn({ method: "POST" })
     }).parse(d ?? {}),
   )
   .handler(async ({ data, context }) => {
-    await assertAdmin((context as any).userId);
+    const { workspaceId } = await requireFeatureAccess((context as any).userId, "seo.internal_links");
     const { data: pages } = await sb()
       .from("content_pages")
       .select("url_path, title, body_markdown")
+      .eq("workspace_id", workspaceId)
       .eq("status", "published")
       .like("url_path", "/p/%")
       .order("updated_at", { ascending: false })

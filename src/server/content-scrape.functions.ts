@@ -2,14 +2,15 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireFeatureAccess } from "@/server/workspace.functions";
 
 /**
  * Scrape a single content_pages row via Firecrawl and store raw_html +
  * body_markdown for human review. Idempotent — overwrites prior scrape data
  * but keeps status="pending" so a second admin step promotes it to "drafted".
  *
- * Auth: admin-only. Driven from the admin migration UI; not on a cron until
- * we've QA'd a handful of pages.
+ * Auth: feature-gated (seo.scrape_import). All queries scoped to the caller's
+ * workspace so customers can only touch their own pages.
  */
 
 const FIRECRAWL_URL = "https://api.firecrawl.dev/v2/scrape";
@@ -46,17 +47,6 @@ async function firecrawlScrape(url: string) {
   };
 }
 
-async function assertAdmin(userId: string) {
-  const { data, error } = await supabaseAdmin
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userId)
-    .eq("role", "admin")
-    .maybeSingle();
-  if (error) throw new Error(error.message);
-  if (!data) throw new Error("Admin role required");
-}
-
 /**
  * Scrape one row by id. Returns the updated row so the admin UI can preview.
  */
@@ -66,12 +56,13 @@ export const scrapeContentPage = createServerFn({ method: "POST" })
     z.object({ id: z.string().uuid() }).parse(data),
   )
   .handler(async ({ data, context }) => {
-    await assertAdmin(context.userId);
+    const { workspaceId } = await requireFeatureAccess(context.userId, "seo.scrape_import");
 
-    const { data: row, error: fetchErr } = await supabaseAdmin
+    const { data: row, error: fetchErr } = await (supabaseAdmin as any)
       .from("content_pages")
       .select("id, source_url, title, status")
       .eq("id", data.id)
+      .eq("workspace_id", workspaceId)
       .maybeSingle();
     if (fetchErr) throw new Error(fetchErr.message);
     if (!row) throw new Error("content_pages row not found");
@@ -94,6 +85,7 @@ export const scrapeContentPage = createServerFn({ method: "POST" })
       .from("content_pages")
       .update(update)
       .eq("id", data.id)
+      .eq("workspace_id", workspaceId)
       .select("*")
       .single();
     if (upErr) throw new Error(upErr.message);
@@ -115,11 +107,12 @@ export const nextPendingPage = createServerFn({ method: "GET" })
       .parse(data ?? {}),
   )
   .handler(async ({ data, context }) => {
-    await assertAdmin(context.userId);
+    const { workspaceId } = await requireFeatureAccess(context.userId, "seo.scrape_import");
 
-    const { data: row, error } = await supabaseAdmin
+    const { data: row, error } = await (supabaseAdmin as any)
       .from("content_pages")
       .select("id, url_path, slug, source_url, title, status, template_type")
+      .eq("workspace_id", workspaceId)
       .eq("template_type", data.template_type)
       .eq("status", "pending")
       .order("priority", { ascending: true })
@@ -143,24 +136,16 @@ export const scrapeProgress = createServerFn({ method: "GET" })
       .parse(data ?? {}),
   )
   .handler(async ({ data, context }) => {
-    await assertAdmin(context.userId);
-
-    const base = supabaseAdmin
-      .from("content_pages")
-      .select("id", { count: "exact", head: true })
-      .eq("template_type", data.template_type);
+    const { workspaceId } = await requireFeatureAccess(context.userId, "seo.scrape_import");
+    const sb = supabaseAdmin as any;
 
     const [pendingRes, scrapedRes, totalRes] = await Promise.all([
-      base.eq("status", "pending"),
-      supabaseAdmin
-        .from("content_pages")
-        .select("id", { count: "exact", head: true })
-        .eq("template_type", data.template_type)
-        .eq("status", "scraped"),
-      supabaseAdmin
-        .from("content_pages")
-        .select("id", { count: "exact", head: true })
-        .eq("template_type", data.template_type),
+      sb.from("content_pages").select("id", { count: "exact", head: true })
+        .eq("workspace_id", workspaceId).eq("template_type", data.template_type).eq("status", "pending"),
+      sb.from("content_pages").select("id", { count: "exact", head: true })
+        .eq("workspace_id", workspaceId).eq("template_type", data.template_type).eq("status", "scraped"),
+      sb.from("content_pages").select("id", { count: "exact", head: true })
+        .eq("workspace_id", workspaceId).eq("template_type", data.template_type),
     ]);
 
     if (pendingRes.error) throw new Error(pendingRes.error.message);

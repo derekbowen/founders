@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireFeatureAccess } from "@/server/workspace.functions";
 
 async function assertAdmin(userId: string) {
   const { data } = await supabaseAdmin
@@ -560,13 +561,14 @@ export const auditPage = createServerFn({ method: "POST" })
     z.object({ url_path: z.string().min(1).max(300) }).parse(d),
   )
   .handler(async ({ data, context }) => {
-    await assertAdmin((context as any).userId);
+    const { workspaceId } = await requireFeatureAccess((context as any).userId, "seo.page_auditor");
     const lovKey = process.env.OPENROUTER_API_KEY;
     if (!lovKey) return { ok: false, error: "OPENROUTER_API_KEY not configured" };
 
     const { data: page } = await sb()
       .from("content_pages")
       .select("url_path, title, seo_description, body_markdown")
+      .eq("workspace_id", workspaceId)
       .eq("url_path", data.url_path)
       .maybeSingle();
     if (!page) return { ok: false, error: "Page not found" };
