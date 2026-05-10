@@ -1,4 +1,12 @@
--- Migration tracking + content store for the /p/ URL inventory
+-- Migration tracking + content store for the /p/ URL inventory.
+--
+-- An earlier migration (20260502233000) created `content_pages` with a
+-- different (CMS-style) schema. This migration redefines it as the
+-- URL-inventory schema that all subsequent migrations expect (they ALTER
+-- TABLE on the columns defined below). The DROP+CASCADE wipes the earlier
+-- placeholder + its policies/indexes/triggers cleanly.
+DROP TABLE IF EXISTS public.content_pages CASCADE;
+
 CREATE TABLE public.content_pages (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 
