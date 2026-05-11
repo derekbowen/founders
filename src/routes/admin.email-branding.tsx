@@ -94,7 +94,7 @@ function EmailBrandingPage() {
     setPreviewLoading(true);
     setPreviewHtml("");
     try {
-      const { html } = await previewAuthEmail({ data: { type } } as any);
+      const { html } = await previewAuthEmail({ data: { type } });
       setPreviewHtml(html);
     } catch (e: any) {
       setPreviewHtml(
@@ -121,7 +121,7 @@ function EmailBrandingPage() {
           primary_text_color: form.primary_text_color,
           footer_text: form.footer_text || null,
         },
-      } as any);
+      });
       toast.success("Branding saved");
       void loadPreview(previewType);
     } catch (e: any) {

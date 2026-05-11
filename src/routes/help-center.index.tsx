@@ -161,11 +161,11 @@ function HelpCenterIndex() {
 
             <div className="mx-auto mt-10 flex max-w-2xl flex-col items-center justify-center gap-3 text-sm sm:flex-row sm:gap-8">
               <a
-                href="mailto:support@poolrentalnearme.com"
+                href="mailto:support@founders.click"
                 className="inline-flex items-center gap-2 opacity-90 hover:opacity-100"
               >
                 <Mail className="h-4 w-4" />
-                support@poolrentalnearme.com
+                support@founders.click
               </a>
               <a
                 href="tel:+18664203702"

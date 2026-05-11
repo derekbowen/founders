@@ -1,5 +1,5 @@
 import * as React from "react";
-import { createFileRoute, redirect, Link } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { checkAdminRole } from "@/server/admin-auth.functions";
 import {
@@ -144,7 +144,7 @@ function KeywordOpportunities() {
     try {
       const r = await importGscQueries({ data: { rows: parsed } });
       setImportResult(
-        r.ok ? `Imported ${r.upserted} of ${r.total} queries.` : `Error: ${(r as any).error}`,
+        r.ok ? `Imported ${r.upserted} of ${r.total} queries.` : `Error: ${r.error}`,
       );
       await loadStats();
       await loadRows();
@@ -387,12 +387,14 @@ function PageOpportunityCard({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <Link
-              to={urlPath as any}
+            <a
+              href={urlPath}
+              target="_blank"
+              rel="noreferrer"
               className="font-mono text-sm font-semibold text-primary hover:underline"
             >
               {urlPath}
-            </Link>
+            </a>
             <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium">
               avg pos {avgPosition.toFixed(1)}
             </span>

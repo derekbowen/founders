@@ -231,10 +231,10 @@ function HelpArticlePage() {
           <p className="mt-1 text-sm text-muted-foreground">Our support team is here to help.</p>
           <div className="mt-4 flex flex-wrap gap-4 text-sm">
             <a
-              href="mailto:support@poolrentalnearme.com"
+              href="mailto:support@founders.click"
               className="inline-flex items-center gap-2 font-medium text-primary hover:underline"
             >
-              <Mail className="h-4 w-4" /> support@poolrentalnearme.com
+              <Mail className="h-4 w-4" /> support@founders.click
             </a>
             <a
               href="tel:+18664203702"

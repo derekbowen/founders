@@ -5,13 +5,13 @@ export const Route = createFileRoute("/privacy-policy")({
   component: PrivacyPolicyPage,
   head: () => ({
     meta: [
-      { title: "Privacy Policy — Pool Rental Near Me" },
+      { title: "Privacy Policy — founders.click" },
       {
         name: "description",
         content:
-          "How PRNM Corp (Pool Rental Near Me) collects, uses, shares, and protects personal information across our marketplace and Pool Host Academy.",
+          "How 10000 Solutions LLC (operator of founders.click and affiliated brands) collects, uses, shares, and protects personal information.",
       },
-      { property: "og:title", content: "Privacy Policy — Pool Rental Near Me" },
+      { property: "og:title", content: "Privacy Policy — founders.click" },
       {
         property: "og:description",
         content:
@@ -26,15 +26,15 @@ function PrivacyPolicyPage() {
   return (
     <LegalPage title="Privacy Policy" effectiveDate="May 3, 2026" lastUpdated="May 3, 2026">
       <p>
-        <strong>PoolRentalNearMe.com / PRNM Corp</strong>
+        <strong>10000 Solutions LLC</strong> — operator of founders.click and affiliated brands
+        (PoolRentalNearMe.com, Pool Host Academy, RentalWaivers.com, BookMyPool.com).
         <br />
-        Policy Version: PRNM-2026.01 (supersedes prior versions, including PRNM-2025.02 and
-        855527-EX)
+        Policy Version: 2026.01 (supersedes prior versions, including PRNM-2025.02 and 855527-EX)
       </p>
 
       <h2>Who We Are</h2>
       <p>
-        This Privacy Policy explains how <strong>PRNM Corp</strong> (doing business as "Pool Rental
+        This Privacy Policy explains how <strong>10000 Solutions LLC</strong> (doing business as "Pool Rental
         Near Me," "PRNM," "Company," "we," "us," "our") collects, uses, shares, protects, and
         retains personal information related to:
       </p>
@@ -50,7 +50,7 @@ function PrivacyPolicyPage() {
         Policy. If you do not agree, do not use the Services.
       </p>
       <p>
-        PRNM Corp is the operator of the Pool Rental Near Me marketplace. Certain ancillary services
+        10000 Solutions LLC is the operator of the Pool Rental Near Me marketplace. Certain ancillary services
         (e.g., Pool Host Academy training content, RentalWaivers.com, BookMyPool.com) may be
         operated by 10,000 Solutions LLC, an affiliated but separate entity. Where those services
         are accessed through PRNM marketplace touchpoints, this Policy governs the marketplace data
@@ -60,7 +60,7 @@ function PrivacyPolicyPage() {
       <h2>Scope and Roles</h2>
       <ul>
         <li>
-          <strong>Data Controller (GDPR context):</strong> PRNM Corp for core Service operations.
+          <strong>Data Controller (GDPR context):</strong> 10000 Solutions LLC for core Service operations.
         </li>
         <li>
           <strong>Data Processor:</strong> In limited cases when acting on behalf of certain
@@ -459,7 +459,7 @@ function PrivacyPolicyPage() {
       </p>
       <ul>
         <li>
-          Email: <a href="mailto:privacy@poolrentalnearme.com">privacy@poolrentalnearme.com</a>
+          Email: <a href="mailto:privacy@founders.click">privacy@founders.click</a>
         </li>
         <li>Provide sufficient information for verification.</li>
         <li>We generally respond within 30–45 days (extensions may apply under applicable law).</li>
@@ -542,7 +542,7 @@ function PrivacyPolicyPage() {
         <strong>Primary Privacy Contact:</strong>
       </p>
       <p>
-        PRNM Corp (Pool Rental Near Me)
+        10000 Solutions LLC (Pool Rental Near Me)
         <br />
         Attn: Privacy Office
         <br />
@@ -551,11 +551,11 @@ function PrivacyPolicyPage() {
       <ul>
         <li>
           <strong>General Support:</strong>{" "}
-          <a href="mailto:support@poolrentalnearme.com">support@poolrentalnearme.com</a>
+          <a href="mailto:support@founders.click">support@founders.click</a>
         </li>
         <li>
           <strong>Privacy / Rights Requests:</strong>{" "}
-          <a href="mailto:privacy@poolrentalnearme.com">privacy@poolrentalnearme.com</a>
+          <a href="mailto:privacy@founders.click">privacy@founders.click</a>
         </li>
         <li>
           <strong>Phone:</strong> 888-940-4247 (10am – 5pm PST)
@@ -640,12 +640,12 @@ function PrivacyPolicyPage() {
         bookings, pay hosts, keep things secure, improve features, and (if you allow) send marketing
         or personalized ads. You can opt out of marketing and targeted advertising. We don't sell
         your data for money. You can request to see it, fix it, or ask us to delete it. Contact{" "}
-        <a href="mailto:privacy@poolrentalnearme.com">privacy@poolrentalnearme.com</a> with
+        <a href="mailto:privacy@founders.click">privacy@founders.click</a> with
         questions.
       </p>
 
       <hr />
-      <p className="text-sm text-muted-foreground">© 2026 PRNM Corp. All rights reserved.</p>
+      <p className="text-sm text-muted-foreground">© 2026 10000 Solutions LLC. All rights reserved.</p>
     </LegalPage>
   );
 }

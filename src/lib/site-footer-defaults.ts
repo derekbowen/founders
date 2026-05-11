@@ -22,8 +22,8 @@ export const DEFAULT_FOOTER: SiteFooterSettings = {
   contact_phone: "tel:18889404247",
   contact_phone_label: "Call us 888-940-4247",
   contact_phone_hours: "10am - 5pm PST",
-  contact_email: "support@poolrentalnearme.com",
-  bottom_text: "© 2026 PRNM CORP Riverside, Ca 92509",
+  contact_email: "support@founders.click",
+  bottom_text: "© 2026 10000 Solutions LLC",
   explore_links: [
     { label: "Search Listings", href: m("/s") },
     { label: "Pool Pros Directory", href: "/directory" },

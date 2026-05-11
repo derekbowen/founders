@@ -133,13 +133,9 @@ function SeoHealth() {
     const t0 = Date.now();
     try {
       const res = await aiFixContentPage({ data: { id: row.id, mode: kind.fixMode } });
-      return {
-        id: row.id,
-        ok: !!res.ok,
-        error: (res as any).error,
-        newWords: (res as any).newWords,
-        ms: Date.now() - t0,
-      };
+      return res.ok
+        ? { id: row.id, ok: true, newWords: res.newWords, ms: Date.now() - t0 }
+        : { id: row.id, ok: false, error: res.error, ms: Date.now() - t0 };
     } catch (e: any) {
       return { id: row.id, ok: false, error: e?.message || "Failed", ms: Date.now() - t0 };
     }

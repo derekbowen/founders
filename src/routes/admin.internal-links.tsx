@@ -1,5 +1,5 @@
 import * as React from "react";
-import { createFileRoute, redirect, Link } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { checkAdminRole } from "@/server/admin-auth.functions";
 import {
@@ -184,19 +184,23 @@ function InternalLinks() {
               />
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-1.5 text-xs">
-                  <Link
-                    to={r.from_url as any}
+                  <a
+                    href={r.from_url}
+                    target="_blank"
+                    rel="noreferrer"
                     className="rounded bg-muted px-1.5 py-0.5 font-mono hover:underline"
                   >
                     {r.from_url}
-                  </Link>
+                  </a>
                   <ArrowRight className="h-3 w-3 text-muted-foreground" />
-                  <Link
-                    to={r.to_url as any}
+                  <a
+                    href={r.to_url}
+                    target="_blank"
+                    rel="noreferrer"
                     className="rounded bg-muted px-1.5 py-0.5 font-mono hover:underline"
                   >
                     {r.to_url}
-                  </Link>
+                  </a>
                   <span className="ml-auto rounded-full bg-primary/10 px-2 py-0.5 font-semibold text-primary">
                     {(r.score * 100).toFixed(0)}%
                   </span>

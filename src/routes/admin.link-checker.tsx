@@ -134,8 +134,7 @@ function LinkChecker() {
           ...s,
           [k]: { status: "fixed", msg: action === "replace" ? `→ ${newHref}` : action },
         }));
-      else
-        setState((s) => ({ ...s, [k]: { status: "error", msg: (res as any).error || "Failed" } }));
+      else setState((s) => ({ ...s, [k]: { status: "error", msg: res.error || "Failed" } }));
     } catch (e: any) {
       setState((s) => ({ ...s, [k]: { status: "error", msg: e?.message || "Failed" } }));
     }

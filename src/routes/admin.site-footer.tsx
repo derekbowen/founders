@@ -58,7 +58,7 @@ function SiteFooterAdmin() {
     if (!data) return;
     setSaving(true);
     try {
-      await updateSiteFooter({ data: data as any });
+      await updateSiteFooter({ data });
       toast.success("Footer saved. Reload pages to see changes.");
     } catch (e: any) {
       toast.error(e.message ?? "Save failed");
@@ -325,36 +325,42 @@ function LinkColumnEditor({
   );
 }
 
-function updateArrayItem<K extends keyof SiteFooterSettings>(
+type ArrayKey = {
+  [K in keyof SiteFooterSettings]: SiteFooterSettings[K] extends readonly unknown[] ? K : never;
+}[keyof SiteFooterSettings];
+
+type ItemOf<K extends ArrayKey> = SiteFooterSettings[K] extends readonly (infer T)[] ? T : never;
+
+function updateArrayItem<K extends ArrayKey>(
   setData: React.Dispatch<React.SetStateAction<SiteFooterSettings | null>>,
   key: K,
   index: number,
-  value: any,
+  value: ItemOf<K>,
 ) {
   setData((d) => {
     if (!d) return d;
-    const arr = [...(d[key] as any[])];
+    const arr = [...(d[key] as ItemOf<K>[])];
     arr[index] = value;
     return { ...d, [key]: arr };
   });
 }
 
-function addArrayItem<K extends keyof SiteFooterSettings>(
+function addArrayItem<K extends ArrayKey>(
   setData: React.Dispatch<React.SetStateAction<SiteFooterSettings | null>>,
   key: K,
-  value: any,
+  value: ItemOf<K>,
 ) {
-  setData((d) => (d ? { ...d, [key]: [...(d[key] as any[]), value] } : d));
+  setData((d) => (d ? { ...d, [key]: [...(d[key] as ItemOf<K>[]), value] } : d));
 }
 
-function removeArrayItem<K extends keyof SiteFooterSettings>(
+function removeArrayItem<K extends ArrayKey>(
   setData: React.Dispatch<React.SetStateAction<SiteFooterSettings | null>>,
   key: K,
   index: number,
 ) {
   setData((d) => {
     if (!d) return d;
-    const arr = [...(d[key] as any[])];
+    const arr = [...(d[key] as ItemOf<K>[])];
     arr.splice(index, 1);
     return { ...d, [key]: arr };
   });

@@ -41,9 +41,9 @@ function AdminQuickPage() {
     setResult(null);
     setBusy(true);
     try {
-      const res = (await createQuickPage({
+      const res = await createQuickPage({
         data: { title, description, topic, model },
-      })) as any;
+      });
       setResult({ page: res.page, words: res.words });
       setTitle("");
       setDescription("");
