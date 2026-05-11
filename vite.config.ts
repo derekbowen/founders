@@ -53,7 +53,10 @@ export default defineConfig(async ({ command }) => {
       ],
     },
     server: {
-      host: "::",
+      // Bind to IPv4 (0.0.0.0) so the dev server starts in environments
+      // without IPv6 (containers, Codespaces, sandboxes). Still reachable
+      // from external network interfaces.
+      host: "0.0.0.0",
       port: Number(process.env.PORT) || 8080,
       strictPort: true,
     },
