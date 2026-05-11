@@ -3,10 +3,7 @@
  * No server deps so both server fns and head() / metadata helpers can use it.
  */
 
-const HOST_ACQ_PREFIXES = [
-  "become-a-swimming-pool-host-",
-  "become-a-pool-host-",
-];
+const HOST_ACQ_PREFIXES = ["become-a-swimming-pool-host-", "become-a-pool-host-"];
 
 const SPANISH_HOST_ACQ_PREFIX = "conviertete-en-anfitrion-de-piscina-";
 
@@ -42,10 +39,57 @@ export function cityForContentPage(
 }
 
 const US_STATE_CODES = new Set([
-  "al","ak","az","ar","ca","co","ct","de","fl","ga","hi","id","il","in","ia",
-  "ks","ky","la","me","md","ma","mi","mn","ms","mo","mt","ne","nv","nh","nj",
-  "nm","ny","nc","nd","oh","ok","or","pa","ri","sc","sd","tn","tx","ut","vt",
-  "va","wa","wv","wi","wy","dc",
+  "al",
+  "ak",
+  "az",
+  "ar",
+  "ca",
+  "co",
+  "ct",
+  "de",
+  "fl",
+  "ga",
+  "hi",
+  "id",
+  "il",
+  "in",
+  "ia",
+  "ks",
+  "ky",
+  "la",
+  "me",
+  "md",
+  "ma",
+  "mi",
+  "mn",
+  "ms",
+  "mo",
+  "mt",
+  "ne",
+  "nv",
+  "nh",
+  "nj",
+  "nm",
+  "ny",
+  "nc",
+  "nd",
+  "oh",
+  "ok",
+  "or",
+  "pa",
+  "ri",
+  "sc",
+  "sd",
+  "tn",
+  "tx",
+  "ut",
+  "vt",
+  "va",
+  "wa",
+  "wv",
+  "wi",
+  "wy",
+  "dc",
 ]);
 
 export interface CityNameParts {
@@ -70,7 +114,5 @@ export function parseCitySlug(citySlug: string): CityNameParts {
 }
 
 function titleCase(words: string[]): string {
-  return words
-    .map((w) => (w.length === 0 ? w : w[0].toUpperCase() + w.slice(1)))
-    .join(" ");
+  return words.map((w) => (w.length === 0 ? w : w[0].toUpperCase() + w.slice(1))).join(" ");
 }

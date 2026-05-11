@@ -25,9 +25,7 @@ export const Route = createFileRoute("/p/$slug")({
   notFoundComponent: () => (
     <main className="mx-auto max-w-3xl px-4 py-20 text-center">
       <h1 className="text-3xl font-bold">Page not found</h1>
-      <p className="mt-2 text-muted-foreground">
-        The content at this URL hasn't been published.
-      </p>
+      <p className="mt-2 text-muted-foreground">The content at this URL hasn't been published.</p>
     </main>
   ),
 });
@@ -44,9 +42,7 @@ function PublicPage() {
         />
       )}
       {page.title && (
-        <h1 className="text-balance text-3xl font-bold tracking-tight sm:text-4xl">
-          {page.title}
-        </h1>
+        <h1 className="text-balance text-3xl font-bold tracking-tight sm:text-4xl">{page.title}</h1>
       )}
       <article
         className="prose prose-neutral mt-8 max-w-none dark:prose-invert"
@@ -55,8 +51,7 @@ function PublicPage() {
         dangerouslySetInnerHTML={{ __html: page.body_html }}
       />
       <p className="mt-12 text-xs text-muted-foreground">
-        {workspace.name} · last updated{" "}
-        {new Date(page.updated_at).toLocaleDateString()} ·{" "}
+        {workspace.name} · last updated {new Date(page.updated_at).toLocaleDateString()} ·{" "}
         <a className="hover:underline" href={`${SITE_URL}${page.url_path}`}>
           source
         </a>

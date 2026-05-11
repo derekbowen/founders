@@ -14,15 +14,13 @@ export const Route = createFileRoute("/verify/$uid")({
       <SiteHeader />
       <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-16 text-center">
         <h1 className="text-2xl font-bold text-foreground">Certificate not found</h1>
-        <p className="mt-2 text-muted-foreground">
-          We couldn't find a certificate with that ID.
-        </p>
+        <p className="mt-2 text-muted-foreground">We couldn't find a certificate with that ID.</p>
       </main>
       <SiteFooter />
     </div>
   ),
   head: ({ params }) => ({
-    meta: [{ title: `Verify certificate ${params.uid} — Pool Rental Near Me` }],
+    meta: [{ title: `Verify certificate ${params.uid} — founders.click` }],
   }),
 });
 
@@ -57,13 +55,12 @@ function VerifyPage() {
             <div>
               <dt className="text-muted-foreground">Course</dt>
               <dd className="text-base text-foreground">
-                <Link
-                  to="/academy/$slug"
-                  params={{ slug: cert.course_slug }}
+                <a
+                  href={`/help-center/e-learning-academy/${cert.course_slug}`}
                   className="hover:text-primary hover:underline"
                 >
                   {cert.course_title}
-                </Link>
+                </a>
               </dd>
             </div>
             <div>

@@ -16,11 +16,7 @@
 const FIVE_MINUTES_MS = 5 * 60 * 1000;
 
 export class EmailitVerifyError extends Error {
-  readonly code:
-    | "missing_headers"
-    | "invalid_timestamp"
-    | "stale_timestamp"
-    | "invalid_signature";
+  readonly code: "missing_headers" | "invalid_timestamp" | "stale_timestamp" | "invalid_signature";
 
   constructor(code: EmailitVerifyError["code"], message: string) {
     super(message);

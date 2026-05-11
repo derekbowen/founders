@@ -34,8 +34,8 @@ export type BackfillResult = {
 const URL_OVERRIDES: Record<string, string> = {
   "los-angeles": "https://www.poolrentalnearme.com/p/losangeles",
   "san-diego": "https://www.poolrentalnearme.com/p/sandiego",
-  "miami": "https://www.poolrentalnearme.com/p/miami",
-  "austin": "https://www.poolrentalnearme.com/p/austin",
+  miami: "https://www.poolrentalnearme.com/p/miami",
+  austin: "https://www.poolrentalnearme.com/p/austin",
   "kansas-city-mo": "https://www.poolrentalnearme.com/p/kansascity",
 };
 
@@ -58,8 +58,7 @@ export async function harvestSourceUrls(): Promise<Map<string, string>> {
   // Match both URL templates listed in the directory:
   //   /p/become-a-swimming-pool-host-{city-slug}-{state-code}
   //   /p/become-a-pool-host-{city-slug}-{state-name}
-  const re =
-    /\/p\/(become-a-(?:swimming-)?pool-host-([a-z0-9-]+))/gi;
+  const re = /\/p\/(become-a-(?:swimming-)?pool-host-([a-z0-9-]+))/gi;
   let m: RegExpExecArray | null;
   while ((m = re.exec(html)) !== null) {
     const path = m[1]; // become-a-swimming-pool-host-birmingham-al
@@ -88,18 +87,56 @@ export async function harvestSourceUrls(): Promise<Map<string, string>> {
 }
 
 const STATE_NAME_TO_CODE: Record<string, string> = {
-  alabama: "al", alaska: "ak", arizona: "az", arkansas: "ar", california: "ca",
-  colorado: "co", connecticut: "ct", delaware: "de", florida: "fl", georgia: "ga",
-  hawaii: "hi", idaho: "id", illinois: "il", indiana: "in", iowa: "ia",
-  kansas: "ks", kentucky: "ky", louisiana: "la", maine: "me", maryland: "md",
-  massachusetts: "ma", michigan: "mi", minnesota: "mn", mississippi: "ms",
-  missouri: "mo", montana: "mt", nebraska: "ne", nevada: "nv",
-  "new-hampshire": "nh", "new-jersey": "nj", "new-mexico": "nm",
-  "new-york": "ny", "north-carolina": "nc", "north-dakota": "nd", ohio: "oh",
-  oklahoma: "ok", oregon: "or", pennsylvania: "pa", "rhode-island": "ri",
-  "south-carolina": "sc", "south-dakota": "sd", tennessee: "tn", texas: "tx",
-  utah: "ut", vermont: "vt", virginia: "va", washington: "wa",
-  "west-virginia": "wv", wisconsin: "wi", wyoming: "wy",
+  alabama: "al",
+  alaska: "ak",
+  arizona: "az",
+  arkansas: "ar",
+  california: "ca",
+  colorado: "co",
+  connecticut: "ct",
+  delaware: "de",
+  florida: "fl",
+  georgia: "ga",
+  hawaii: "hi",
+  idaho: "id",
+  illinois: "il",
+  indiana: "in",
+  iowa: "ia",
+  kansas: "ks",
+  kentucky: "ky",
+  louisiana: "la",
+  maine: "me",
+  maryland: "md",
+  massachusetts: "ma",
+  michigan: "mi",
+  minnesota: "mn",
+  mississippi: "ms",
+  missouri: "mo",
+  montana: "mt",
+  nebraska: "ne",
+  nevada: "nv",
+  "new-hampshire": "nh",
+  "new-jersey": "nj",
+  "new-mexico": "nm",
+  "new-york": "ny",
+  "north-carolina": "nc",
+  "north-dakota": "nd",
+  ohio: "oh",
+  oklahoma: "ok",
+  oregon: "or",
+  pennsylvania: "pa",
+  "rhode-island": "ri",
+  "south-carolina": "sc",
+  "south-dakota": "sd",
+  tennessee: "tn",
+  texas: "tx",
+  utah: "ut",
+  vermont: "vt",
+  virginia: "va",
+  washington: "wa",
+  "west-virginia": "wv",
+  wisconsin: "wi",
+  wyoming: "wy",
 };
 
 /**
@@ -142,8 +179,7 @@ export function resolveSourceUrl(
 /** Extract the first plausible hero image URL from rendered HTML. */
 export function extractHeroUrl(html: string): string | null {
   if (!html) return null;
-  const re =
-    /https:\/\/sharetribe-assets\.imgix\.net\/[A-Za-z0-9._/-]+\?[^"'\s)]+/g;
+  const re = /https:\/\/sharetribe-assets\.imgix\.net\/[A-Za-z0-9._/-]+\?[^"'\s)]+/g;
   const candidates: string[] = [];
   let m: RegExpExecArray | null;
   while ((m = re.exec(html)) !== null) {
@@ -211,18 +247,27 @@ async function scrapeOne(
       .eq("slug", citySlug);
     if (error) {
       return {
-        slug: citySlug, name: cityName, source_url: sourceUrl,
-        status: "error", error: error.message,
+        slug: citySlug,
+        name: cityName,
+        source_url: sourceUrl,
+        status: "error",
+        error: error.message,
       };
     }
     return {
-      slug: citySlug, name: cityName, source_url: sourceUrl,
-      status: "ok", hero_url: hero,
+      slug: citySlug,
+      name: cityName,
+      source_url: sourceUrl,
+      status: "ok",
+      hero_url: hero,
     };
   } catch (e) {
     return {
-      slug: citySlug, name: cityName, source_url: sourceUrl,
-      status: "error", error: e instanceof Error ? e.message : String(e),
+      slug: citySlug,
+      name: cityName,
+      source_url: sourceUrl,
+      status: "error",
+      error: e instanceof Error ? e.message : String(e),
     };
   }
 }
@@ -264,15 +309,22 @@ export async function backfillCityHeroes(opts: {
       let r: BackfillResult;
       if (!url) {
         r = {
-          slug: c.slug, name: c.name, source_url: null,
-          status: "skipped", error: "No source URL found in directory or overrides",
+          slug: c.slug,
+          name: c.name,
+          source_url: null,
+          status: "skipped",
+          error: "No source URL found in directory or overrides",
         };
       } else {
         r = await scrapeOne(client, c.slug, c.name, url);
       }
       results.push(r);
       // Best-effort log; don't fail the run if logging fails.
-      try { await logAttempt(r); } catch { /* swallow */ }
+      try {
+        await logAttempt(r);
+      } catch {
+        /* swallow */
+      }
       await new Promise((res) => setTimeout(res, 150));
     }
   }

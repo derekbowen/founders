@@ -47,7 +47,11 @@ function seasonsForState(stateCode: string): string {
   if (["FL", "HI", "AZ", "TX", "CA", "NV", "LA", "GA", "AL", "MS", "SC"].includes(code)) {
     return "year-round, with peak demand from April through October";
   }
-  if (["WA", "OR", "ID", "MT", "WY", "ND", "SD", "MN", "WI", "MI", "ME", "VT", "NH", "MA"].includes(code)) {
+  if (
+    ["WA", "OR", "ID", "MT", "WY", "ND", "SD", "MN", "WI", "MI", "ME", "VT", "NH", "MA"].includes(
+      code,
+    )
+  ) {
     return "concentrated between Memorial Day and mid-September";
   }
   return "running from late April through early October, with shoulder bookings on warm spring and fall weekends";

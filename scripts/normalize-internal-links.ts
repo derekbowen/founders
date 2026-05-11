@@ -31,11 +31,7 @@ const supabase = createClient(SUPABASE_URL, SERVICE_KEY, {
 });
 
 // Site origins that should be treated as internal when present in absolute URLs.
-const INTERNAL_HOSTS = [
-  "swimply.com",
-  "www.swimply.com",
-  "fresh-web.lovable.app",
-];
+const INTERNAL_HOSTS = ["swimply.com", "www.swimply.com", "fresh-web.lovable.app"];
 
 /**
  * Given a /p/... path (with or without leading slash, may include query/hash),
@@ -70,13 +66,8 @@ function rewrite(content: string): { next: string; count: number } {
   let count = 0;
 
   // 1. Absolute URLs to known internal hosts pointing at /p/...
-  const hostAlt = INTERNAL_HOSTS.map((h) =>
-    h.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
-  ).join("|");
-  const absRe = new RegExp(
-    `https?://(?:${hostAlt})(/p/[^\\s"'<>)]+)`,
-    "gi",
-  );
+  const hostAlt = INTERNAL_HOSTS.map((h) => h.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|");
+  const absRe = new RegExp(`https?://(?:${hostAlt})(/p/[^\\s"'<>)]+)`, "gi");
   let next = content.replace(absRe, (match, path) => {
     const canon = canonicalize(path);
     if (!canon) return match;
@@ -154,9 +145,7 @@ async function processTable(spec: TableSpec) {
       if (rowCount > 0) {
         updated++;
         totalReplacements += rowCount;
-        console.log(
-          `  • ${spec.table} ${row[spec.idCol]}: ${rowCount} link(s) rewritten`,
-        );
+        console.log(`  • ${spec.table} ${row[spec.idCol]}: ${rowCount} link(s) rewritten`);
         if (APPLY) {
           const { error: upErr } = await supabase
             .from(spec.table)
@@ -173,15 +162,11 @@ async function processTable(spec: TableSpec) {
     from += pageSize;
   }
 
-  console.log(
-    `  scanned=${scanned} rowsChanged=${updated} ${APPLY ? "(applied)" : "(dry-run)"}`,
-  );
+  console.log(`  scanned=${scanned} rowsChanged=${updated} ${APPLY ? "(applied)" : "(dry-run)"}`);
 }
 
 async function main() {
-  console.log(
-    `Normalizing legacy /p/* links → /p/{slug}  [${APPLY ? "APPLY" : "DRY-RUN"}]`,
-  );
+  console.log(`Normalizing legacy /p/* links → /p/{slug}  [${APPLY ? "APPLY" : "DRY-RUN"}]`);
   for (const spec of TABLES) {
     await processTable(spec);
   }

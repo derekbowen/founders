@@ -22,7 +22,7 @@ export const Route = createFileRoute("/account/learning")({
     }
   },
   component: MyLearningPage,
-  head: () => ({ meta: [{ title: "My learning — Pool Rental Near Me Academy" }] }),
+  head: () => ({ meta: [{ title: "My learning — founders.click" }] }),
 });
 
 function MyLearningPage() {
@@ -81,7 +81,9 @@ function MyLearningPage() {
                   key={r.course_slug}
                   className="rounded-2xl border border-border bg-card p-4 shadow-sm"
                 >
-                  <div className="font-semibold text-foreground">{r.course_title ?? r.course_slug}</div>
+                  <div className="font-semibold text-foreground">
+                    {r.course_title ?? r.course_slug}
+                  </div>
                   <div className="mt-1 text-xs text-muted-foreground">
                     Completed {r.completed_at ? new Date(r.completed_at).toLocaleDateString() : ""}
                   </div>
@@ -116,7 +118,11 @@ function MyLearningPage() {
           {inProgress.length === 0 ? (
             <p className="mt-2 text-sm text-muted-foreground">
               You aren't enrolled in any active courses.{" "}
-              <Link to="/academy" className="text-primary hover:underline">
+              <Link
+                to="/help-center/$category"
+                params={{ category: "e-learning-academy" }}
+                className="text-primary hover:underline"
+              >
                 Browse the Academy
               </Link>
               .
@@ -145,9 +151,9 @@ function MyLearningPage() {
                       <Progress value={pct} aria-label={`${pct}% complete`} />
                     </div>
                     <Button asChild size="sm" variant="outline" className="mt-3">
-                      <Link to="/academy/$slug" params={{ slug: r.course_slug }}>
+                      <a href={`/help-center/e-learning-academy/${r.course_slug}`}>
                         Continue course
-                      </Link>
+                      </a>
                     </Button>
                   </li>
                 );

@@ -33,9 +33,7 @@ async function firecrawlScrape(url: string) {
 
   const json = (await res.json().catch(() => null)) as any;
   if (!res.ok) {
-    throw new Error(
-      `Firecrawl scrape failed [${res.status}]: ${JSON.stringify(json)}`,
-    );
+    throw new Error(`Firecrawl scrape failed [${res.status}]: ${JSON.stringify(json)}`);
   }
   // SDK/REST shape: data may be at top level or under data
   const doc = json?.data ?? json;
@@ -62,9 +60,7 @@ async function assertAdmin(userId: string) {
  */
 export const scrapeContentPage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: unknown) =>
-    z.object({ id: z.string().uuid() }).parse(data),
-  )
+  .inputValidator((data: unknown) => z.object({ id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }) => {
     await assertAdmin(context.userId);
 
@@ -76,9 +72,7 @@ export const scrapeContentPage = createServerFn({ method: "POST" })
     if (fetchErr) throw new Error(fetchErr.message);
     if (!row) throw new Error("content_pages row not found");
 
-    const { markdown, html, metadata } = await firecrawlScrape(
-      (row as any).source_url,
-    );
+    const { markdown, html, metadata } = await firecrawlScrape((row as any).source_url);
 
     const meta = (metadata ?? {}) as { title?: string; description?: string };
     const update = {
@@ -138,9 +132,7 @@ export const nextPendingPage = createServerFn({ method: "GET" })
 export const scrapeProgress = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) =>
-    z
-      .object({ template_type: z.string().default("host_acq_city") })
-      .parse(data ?? {}),
+    z.object({ template_type: z.string().default("host_acq_city") }).parse(data ?? {}),
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context.userId);

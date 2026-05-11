@@ -35,19 +35,17 @@ export const submitFeatureRequest = createServerFn({ method: "POST" })
       // best-effort context capture
     }
 
-    const { error } = await (supabaseAdmin as any)
-      .from("feature_requests")
-      .insert({
-        email: data.email.toLowerCase(),
-        name: data.name ?? null,
-        request_text: data.requestText,
-        city,
-        region,
-        latitude,
-        longitude,
-        user_agent: userAgent,
-        referrer_path: data.referrerPath ?? null,
-      });
+    const { error } = await (supabaseAdmin as any).from("feature_requests").insert({
+      email: data.email.toLowerCase(),
+      name: data.name ?? null,
+      request_text: data.requestText,
+      city,
+      region,
+      latitude,
+      longitude,
+      user_agent: userAgent,
+      referrer_path: data.referrerPath ?? null,
+    });
     if (error) {
       console.error("submitFeatureRequest insert failed:", error);
       throw new Error("Could not submit your request. Please try again.");

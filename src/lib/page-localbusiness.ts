@@ -13,9 +13,7 @@ const CITY_TEMPLATE_TYPES = new Set([
   "swim_instructor_city",
 ]);
 
-export function localBusinessForContentPage(
-  page: ContentPage,
-): Record<string, unknown> | null {
+export function localBusinessForContentPage(page: ContentPage): Record<string, unknown> | null {
   if (!page.template_type || !CITY_TEMPLATE_TYPES.has(page.template_type)) {
     return null;
   }
@@ -25,8 +23,7 @@ export function localBusinessForContentPage(
   const { city, stateCode } = parseCitySlug(citySlug);
   if (!city) return null;
 
-  const language =
-    page.language || (page.template_type === "spanish_host_acq" ? "es" : "en");
+  const language = page.language || (page.template_type === "spanish_host_acq" ? "es" : "en");
 
   const areaServed: Record<string, unknown> = {
     "@type": "City",

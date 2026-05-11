@@ -34,6 +34,8 @@ const SECURITY_HEADERS: Record<string, string> = {
 // to forward the original Host as X-Forwarded-Host, so requests proxied
 // through prod will have the canonical host and stay indexable.
 const PRODUCTION_HOSTS = new Set([
+  "founders.click",
+  "www.founders.click",
   "poolrentalnearme.com",
   "www.poolrentalnearme.com",
 ]);

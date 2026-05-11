@@ -44,8 +44,14 @@ export const getSiteFooter = createServerFn({ method: "GET" }).handler(async () 
   return loadSiteFooter();
 });
 
-const LinkSchema = z.object({ label: z.string().min(1).max(120), href: z.string().min(1).max(500) });
-const MarketSchema = z.object({ name: z.string().min(1).max(120), slug: z.string().min(1).max(120) });
+const LinkSchema = z.object({
+  label: z.string().min(1).max(120),
+  href: z.string().min(1).max(500),
+});
+const MarketSchema = z.object({
+  name: z.string().min(1).max(120),
+  slug: z.string().min(1).max(120),
+});
 const SocialSchema = z.object({
   label: z.string().min(1).max(60),
   href: z.string().min(1).max(500),
@@ -53,11 +59,31 @@ const SocialSchema = z.object({
 });
 
 const UpdateSchema = z.object({
-  contact_phone: z.string().max(120).nullable().or(z.literal("").transform(() => null)),
-  contact_phone_label: z.string().max(120).nullable().or(z.literal("").transform(() => null)),
-  contact_phone_hours: z.string().max(120).nullable().or(z.literal("").transform(() => null)),
-  contact_email: z.string().max(120).nullable().or(z.literal("").transform(() => null)),
-  bottom_text: z.string().max(500).nullable().or(z.literal("").transform(() => null)),
+  contact_phone: z
+    .string()
+    .max(120)
+    .nullable()
+    .or(z.literal("").transform(() => null)),
+  contact_phone_label: z
+    .string()
+    .max(120)
+    .nullable()
+    .or(z.literal("").transform(() => null)),
+  contact_phone_hours: z
+    .string()
+    .max(120)
+    .nullable()
+    .or(z.literal("").transform(() => null)),
+  contact_email: z
+    .string()
+    .max(120)
+    .nullable()
+    .or(z.literal("").transform(() => null)),
+  bottom_text: z
+    .string()
+    .max(500)
+    .nullable()
+    .or(z.literal("").transform(() => null)),
   explore_links: z.array(LinkSchema).max(50),
   host_links: z.array(LinkSchema).max(50),
   company_links: z.array(LinkSchema).max(50),

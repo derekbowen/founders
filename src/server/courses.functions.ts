@@ -3,8 +3,6 @@ import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { slugSchema, listSchema, COURSE_FIELDS } from "./courses.server";
 
-
-
 /** Paginated listing of published courses with optional filters. */
 export const listCourses = createServerFn({ method: "GET" })
   .inputValidator((d: unknown) => listSchema.parse(d ?? {}))
@@ -22,7 +20,11 @@ export const listCourses = createServerFn({ method: "GET" })
       const s = data.search.replace(/[%_,()]/g, " ");
       q = q.or(`title.ilike.%${s}%,excerpt.ilike.%${s}%`);
     }
-    const { data: rows, count, error } = await q
+    const {
+      data: rows,
+      count,
+      error,
+    } = await q
       .order("is_featured", { ascending: false })
       .order("published_at", { ascending: false, nullsFirst: false })
       .range(from, to);
@@ -71,10 +73,7 @@ export const listCourseCategories = createServerFn({ method: "GET" })
     z.object({ language: z.enum(["en", "es"]).optional() }).parse(d ?? {}),
   )
   .handler(async ({ data }) => {
-    let q = supabaseAdmin
-      .from("courses")
-      .select("category")
-      .eq("is_published", true);
+    let q = supabaseAdmin.from("courses").select("category").eq("is_published", true);
     if (data.language) q = q.eq("language", data.language);
     const { data: rows, error } = await q;
     if (error) console.error("listCourseCategories:", error);
@@ -134,7 +133,11 @@ export const getRelatedCourses = createServerFn({ method: "GET" })
     z
       .object({
         slug: slugSchema,
-        category: z.string().min(1).max(48).regex(/^[a-z0-9-]+$/),
+        category: z
+          .string()
+          .min(1)
+          .max(48)
+          .regex(/^[a-z0-9-]+$/),
         language: z.enum(["en", "es"]).default("en"),
       })
       .parse(d),
@@ -155,13 +158,11 @@ export const getRelatedCourses = createServerFn({ method: "GET" })
   });
 
 /** All published course slugs for sitemap generation. */
-export const listAllCourseSlugs = createServerFn({ method: "GET" }).handler(
-  async () => {
-    const { data, error } = await supabaseAdmin
-      .from("courses")
-      .select("slug, updated_at")
-      .eq("is_published", true);
-    if (error) console.error("listAllCourseSlugs:", error);
-    return { courses: data ?? [] };
-  },
-);
+export const listAllCourseSlugs = createServerFn({ method: "GET" }).handler(async () => {
+  const { data, error } = await supabaseAdmin
+    .from("courses")
+    .select("slug, updated_at")
+    .eq("is_published", true);
+  if (error) console.error("listAllCourseSlugs:", error);
+  return { courses: data ?? [] };
+});

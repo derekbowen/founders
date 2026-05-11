@@ -32,8 +32,17 @@ export const getAdminIdentity = createServerFn({ method: "POST" })
     const email = (claims?.email as string | undefined) ?? null;
 
     const [{ data: roleRow }, { data: profile }] = await Promise.all([
-      supabaseAdmin.from("user_roles").select("role").eq("user_id", userId).eq("role", "admin").maybeSingle(),
-      supabaseAdmin.from("profiles").select("display_name, full_name").eq("user_id", userId).maybeSingle(),
+      supabaseAdmin
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .eq("role", "admin")
+        .maybeSingle(),
+      supabaseAdmin
+        .from("profiles")
+        .select("display_name, full_name")
+        .eq("user_id", userId)
+        .maybeSingle(),
     ]);
 
     return {
@@ -59,7 +68,10 @@ async function fetchAuthUsersByIds(ids: string[]): Promise<Map<string, any>> {
   if (ids.length === 0) return map;
   const idSet = new Set(ids);
   for (let page = 1; page <= 20; page++) {
-    const { data: list, error } = await (supabaseAdmin as any).auth.admin.listUsers({ page, perPage: 200 });
+    const { data: list, error } = await (supabaseAdmin as any).auth.admin.listUsers({
+      page,
+      perPage: 200,
+    });
     if (error) throw new Error(`Auth lookup failed: ${error.message}`);
     const users = list?.users || [];
     for (const u of users) {
@@ -94,17 +106,25 @@ export const listAdmins = createServerFn({ method: "POST" })
       granted_at: r.created_at ?? null,
       last_sign_in_at: authMap.get(r.user_id)?.last_sign_in_at ?? null,
     }));
-    admins.sort((a, b) => (a.full_name || a.display_name || a.email || a.user_id).localeCompare(b.full_name || b.display_name || b.email || b.user_id));
+    admins.sort((a, b) =>
+      (a.full_name || a.display_name || a.email || a.user_id).localeCompare(
+        b.full_name || b.display_name || b.email || b.user_id,
+      ),
+    );
     return { admins };
   });
 
 export const createAdminUser = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({
-    email: z.string().email(),
-    password: z.string().min(8),
-    full_name: z.string().optional(),
-  }).parse(d))
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        email: z.string().email(),
+        password: z.string().min(8),
+        full_name: z.string().optional(),
+      })
+      .parse(d),
+  )
   .handler(async ({ data, context }): Promise<{ ok: true; user_id: string }> => {
     await assertAdmin((context as any).userId);
     const email = data.email.trim().toLowerCase();
@@ -112,7 +132,10 @@ export const createAdminUser = createServerFn({ method: "POST" })
     // Check if user already exists
     let userId: string | null = null;
     for (let page = 1; page <= 10 && !userId; page++) {
-      const { data: list, error } = await (supabaseAdmin as any).auth.admin.listUsers({ page, perPage: 200 });
+      const { data: list, error } = await (supabaseAdmin as any).auth.admin.listUsers({
+        page,
+        perPage: 200,
+      });
       if (error) throw new Error(`Lookup failed: ${error.message}`);
       const users = list?.users || [];
       const hit = users.find((u: any) => (u.email || "").toLowerCase() === email);
@@ -122,14 +145,18 @@ export const createAdminUser = createServerFn({ method: "POST" })
 
     if (userId) {
       // Update existing user's password
-      const { error } = await (supabaseAdmin as any).auth.admin.updateUserById(userId, { password: data.password });
+      const { error } = await (supabaseAdmin as any).auth.admin.updateUserById(userId, {
+        password: data.password,
+      });
       if (error) throw new Error(error.message);
     } else {
       const { data: created, error } = await (supabaseAdmin as any).auth.admin.createUser({
         email,
         password: data.password,
         email_confirm: true,
-        user_metadata: data.full_name ? { full_name: data.full_name, display_name: data.full_name } : {},
+        user_metadata: data.full_name
+          ? { full_name: data.full_name, display_name: data.full_name }
+          : {},
       });
       if (error) throw new Error(error.message);
       userId = created?.user?.id;
@@ -147,13 +174,19 @@ export const createAdminUser = createServerFn({ method: "POST" })
 
 export const setAdminPassword = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({
-    user_id: z.string().uuid(),
-    password: z.string().min(8),
-  }).parse(d))
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        user_id: z.string().uuid(),
+        password: z.string().min(8),
+      })
+      .parse(d),
+  )
   .handler(async ({ data, context }): Promise<{ ok: true }> => {
     await assertAdmin((context as any).userId);
-    const { error } = await (supabaseAdmin as any).auth.admin.updateUserById(data.user_id, { password: data.password });
+    const { error } = await (supabaseAdmin as any).auth.admin.updateUserById(data.user_id, {
+      password: data.password,
+    });
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -190,14 +223,18 @@ export const grantAdmin = createServerFn({ method: "POST" })
       const email = raw.toLowerCase();
       // listUsers paginated; search up to 10 pages of 200 (covers 2k users)
       for (let page = 1; page <= 10 && !targetId; page++) {
-        const { data: list, error } = await (supabaseAdmin as any).auth.admin.listUsers({ page, perPage: 200 });
+        const { data: list, error } = await (supabaseAdmin as any).auth.admin.listUsers({
+          page,
+          perPage: 200,
+        });
         if (error) throw new Error(`Lookup failed: ${error.message}`);
         const users = list?.users || [];
         const hit = users.find((u: any) => (u.email || "").toLowerCase() === email);
         if (hit) targetId = hit.id;
         if (users.length < 200) break;
       }
-      if (!targetId) throw new Error(`No user found with email ${email}. They must sign up at /auth first.`);
+      if (!targetId)
+        throw new Error(`No user found with email ${email}. They must sign up at /auth first.`);
     } else {
       throw new Error("Provide a user UUID or email address.");
     }

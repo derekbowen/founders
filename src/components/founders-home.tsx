@@ -35,21 +35,36 @@ function Header() {
           <span className="text-base font-bold tracking-tight">founders.click</span>
         </Link>
         <nav className="hidden items-center gap-6 md:flex">
-          <a href="#features" className="text-sm font-medium text-muted-foreground hover:text-foreground">Features</a>
-          <a href="#pricing" className="text-sm font-medium text-muted-foreground hover:text-foreground">Pricing</a>
-          <a href="#faq" className="text-sm font-medium text-muted-foreground hover:text-foreground">FAQ</a>
+          <a
+            href="#features"
+            className="text-sm font-medium text-muted-foreground hover:text-foreground"
+          >
+            Features
+          </a>
+          <a
+            href="#pricing"
+            className="text-sm font-medium text-muted-foreground hover:text-foreground"
+          >
+            Pricing
+          </a>
+          <a
+            href="#faq"
+            className="text-sm font-medium text-muted-foreground hover:text-foreground"
+          >
+            FAQ
+          </a>
         </nav>
         <div className="flex items-center gap-2">
           <Link
             to="/auth"
-            search={{ redirect: "/admin/dashboard", mode: "signin" } as never}
+            search={{ redirect: "/app/dashboard", mode: "signin" } as never}
             className="hidden h-9 items-center justify-center rounded-full border border-border px-4 text-sm font-medium hover:bg-muted sm:inline-flex"
           >
             Log in
           </Link>
           <Link
             to="/auth"
-            search={{ redirect: "/admin/dashboard", mode: "signup" } as never}
+            search={{ redirect: "/onboarding", mode: "signup" } as never}
             className="inline-flex h-9 items-center justify-center rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:opacity-90"
           >
             Start free trial
@@ -63,7 +78,15 @@ function Header() {
 function Logo() {
   return (
     <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="h-5 w-5"
+      >
         <polyline points="8 6 4 12 8 18" />
         <polyline points="16 6 20 12 16 18" />
       </svg>
@@ -90,7 +113,7 @@ function Hero() {
         <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Link
             to="/auth"
-            search={{ redirect: "/admin/dashboard", mode: "signup" } as never}
+            search={{ redirect: "/onboarding", mode: "signup" } as never}
             className="inline-flex h-12 w-full items-center justify-center rounded-full bg-primary px-8 text-base font-semibold text-primary-foreground shadow-sm transition-all hover:opacity-90 sm:w-auto"
           >
             Start free trial — no developers required
@@ -110,15 +133,29 @@ function Hero() {
 // ─── Problem ────────────────────────────────────────────────────────────────
 function Problem() {
   const cards = [
-    { n: "01", title: "Agency budgets are brutal", body: "Hiring devs or agencies costs $5,000–$20,000/month just for content and SEO." },
-    { n: "02", title: "Sharetribe ships nothing for growth", body: "No native Sharetribe tools for bulk page generation, rank tracking, or lead ops." },
-    { n: "03", title: "Competitors are pulling away", body: "Swimply and Peerspace publish thousands of pages — you can't keep up manually." },
+    {
+      n: "01",
+      title: "Agency budgets are brutal",
+      body: "Hiring devs or agencies costs $5,000–$20,000/month just for content and SEO.",
+    },
+    {
+      n: "02",
+      title: "Sharetribe ships nothing for growth",
+      body: "No native Sharetribe tools for bulk page generation, rank tracking, or lead ops.",
+    },
+    {
+      n: "03",
+      title: "Competitors are pulling away",
+      body: "Swimply and Peerspace publish thousands of pages — you can't keep up manually.",
+    },
   ];
   return (
     <section className="border-b border-border bg-muted/20">
       <div className="mx-auto max-w-7xl px-6 py-20 lg:py-24">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Sharetribe founders are losing the SEO &amp; content race</h2>
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            Sharetribe founders are losing the SEO &amp; content race
+          </h2>
           <p className="mt-4 text-lg text-muted-foreground">founders.click changes that.</p>
         </div>
         <div className="mt-14 grid gap-6 md:grid-cols-3">
@@ -138,23 +175,40 @@ function Problem() {
 // ─── 4-Feature Grid ─────────────────────────────────────────────────────────
 function FeatureGrid() {
   const features = [
-    { title: "Dashboard", body: "Morning command center with live KPIs and AI-ranked action items." },
-    { title: "Content", body: "AI content factory generating hundreds of pages per day automatically." },
-    { title: "SEO", body: "Rank tracking, competitor radar, link audits, and keyword opportunities." },
-    { title: "Users & Ops", body: "Lead inbox, directory moderation, email tools, and team admin." },
+    {
+      title: "Dashboard",
+      body: "Morning command center with live KPIs and AI-ranked action items.",
+    },
+    {
+      title: "Content",
+      body: "AI content factory generating hundreds of pages per day automatically.",
+    },
+    {
+      title: "SEO",
+      body: "Rank tracking, competitor radar, link audits, and keyword opportunities.",
+    },
+    {
+      title: "Users & Ops",
+      body: "Lead inbox, directory moderation, email tools, and team admin.",
+    },
   ];
   return (
     <section id="features" className="border-b border-border">
       <div className="mx-auto max-w-7xl px-6 py-20 lg:py-24">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Everything you need to grow</h2>
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            Everything you need to grow
+          </h2>
           <p className="mt-4 text-lg text-muted-foreground">
             A comprehensive suite of tools purpose-built for Sharetribe marketplace operators.
           </p>
         </div>
         <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {features.map((f) => (
-            <div key={f.title} className="rounded-2xl border border-border p-7 transition-colors hover:bg-muted/40">
+            <div
+              key={f.title}
+              className="rounded-2xl border border-border p-7 transition-colors hover:bg-muted/40"
+            >
               <h3 className="text-lg font-semibold">{f.title}</h3>
               <p className="mt-2 text-sm text-muted-foreground">{f.body}</p>
             </div>
@@ -172,7 +226,9 @@ function DashboardSection() {
       <div className="mx-auto max-w-7xl px-6 py-20 lg:py-24">
         <div className="mx-auto max-w-2xl text-center">
           <p className="text-sm font-medium uppercase tracking-wide text-primary">Dashboard</p>
-          <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">Your morning command center</h2>
+          <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
+            Your morning command center
+          </h2>
           <p className="mt-4 text-lg text-muted-foreground">
             The Dashboard auto-refreshes every 30 seconds and surfaces exactly what needs your
             attention — organized into 6 tabs: Today / Revenue / SEO / Factory / Humans / Tools.
@@ -222,12 +278,19 @@ function DashCard({
   return (
     <div className="rounded-2xl border border-border bg-background p-7 shadow-sm">
       <h3 className="text-lg font-semibold" dangerouslySetInnerHTML={{ __html: label }} />
-      {body && <p className="mt-3 text-sm text-muted-foreground" dangerouslySetInnerHTML={{ __html: body }} />}
+      {body && (
+        <p
+          className="mt-3 text-sm text-muted-foreground"
+          dangerouslySetInnerHTML={{ __html: body }}
+        />
+      )}
       {items && (
         <ul className="mt-3 space-y-2 text-sm">
           {items.map((it) => (
             <li key={it.text} className="flex gap-3">
-              <span className="font-mono text-xs font-semibold tracking-wide text-primary">{it.tag}</span>
+              <span className="font-mono text-xs font-semibold tracking-wide text-primary">
+                {it.tag}
+              </span>
               <span className="text-foreground">{it.text}</span>
             </li>
           ))}
@@ -241,7 +304,9 @@ function KPI({ big, small }: { big: string; small: string }) {
   return (
     <div>
       <div className="text-3xl font-bold sm:text-4xl">{big}</div>
-      <div className="mt-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">{small}</div>
+      <div className="mt-1 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        {small}
+      </div>
     </div>
   );
 }
@@ -271,7 +336,9 @@ function ContentFactorySection() {
       <div className="mx-auto max-w-7xl px-6 py-20 lg:py-24">
         <div className="mx-auto max-w-2xl text-center">
           <p className="text-sm font-medium uppercase tracking-wide text-primary">Content</p>
-          <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">Stop paying agencies. Generate hundreds of pages.</h2>
+          <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
+            Stop paying agencies. Generate hundreds of pages.
+          </h2>
           <p className="mt-4 text-lg text-muted-foreground">
             A full content production pipeline — from one-shot page generation to bulk importing
             thousands of rows — all without writing a single line of SQL.
@@ -288,8 +355,8 @@ function ContentFactorySection() {
         <div className="mt-6 rounded-2xl border border-primary/30 bg-primary/5 p-7">
           <h3 className="text-lg font-semibold">Data Import</h3>
           <p className="mt-2 text-sm text-muted-foreground">
-            Upload CSVs up to 100MB+ for content_plan or content_pages. Ships in 200-row chunks
-            with browser-side parsing for maximum reliability.
+            Upload CSVs up to 100MB+ for content_plan or content_pages. Ships in 200-row chunks with
+            browser-side parsing for maximum reliability.
           </p>
         </div>
       </div>
@@ -330,7 +397,9 @@ function SEOToolsSection() {
       <div className="mx-auto max-w-7xl px-6 py-20 lg:py-24">
         <div className="mx-auto max-w-2xl text-center">
           <p className="text-sm font-medium uppercase tracking-wide text-primary">SEO</p>
-          <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">Replace your SEO agency. Every tool built in.</h2>
+          <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
+            Replace your SEO agency. Every tool built in.
+          </h2>
           <p className="mt-4 text-lg text-muted-foreground">
             Competitor monitoring, rank tracking, link auditing, and keyword gap analysis — all
             connected to your live site data.
@@ -340,14 +409,17 @@ function SEOToolsSection() {
           {tools.map((t) => (
             <div key={t.title} className="rounded-2xl border border-border bg-background p-7">
               <h3 className="text-lg font-semibold" dangerouslySetInnerHTML={{ __html: t.title }} />
-              <p className="mt-2 text-sm text-muted-foreground" dangerouslySetInnerHTML={{ __html: t.body }} />
+              <p
+                className="mt-2 text-sm text-muted-foreground"
+                dangerouslySetInnerHTML={{ __html: t.body }}
+              />
             </div>
           ))}
         </div>
         <p className="mt-10 text-center text-sm text-muted-foreground">
           <strong className="text-foreground">Bonus:</strong> Sitemap &amp; 404 management — full
-          inventory of 17 sitemap files by template type. Logs every 404 hit with referrer data
-          for instant triage.
+          inventory of 17 sitemap files by template type. Logs every 404 hit with referrer data for
+          instant triage.
         </p>
       </div>
     </section>
@@ -383,8 +455,12 @@ function OpsSection() {
     <section className="border-b border-border">
       <div className="mx-auto max-w-7xl px-6 py-20 lg:py-24">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-sm font-medium uppercase tracking-wide text-primary">Users &amp; Ops</p>
-          <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">Run your marketplace like a pro</h2>
+          <p className="text-sm font-medium uppercase tracking-wide text-primary">
+            Users &amp; Ops
+          </p>
+          <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
+            Run your marketplace like a pro
+          </h2>
           <p className="mt-4 text-lg text-muted-foreground">
             All your operational tools in one admin panel — no extra subscriptions, no duct tape.
           </p>
@@ -392,7 +468,9 @@ function OpsSection() {
         <div className="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {tools.map((t) => (
             <div key={t.title} className="rounded-2xl border border-border p-7">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">{t.n}</div>
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
+                {t.n}
+              </div>
               <h3 className="mt-4 text-lg font-semibold">{t.title}</h3>
               <p className="mt-2 text-sm text-muted-foreground">{t.body}</p>
             </div>
@@ -400,7 +478,10 @@ function OpsSection() {
         </div>
         <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
           {extras.map((e) => (
-            <span key={e} className="rounded-full border border-border px-4 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            <span
+              key={e}
+              className="rounded-full border border-border px-4 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground"
+            >
               {e}
             </span>
           ))}
@@ -430,16 +511,21 @@ function WhyChooseUsSection() {
     <section className="border-b border-border bg-muted/20">
       <div className="mx-auto max-w-7xl px-6 py-20 lg:py-24">
         <div className="mx-auto max-w-3xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Built for Sharetribe founders who want to win</h2>
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            Built for Sharetribe founders who want to win
+          </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            Solo founders and lean teams get the same leverage as a well-funded startup with a
-            full engineering team. Every feature is designed to cut costs and compound your
-            organic growth.
+            Solo founders and lean teams get the same leverage as a well-funded startup with a full
+            engineering team. Every feature is designed to cut costs and compound your organic
+            growth.
           </p>
         </div>
         <div className="mt-14 grid gap-6 md:grid-cols-3">
           {reasons.map((r) => (
-            <div key={r.title} className="rounded-2xl border border-border bg-background p-7 shadow-sm">
+            <div
+              key={r.title}
+              className="rounded-2xl border border-border bg-background p-7 shadow-sm"
+            >
               <h3 className="text-lg font-semibold">{r.title}</h3>
               <p className="mt-3 text-sm text-muted-foreground">{r.body}</p>
             </div>
@@ -547,7 +633,9 @@ function Pricing() {
     <section id="pricing" className="border-b border-border">
       <div className="mx-auto max-w-7xl px-6 py-20 lg:py-24">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Pick a plan, replace your agency</h2>
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            Pick a plan, replace your agency
+          </h2>
           <p className="mt-4 text-lg text-muted-foreground">
             Every plan includes the full admin panel. Upgrade for more page-generation volume,
             keyword tracking slots, and team seats.
@@ -568,17 +656,30 @@ function Pricing() {
                   MOST POPULAR
                 </div>
               )}
-              <div className="text-sm font-medium uppercase tracking-wide text-muted-foreground">{p.name}</div>
+              <div className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+                {p.name}
+              </div>
               <div className="mt-3 flex items-baseline gap-1">
                 <span className="text-4xl font-bold tracking-tight">{p.price}</span>
                 <span className="text-muted-foreground">{p.period}</span>
               </div>
-              <p className="mt-3 text-sm text-muted-foreground" dangerouslySetInnerHTML={{ __html: p.blurb }} />
+              <p
+                className="mt-3 text-sm text-muted-foreground"
+                dangerouslySetInnerHTML={{ __html: p.blurb }}
+              />
               <ul className="mt-6 flex-1 space-y-2 text-sm">
                 {p.features.map((f) => (
                   <li key={f} className="flex gap-2">
-                    <svg className="mt-0.5 h-4 w-4 shrink-0 text-primary" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M16.704 5.29a1 1 0 010 1.42l-7.5 7.5a1 1 0 01-1.42 0l-3.5-3.5a1 1 0 011.42-1.42L8.5 11.793l6.79-6.79a1 1 0 011.414 0z" clipRule="evenodd" />
+                    <svg
+                      className="mt-0.5 h-4 w-4 shrink-0 text-primary"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M16.704 5.29a1 1 0 010 1.42l-7.5 7.5a1 1 0 01-1.42 0l-3.5-3.5a1 1 0 011.42-1.42L8.5 11.793l6.79-6.79a1 1 0 011.414 0z"
+                        clipRule="evenodd"
+                      />
                     </svg>
                     <span dangerouslySetInnerHTML={{ __html: f }} />
                   </li>
@@ -649,14 +750,24 @@ function FAQ() {
       <div className="mx-auto max-w-3xl px-6 py-20 lg:py-24">
         <div className="text-center">
           <p className="text-sm font-medium uppercase tracking-wide text-primary">Knowledge Base</p>
-          <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">Frequently asked questions</h2>
+          <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
+            Frequently asked questions
+          </h2>
         </div>
         <div className="mt-12 divide-y divide-border rounded-2xl border border-border bg-background">
           {faqs.map((f, i) => (
             <details key={i} className="group p-6">
               <summary className="flex cursor-pointer list-none items-center justify-between gap-4">
                 <h3 className="text-base font-semibold">{f.q}</h3>
-                <svg className="h-5 w-5 shrink-0 text-muted-foreground transition-transform group-open:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  className="h-5 w-5 shrink-0 text-muted-foreground transition-transform group-open:rotate-180"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <polyline points="6 9 12 15 18 9" />
                 </svg>
               </summary>
@@ -674,16 +785,14 @@ function ClosingCta() {
   return (
     <section className="border-b border-border">
       <div className="mx-auto max-w-3xl px-6 py-20 text-center lg:py-24">
-        <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-          Ready to see it live?
-        </h2>
+        <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Ready to see it live?</h2>
         <p className="mt-4 text-lg text-muted-foreground">
-          Start your free trial today. 14 days, no credit card. Generate your first 100 pages
-          before you decide whether to pay us a dollar.
+          Start your free trial today. 14 days, no credit card. Generate your first 100 pages before
+          you decide whether to pay us a dollar.
         </p>
         <Link
           to="/auth"
-          search={{ redirect: "/admin/dashboard", mode: "signup" } as never}
+          search={{ redirect: "/onboarding", mode: "signup" } as never}
           className="mt-10 inline-flex h-12 items-center justify-center rounded-full bg-primary px-8 text-base font-semibold text-primary-foreground shadow-sm transition-all hover:opacity-90"
         >
           Start your free trial
@@ -703,10 +812,18 @@ function Footer() {
           <span>founders.click</span>
         </div>
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-          <a href="#features" className="hover:text-foreground">Features</a>
-          <a href="#pricing" className="hover:text-foreground">Pricing</a>
-          <a href="#faq" className="hover:text-foreground">FAQ</a>
-          <a href="/privacy-policy" className="hover:text-foreground">Privacy</a>
+          <a href="#features" className="hover:text-foreground">
+            Features
+          </a>
+          <a href="#pricing" className="hover:text-foreground">
+            Pricing
+          </a>
+          <a href="#faq" className="hover:text-foreground">
+            FAQ
+          </a>
+          <a href="/privacy-policy" className="hover:text-foreground">
+            Privacy
+          </a>
         </div>
         <div>© 2026 founders.click</div>
       </div>

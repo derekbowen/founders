@@ -3,48 +3,45 @@ import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { stateName } from "@/lib/states";
 
+export const listBuilderStates = createServerFn({ method: "GET" }).handler(async () => {
+  const { data, error } = await supabaseAdmin
+    .from("providers")
+    .select("state_code")
+    .eq("is_published", true)
+    .not("state_code", "is", null)
+    .limit(5000);
+  if (error) console.error("listBuilderStates:", error);
+  const counts = new Map<string, number>();
+  for (const r of data ?? []) {
+    const sc = (r as { state_code: string | null }).state_code;
+    if (!sc) continue;
+    counts.set(sc, (counts.get(sc) ?? 0) + 1);
+  }
+  return {
+    states: Array.from(counts.entries())
+      .map(([code, count]) => ({
+        code,
+        name: stateName(code),
+        count,
+        slug: code.toLowerCase(),
+      }))
+      .sort((a, b) => b.count - a.count),
+  };
+});
 
-
-
-
-export const listBuilderStates = createServerFn({ method: "GET" }).handler(
-  async () => {
-    const { data, error } = await supabaseAdmin
-      .from("providers")
-      .select("state_code")
-      .eq("is_published", true)
-      .not("state_code", "is", null)
-      .limit(5000);
-    if (error) console.error("listBuilderStates:", error);
-    const counts = new Map<string, number>();
-    for (const r of data ?? []) {
-      const sc = (r as { state_code: string | null }).state_code;
-      if (!sc) continue;
-      counts.set(sc, (counts.get(sc) ?? 0) + 1);
-    }
-    return {
-      states: Array.from(counts.entries())
-        .map(([code, count]) => ({
-          code, name: stateName(code), count, slug: code.toLowerCase(),
-        }))
-        .sort((a, b) => b.count - a.count),
-    };
-  },
-);
-
-export const listAllBuilders = createServerFn({ method: "GET" }).handler(
-  async () => {
-    const { data, error } = await supabaseAdmin
-      .from("providers")
-      .select("slug, name, city, city_slug, state_code, rating, rating_count, business_type, logo_url")
-      .eq("is_published", true)
-      .order("rating", { ascending: false, nullsFirst: false })
-      .order("rating_count", { ascending: false, nullsFirst: false })
-      .limit(1000);
-    if (error) console.error("listAllBuilders:", error);
-    return { providers: data ?? [] };
-  },
-);
+export const listAllBuilders = createServerFn({ method: "GET" }).handler(async () => {
+  const { data, error } = await supabaseAdmin
+    .from("providers")
+    .select(
+      "slug, name, city, city_slug, state_code, rating, rating_count, business_type, logo_url",
+    )
+    .eq("is_published", true)
+    .order("rating", { ascending: false, nullsFirst: false })
+    .order("rating_count", { ascending: false, nullsFirst: false })
+    .limit(1000);
+  if (error) console.error("listAllBuilders:", error);
+  return { providers: data ?? [] };
+});
 
 export const getBuildersByState = createServerFn({ method: "GET" })
   .inputValidator((d: unknown) => z.object({ state: z.string().regex(/^[a-z]{2}$/) }).parse(d))
@@ -52,7 +49,9 @@ export const getBuildersByState = createServerFn({ method: "GET" })
     const code = data.state.toUpperCase();
     const { data: providers, error } = await supabaseAdmin
       .from("providers")
-      .select("slug, name, city, city_slug, state_code, rating, rating_count, business_type, logo_url, hero_image_url, latitude, longitude")
+      .select(
+        "slug, name, city, city_slug, state_code, rating, rating_count, business_type, logo_url, hero_image_url, latitude, longitude",
+      )
       .eq("is_published", true)
       .eq("state_code", code)
       .order("rating", { ascending: false, nullsFirst: false })
@@ -70,21 +69,40 @@ export const getBuildersByState = createServerFn({ method: "GET" })
     }
     const cities = Array.from(cityMap.values()).sort((a, b) => b.count - a.count);
     return {
-      state: { code, name: stateName(code), slug: code.toLowerCase(), count: providers?.length ?? 0 },
+      state: {
+        code,
+        name: stateName(code),
+        slug: code.toLowerCase(),
+        count: providers?.length ?? 0,
+      },
       providers: providers ?? [],
       cities,
     };
   });
 
 export const getBuildersByCity = createServerFn({ method: "GET" })
-  .inputValidator((d: unknown) => z.object({ state: z.string().regex(/^[a-z]{2}$/), city: z.string().regex(/^[a-z0-9-]+$/).max(80) }).parse(d))
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        state: z.string().regex(/^[a-z]{2}$/),
+        city: z
+          .string()
+          .regex(/^[a-z0-9-]+$/)
+          .max(80),
+      })
+      .parse(d),
+  )
   .handler(async ({ data }) => {
     const code = data.state.toUpperCase();
     // city slug as stored is "<city>-<state-lower>" e.g. "charlotte-nc"
-    const fullSlug = data.city.endsWith(`-${data.state}`) ? data.city : `${data.city}-${data.state}`;
+    const fullSlug = data.city.endsWith(`-${data.state}`)
+      ? data.city
+      : `${data.city}-${data.state}`;
     const { data: providers, error } = await supabaseAdmin
       .from("providers")
-      .select("slug, name, city, city_slug, state_code, rating, rating_count, business_type, address, phone, website_url, logo_url, hero_image_url, latitude, longitude, description")
+      .select(
+        "slug, name, city, city_slug, state_code, rating, rating_count, business_type, address, phone, website_url, logo_url, hero_image_url, latitude, longitude, description",
+      )
       .eq("is_published", true)
       .eq("state_code", code)
       .eq("city_slug", fullSlug)
@@ -101,18 +119,20 @@ export const getBuildersByCity = createServerFn({ method: "GET" })
 
 export const submitProviderLead = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) =>
-    z.object({
-      name: z.string().trim().min(1).max(120),
-      email: z.string().trim().email().max(255),
-      phone: z.string().trim().max(40).optional().or(z.literal("")),
-      company: z.string().trim().max(160).optional().or(z.literal("")),
-      website: z.string().trim().max(300).optional().or(z.literal("")),
-      city: z.string().trim().max(120).optional().or(z.literal("")),
-      state_code: z.string().trim().max(4).optional().or(z.literal("")),
-      message: z.string().trim().max(2000).optional().or(z.literal("")),
-      source_provider_slug: z.string().trim().max(120).optional().or(z.literal("")),
-      source_path: z.string().trim().max(300).optional().or(z.literal("")),
-    }).parse(d),
+    z
+      .object({
+        name: z.string().trim().min(1).max(120),
+        email: z.string().trim().email().max(255),
+        phone: z.string().trim().max(40).optional().or(z.literal("")),
+        company: z.string().trim().max(160).optional().or(z.literal("")),
+        website: z.string().trim().max(300).optional().or(z.literal("")),
+        city: z.string().trim().max(120).optional().or(z.literal("")),
+        state_code: z.string().trim().max(4).optional().or(z.literal("")),
+        message: z.string().trim().max(2000).optional().or(z.literal("")),
+        source_provider_slug: z.string().trim().max(120).optional().or(z.literal("")),
+        source_path: z.string().trim().max(300).optional().or(z.literal("")),
+      })
+      .parse(d),
   )
   .handler(async ({ data }) => {
     const blank = (s?: string) => (s && s.trim() ? s.trim() : null);

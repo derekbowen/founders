@@ -28,10 +28,7 @@ export function pickFallbackHero(slug: string): string {
 }
 
 /** Resolve the hero image URL for a city, with deterministic fallback. */
-export function resolveCityHero(
-  slug: string,
-  storedUrl: string | null | undefined,
-): string {
+export function resolveCityHero(slug: string, storedUrl: string | null | undefined): string {
   if (storedUrl && storedUrl.trim()) return storedUrl;
   return pickFallbackHero(slug);
 }

@@ -34,16 +34,23 @@ export type KeywordRow = {
 export const importGscQueries = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({
-      rows: z.array(z.object({
-        url_path: z.string().min(1),
-        query: z.string().min(1).max(300),
-        clicks: z.number().int().min(0).default(0),
-        impressions: z.number().int().min(0).default(0),
-        ctr: z.number().nullable().optional(),
-        position: z.number().nullable().optional(),
-      })).min(1).max(5000),
-    }).parse(d),
+    z
+      .object({
+        rows: z
+          .array(
+            z.object({
+              url_path: z.string().min(1),
+              query: z.string().min(1).max(300),
+              clicks: z.number().int().min(0).default(0),
+              impressions: z.number().int().min(0).default(0),
+              ctr: z.number().nullable().optional(),
+              position: z.number().nullable().optional(),
+            }),
+          )
+          .min(1)
+          .max(5000),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }) => {
     await assertAdmin((context as any).userId);
@@ -65,13 +72,15 @@ export const importGscQueries = createServerFn({ method: "POST" })
 export const findKeywordOpportunities = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({
-      minPosition: z.number().min(1).max(100).default(5),
-      maxPosition: z.number().min(1).max(100).default(20),
-      minImpressions: z.number().int().min(0).default(50),
-      limit: z.number().int().min(10).max(500).default(100),
-      pathLike: z.string().max(200).default(""),
-    }).parse(d ?? {}),
+    z
+      .object({
+        minPosition: z.number().min(1).max(100).default(5),
+        maxPosition: z.number().min(1).max(100).default(20),
+        minImpressions: z.number().int().min(0).default(50),
+        limit: z.number().int().min(10).max(500).default(100),
+        pathLike: z.string().max(200).default(""),
+      })
+      .parse(d ?? {}),
   )
   .handler(async ({ data, context }): Promise<{ rows: KeywordRow[]; total: number }> => {
     await assertAdmin((context as any).userId);
@@ -94,10 +103,13 @@ export const getKeywordStats = createServerFn({ method: "GET" })
     await assertAdmin((context as any).userId);
     const [{ count: totalQueries }, { count: opportunities }, { count: top3 }] = await Promise.all([
       sb().from("gsc_query_data").select("*", { count: "exact", head: true }),
-      sb().from("gsc_query_data").select("*", { count: "exact", head: true })
-        .gte("position", 5).lte("position", 20).gte("impressions", 50),
-      sb().from("gsc_query_data").select("*", { count: "exact", head: true })
-        .lte("position", 3),
+      sb()
+        .from("gsc_query_data")
+        .select("*", { count: "exact", head: true })
+        .gte("position", 5)
+        .lte("position", 20)
+        .gte("impressions", 50),
+      sb().from("gsc_query_data").select("*", { count: "exact", head: true }).lte("position", 3),
     ]);
     return {
       totalQueries: totalQueries || 0,
@@ -126,16 +138,20 @@ export type CompetitorRow = {
 export const listCompetitorPages = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({
-      q: z.string().max(200).default(""),
-      limit: z.number().int().min(10).max(500).default(100),
-    }).parse(d ?? {}),
+    z
+      .object({
+        q: z.string().max(200).default(""),
+        limit: z.number().int().min(10).max(500).default(100),
+      })
+      .parse(d ?? {}),
   )
   .handler(async ({ data, context }): Promise<{ rows: CompetitorRow[] }> => {
     await assertAdmin((context as any).userId);
     let q = sb()
       .from("competitor_pages")
-      .select("id, url, domain, title, meta_description, h1, word_count, notes, last_scraped_at, updated_at")
+      .select(
+        "id, url, domain, title, meta_description, h1, word_count, notes, last_scraped_at, updated_at",
+      )
       .order("updated_at", { ascending: false })
       .limit(data.limit);
     if (data.q) q = q.or(`url.ilike.%${data.q}%,title.ilike.%${data.q}%,domain.ilike.%${data.q}%`);
@@ -146,10 +162,12 @@ export const listCompetitorPages = createServerFn({ method: "POST" })
 export const scrapeCompetitorUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({
-      url: z.string().url(),
-      notes: z.string().max(1000).optional(),
-    }).parse(d),
+    z
+      .object({
+        url: z.string().url(),
+        notes: z.string().max(1000).optional(),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }) => {
     await assertAdmin((context as any).userId);
@@ -166,34 +184,44 @@ export const scrapeCompetitorUrl = createServerFn({ method: "POST" })
       }),
     });
     if (resp.status === 402) return { ok: false, error: "Firecrawl credits exhausted" };
-    if (!resp.ok) return { ok: false, error: `Firecrawl ${resp.status}: ${(await resp.text()).slice(0, 200)}` };
+    if (!resp.ok)
+      return { ok: false, error: `Firecrawl ${resp.status}: ${(await resp.text()).slice(0, 200)}` };
     const json = await resp.json();
     const doc = json?.data || json;
     const markdown: string = doc?.markdown || "";
     const meta = doc?.metadata || {};
     let domain: string | null = null;
-    try { domain = new URL(data.url).hostname.replace(/^www\./, ""); } catch { /* noop */ }
+    try {
+      domain = new URL(data.url).hostname.replace(/^www\./, "");
+    } catch {
+      /* noop */
+    }
     const h1Match = markdown.match(/^#\s+(.+)$/m);
-    const headings = Array.from(markdown.matchAll(/^(#{1,3})\s+(.+)$/gm)).slice(0, 50).map((m) => ({
-      level: m[1].length,
-      text: m[2].trim(),
-    }));
+    const headings = Array.from(markdown.matchAll(/^(#{1,3})\s+(.+)$/gm))
+      .slice(0, 50)
+      .map((m) => ({
+        level: m[1].length,
+        text: m[2].trim(),
+      }));
     const word_count = markdown.split(/\s+/).filter(Boolean).length;
 
     const { data: row, error } = await sb()
       .from("competitor_pages")
-      .upsert({
-        url: data.url,
-        domain,
-        title: meta.title || meta.ogTitle || null,
-        meta_description: meta.description || meta.ogDescription || null,
-        h1: h1Match ? h1Match[1].trim() : null,
-        word_count,
-        headings,
-        markdown: markdown.slice(0, 50000),
-        notes: data.notes ?? null,
-        last_scraped_at: new Date().toISOString(),
-      }, { onConflict: "url" })
+      .upsert(
+        {
+          url: data.url,
+          domain,
+          title: meta.title || meta.ogTitle || null,
+          meta_description: meta.description || meta.ogDescription || null,
+          h1: h1Match ? h1Match[1].trim() : null,
+          word_count,
+          headings,
+          markdown: markdown.slice(0, 50000),
+          notes: data.notes ?? null,
+          last_scraped_at: new Date().toISOString(),
+        },
+        { onConflict: "url" },
+      )
       .select("id, url, word_count")
       .maybeSingle();
     if (error) return { ok: false, error: error.message };
@@ -203,28 +231,49 @@ export const scrapeCompetitorUrl = createServerFn({ method: "POST" })
 export const compareCompetitorToPage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({
-      competitor_id: z.string().uuid(),
-      our_url_path: z.string().min(1),
-    }).parse(d),
+    z
+      .object({
+        competitor_id: z.string().uuid(),
+        our_url_path: z.string().min(1),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }) => {
     await assertAdmin((context as any).userId);
     const [{ data: comp }, { data: ours }] = await Promise.all([
-      sb().from("competitor_pages").select("url, title, h1, word_count, headings, markdown").eq("id", data.competitor_id).maybeSingle(),
-      sb().from("content_pages").select("url_path, title, body_markdown").eq("url_path", data.our_url_path).maybeSingle(),
+      sb()
+        .from("competitor_pages")
+        .select("url, title, h1, word_count, headings, markdown")
+        .eq("id", data.competitor_id)
+        .maybeSingle(),
+      sb()
+        .from("content_pages")
+        .select("url_path, title, body_markdown")
+        .eq("url_path", data.our_url_path)
+        .maybeSingle(),
     ]);
     if (!comp) return { ok: false, error: "Competitor page not found" };
     if (!ours) return { ok: false, error: "Our page not found" };
     const ourWords = (ours.body_markdown || "").split(/\s+/).filter(Boolean).length;
-    const ourHeadings = Array.from((ours.body_markdown || "").matchAll(/^(#{1,3})\s+(.+)$/gm))
-      .map((m) => (m as RegExpMatchArray)[2].trim().toLowerCase());
+    const ourHeadings = Array.from((ours.body_markdown || "").matchAll(/^(#{1,3})\s+(.+)$/gm)).map(
+      (m) => (m as RegExpMatchArray)[2].trim().toLowerCase(),
+    );
     const compHeadings = (comp.headings || []) as Array<{ level: number; text: string }>;
     const missing = compHeadings.filter((h) => !ourHeadings.includes(h.text.toLowerCase()));
     return {
       ok: true,
-      our: { url_path: ours.url_path, title: ours.title, word_count: ourWords, headings: ourHeadings.length },
-      competitor: { url: comp.url, title: comp.title, word_count: comp.word_count, headings: compHeadings.length },
+      our: {
+        url_path: ours.url_path,
+        title: ours.title,
+        word_count: ourWords,
+        headings: ourHeadings.length,
+      },
+      competitor: {
+        url: comp.url,
+        title: comp.title,
+        word_count: comp.word_count,
+        headings: compHeadings.length,
+      },
       word_gap: comp.word_count - ourWords,
       missing_sections: missing.slice(0, 30),
     };
@@ -255,11 +304,88 @@ export type LinkSuggestionRow = {
 };
 
 const STOP = new Set([
-  "the","a","an","and","or","of","in","to","for","with","on","at","by","from","is","are","was","were",
-  "be","been","being","this","that","these","those","it","its","as","but","if","then","than","so","you",
-  "your","i","we","our","they","them","their","he","she","his","her","not","no","yes","do","does","did",
-  "have","has","had","will","would","can","could","should","may","might","just","also","very","more","most",
-  "all","any","some","one","two","three","up","down","out","into","over","under","about","near","there","here"
+  "the",
+  "a",
+  "an",
+  "and",
+  "or",
+  "of",
+  "in",
+  "to",
+  "for",
+  "with",
+  "on",
+  "at",
+  "by",
+  "from",
+  "is",
+  "are",
+  "was",
+  "were",
+  "be",
+  "been",
+  "being",
+  "this",
+  "that",
+  "these",
+  "those",
+  "it",
+  "its",
+  "as",
+  "but",
+  "if",
+  "then",
+  "than",
+  "so",
+  "you",
+  "your",
+  "i",
+  "we",
+  "our",
+  "they",
+  "them",
+  "their",
+  "he",
+  "she",
+  "his",
+  "her",
+  "not",
+  "no",
+  "yes",
+  "do",
+  "does",
+  "did",
+  "have",
+  "has",
+  "had",
+  "will",
+  "would",
+  "can",
+  "could",
+  "should",
+  "may",
+  "might",
+  "just",
+  "also",
+  "very",
+  "more",
+  "most",
+  "all",
+  "any",
+  "some",
+  "one",
+  "two",
+  "three",
+  "up",
+  "down",
+  "out",
+  "into",
+  "over",
+  "under",
+  "about",
+  "near",
+  "there",
+  "here",
 ]);
 
 function tokenize(text: string): Set<string> {
@@ -268,7 +394,7 @@ function tokenize(text: string): Set<string> {
       .toLowerCase()
       .replace(/[^a-z0-9\s]/g, " ")
       .split(/\s+/)
-      .filter((w) => w.length > 3 && !STOP.has(w))
+      .filter((w) => w.length > 3 && !STOP.has(w)),
   );
 }
 
@@ -283,11 +409,13 @@ function jaccard(a: Set<string>, b: Set<string>): number {
 export const generateLinkSuggestions = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({
-      sampleSize: z.number().int().min(20).max(2000).default(500),
-      minScore: z.number().min(0.05).max(1).default(0.18),
-      perPage: z.number().int().min(1).max(20).default(5),
-    }).parse(d ?? {}),
+    z
+      .object({
+        sampleSize: z.number().int().min(20).max(2000).default(500),
+        minScore: z.number().min(0.05).max(1).default(0.18),
+        perPage: z.number().int().min(1).max(20).default(5),
+      })
+      .parse(d ?? {}),
   )
   .handler(async ({ data, context }) => {
     await assertAdmin((context as any).userId);
@@ -307,7 +435,13 @@ export const generateLinkSuggestions = createServerFn({ method: "POST" })
       tokens: tokenize(`${p.title || ""} ${(p.body_markdown || "").slice(0, 4000)}`),
     }));
 
-    const suggestions: { from_url: string; to_url: string; anchor_text: string | null; score: number; reason: string }[] = [];
+    const suggestions: {
+      from_url: string;
+      to_url: string;
+      anchor_text: string | null;
+      score: number;
+      reason: string;
+    }[] = [];
     for (let i = 0; i < tokenized.length; i++) {
       const a = tokenized[i];
       const candidates: { to_url: string; anchor_text: string | null; score: number }[] = [];
@@ -342,11 +476,13 @@ export const generateLinkSuggestions = createServerFn({ method: "POST" })
 export const listLinkSuggestions = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({
-      status: z.enum(["pending", "applied", "dismissed", "all"]).default("pending"),
-      q: z.string().max(200).default(""),
-      limit: z.number().int().min(10).max(500).default(100),
-    }).parse(d ?? {}),
+    z
+      .object({
+        status: z.enum(["pending", "applied", "dismissed", "all"]).default("pending"),
+        q: z.string().max(200).default(""),
+        limit: z.number().int().min(10).max(500).default(100),
+      })
+      .parse(d ?? {}),
   )
   .handler(async ({ data, context }): Promise<{ rows: LinkSuggestionRow[] }> => {
     await assertAdmin((context as any).userId);
@@ -356,7 +492,8 @@ export const listLinkSuggestions = createServerFn({ method: "POST" })
       .order("score", { ascending: false })
       .limit(data.limit);
     if (data.status !== "all") q = q.eq("status", data.status);
-    if (data.q) q = q.or(`from_url.ilike.%${data.q}%,to_url.ilike.%${data.q}%,anchor_text.ilike.%${data.q}%`);
+    if (data.q)
+      q = q.or(`from_url.ilike.%${data.q}%,to_url.ilike.%${data.q}%,anchor_text.ilike.%${data.q}%`);
     const { data: rows } = await q;
     return { rows: (rows || []) as LinkSuggestionRow[] };
   });
@@ -364,10 +501,12 @@ export const listLinkSuggestions = createServerFn({ method: "POST" })
 export const updateLinkSuggestionStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({
-      ids: z.array(z.string().uuid()).min(1).max(500),
-      status: z.enum(["pending", "applied", "dismissed"]),
-    }).parse(d),
+    z
+      .object({
+        ids: z.array(z.string().uuid()).min(1).max(500),
+        status: z.enum(["pending", "applied", "dismissed"]),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }) => {
     await assertAdmin((context as any).userId);
@@ -397,7 +536,10 @@ export const applyLinkSuggestion = createServerFn({ method: "POST" })
       .maybeSingle();
     if (!page) return { ok: false, error: "From-page not found" };
     if ((page.body_markdown || "").includes(sug.to_url)) {
-      await sb().from("internal_link_suggestions").update({ status: "applied", updated_at: new Date().toISOString() }).eq("id", data.id);
+      await sb()
+        .from("internal_link_suggestions")
+        .update({ status: "applied", updated_at: new Date().toISOString() })
+        .eq("id", data.id);
       return { ok: true, alreadyLinked: true };
     }
     const anchor = sug.anchor_text || sug.to_url;
@@ -408,6 +550,9 @@ export const applyLinkSuggestion = createServerFn({ method: "POST" })
       .update({ body_markdown: newBody, updated_at: new Date().toISOString() })
       .eq("id", page.id);
     if (uErr) return { ok: false, error: uErr.message };
-    await sb().from("internal_link_suggestions").update({ status: "applied", updated_at: new Date().toISOString() }).eq("id", data.id);
+    await sb()
+      .from("internal_link_suggestions")
+      .update({ status: "applied", updated_at: new Date().toISOString() })
+      .eq("id", data.id);
     return { ok: true };
   });

@@ -5,10 +5,7 @@ import { CheckCircle2, ExternalLink, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteHeader, SiteFooter } from "@/components/site-layout";
 import { getCurrentWorkspace, type CurrentWorkspace } from "@/server/workspace.functions";
-import {
-  createCheckoutSession,
-  createPortalSession,
-} from "@/server/billing.functions";
+import { createCheckoutSession, createPortalSession } from "@/server/billing.functions";
 import {
   PLAN_FEATURES,
   type Plan,
@@ -90,11 +87,23 @@ function BillingPage() {
         <UpgradeBanner feature={search.upgrade as Feature} currentPlan={workspace.plan} />
       )}
 
-      <h1 className="text-3xl font-bold tracking-tight">Billing</h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        {workspace.name} ·{" "}
-        <span className="font-mono text-xs">{workspace.marketplace_domain ?? "no domain"}</span>
-      </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Billing</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {workspace.name} ·{" "}
+            <span className="font-mono text-xs">
+              {workspace.marketplace_domain ?? "no domain"}
+            </span>
+          </p>
+        </div>
+        <Link
+          to="/app/dashboard"
+          className="inline-flex h-9 items-center justify-center rounded-full border border-border bg-card px-4 text-sm font-medium hover:bg-muted"
+        >
+          Go to workspace →
+        </Link>
+      </div>
 
       <CurrentPlanCard workspace={workspace} />
 
@@ -134,8 +143,7 @@ function UpgradeBanner({ feature, currentPlan }: { feature: Feature; currentPlan
     <div className="mb-6 rounded-xl border border-primary/30 bg-primary/5 p-4">
       <p className="text-sm">
         <strong>{feature}</strong> is available on the{" "}
-        <strong>{PLAN_FEATURES[minPlan].name}</strong> plan and above. Upgrade below to unlock
-        it.
+        <strong>{PLAN_FEATURES[minPlan].name}</strong> plan and above. Upgrade below to unlock it.
       </p>
     </div>
   );
@@ -186,7 +194,11 @@ function CurrentPlanCard({ workspace }: { workspace: CurrentWorkspace }) {
             disabled={busy}
             className="inline-flex h-9 items-center gap-2 rounded-full border border-border px-4 text-sm font-medium hover:bg-muted disabled:opacity-50"
           >
-            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <ExternalLink className="h-4 w-4" />}
+            {busy ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <ExternalLink className="h-4 w-4" />
+            )}
             Manage payment & invoices
           </button>
         )}

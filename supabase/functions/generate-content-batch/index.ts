@@ -243,7 +243,10 @@ function estimateOutputTokens(row: PlanRow): number {
   return Math.ceil((base + faqOverhead) * 1.15);
 }
 
-function pickModelForBudget(row: PlanRow, requestedModel: string): {
+function pickModelForBudget(
+  row: PlanRow,
+  requestedModel: string,
+): {
   model: string;
   estTokens: number;
   maxTokens: number;
@@ -263,7 +266,12 @@ function pickModelForBudget(row: PlanRow, requestedModel: string): {
     reason = `est ${estTokens} tok > ${requestedBudget} tok budget of ${requestedModel}; switched to ${model}`;
   }
   // Hard rule: event_guides always need Pro regardless (15-20 FAQs + 4k words).
-  if (isEventSource(row) && !model.includes("pro") && !model.includes("gpt-5") && !model.includes("gpt-5.2")) {
+  if (
+    isEventSource(row) &&
+    !model.includes("pro") &&
+    !model.includes("gpt-5") &&
+    !model.includes("gpt-5.2")
+  ) {
     model = "google/gemini-2.5-pro";
     switched = true;
     reason = `event_guide forced to ${model} (FAQ + word-count requirement)`;
@@ -446,6 +454,17 @@ async function processGeneration(
 ) {
   const errors: string[] = [];
 
+  // content_pages.workspace_id is NOT NULL post-SaaS migration. Admin-driven
+  // batch generation publishes into PRNM (founders.click staff workspace).
+  const { data: prnm, error: wsErr } = await supabase
+    .from("workspaces")
+    .select("id")
+    .eq("slug", "pool-rental-near-me")
+    .maybeSingle();
+  if (wsErr) throw new Error(`PRNM workspace lookup failed: ${wsErr.message}`);
+  if (!prnm?.id) throw new Error("PRNM workspace not found — run SaaS migration first");
+  const workspaceId = prnm.id as string;
+
   const generated = (
     await Promise.all(
       planRows.map((row) => {
@@ -454,7 +473,9 @@ async function processGeneration(
         if (pick.switched) {
           console.log(`[generate-content-batch:${row.slug}] model auto-switch — ${pick.reason}`);
         } else {
-          console.log(`[generate-content-batch:${row.slug}] using ${pick.model} (~${pick.estTokens} tok)`);
+          console.log(
+            `[generate-content-batch:${row.slug}] using ${pick.model} (~${pick.estTokens} tok)`,
+          );
         }
         return generateOne(row, pick.model, apiKey, pick.maxTokens);
       }),
@@ -572,6 +593,7 @@ async function processGeneration(
           ? "Host/City Acquisition (ES)"
           : "Resource/Article Page";
     return {
+      workspace_id: workspaceId,
       slug: plan.slug,
       url_path: `/p/${plan.slug}`,
       template_type,
@@ -592,7 +614,7 @@ async function processGeneration(
 
   const { error: upErr } = await supabase
     .from("content_pages")
-    .upsert(rows, { onConflict: "url_path" });
+    .upsert(rows, { onConflict: "workspace_id,url_path" });
   if (upErr) throw new Error(`upsert failed: ${upErr.message}`);
 
   const generatedSlugs = okPages.map((p) => p.plan.slug);

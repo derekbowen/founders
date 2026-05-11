@@ -27,10 +27,7 @@ export const Route = createFileRoute("/admin/team")({
     if (!isAdmin) throw redirect({ to: "/admin/no-access" });
   },
   head: () => ({
-    meta: [
-      { title: "Admin team — PRNM" },
-      { name: "robots", content: "noindex,nofollow" },
-    ],
+    meta: [{ title: "Admin team — PRNM" }, { name: "robots", content: "noindex,nofollow" }],
   }),
   component: TeamPage,
 });
@@ -67,16 +64,26 @@ function TeamPage() {
     }
   }, []);
 
-  React.useEffect(() => { void load(); }, [load]);
+  React.useEffect(() => {
+    void load();
+  }, [load]);
 
   async function onCreate(e: React.FormEvent) {
     e.preventDefault();
     if (!newEmail.trim() || !newPassword || busy) return;
     setBusy(true);
     try {
-      await createAdminUser({ data: { email: newEmail.trim(), password: newPassword, full_name: newName.trim() || undefined } });
+      await createAdminUser({
+        data: {
+          email: newEmail.trim(),
+          password: newPassword,
+          full_name: newName.trim() || undefined,
+        },
+      });
       toast.success(`Admin created. Password: ${newPassword}`);
-      setNewEmail(""); setNewName(""); setNewPassword("");
+      setNewEmail("");
+      setNewName("");
+      setNewPassword("");
       await load();
     } catch (e: any) {
       toast.error(e?.message || "Failed to create admin");
@@ -113,10 +120,15 @@ function TeamPage() {
   }
 
   async function onResetPassword(user_id: string, label: string) {
-    const pwd = prompt(`Set new password for ${label} (min 8 chars). Leave empty to auto-generate:`);
+    const pwd = prompt(
+      `Set new password for ${label} (min 8 chars). Leave empty to auto-generate:`,
+    );
     if (pwd === null) return;
     const password = pwd.trim() || genPassword();
-    if (password.length < 8) { toast.error("Password too short"); return; }
+    if (password.length < 8) {
+      toast.error("Password too short");
+      return;
+    }
     try {
       await setAdminPassword({ data: { user_id, password } });
       // Show in a way the admin can copy
@@ -144,30 +156,67 @@ function TeamPage() {
       </p>
 
       {/* Create new admin */}
-      <form onSubmit={onCreate} className="mt-6 grid gap-3 rounded-xl border border-border bg-card p-4 sm:grid-cols-[1fr_1fr_1fr_auto_auto] sm:items-end">
+      <form
+        onSubmit={onCreate}
+        className="mt-6 grid gap-3 rounded-xl border border-border bg-card p-4 sm:grid-cols-[1fr_1fr_1fr_auto_auto] sm:items-end"
+      >
         <div>
-          <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Email</label>
-          <Input value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="user@example.com" type="email" className="mt-1" />
+          <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Email
+          </label>
+          <Input
+            value={newEmail}
+            onChange={(e) => setNewEmail(e.target.value)}
+            placeholder="user@example.com"
+            type="email"
+            className="mt-1"
+          />
         </div>
         <div>
-          <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Full name (optional)</label>
-          <Input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Jane Doe" className="mt-1" />
+          <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Full name (optional)
+          </label>
+          <Input
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            placeholder="Jane Doe"
+            className="mt-1"
+          />
         </div>
         <div>
-          <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Password</label>
-          <Input value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="min 8 chars" className="mt-1" />
+          <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Password
+          </label>
+          <Input
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            placeholder="min 8 chars"
+            className="mt-1"
+          />
         </div>
-        <Button type="button" variant="outline" onClick={() => setNewPassword(genPassword())}>Generate</Button>
+        <Button type="button" variant="outline" onClick={() => setNewPassword(genPassword())}>
+          Generate
+        </Button>
         <Button type="submit" disabled={busy || !newEmail.trim() || newPassword.length < 8}>
           {busy ? "Creating…" : "Create admin"}
         </Button>
       </form>
 
       {/* Grant existing */}
-      <form onSubmit={onGrant} className="mt-4 flex flex-wrap items-end gap-3 rounded-xl border border-border bg-card p-4">
+      <form
+        onSubmit={onGrant}
+        className="mt-4 flex flex-wrap items-end gap-3 rounded-xl border border-border bg-card p-4"
+      >
         <div className="min-w-[260px] flex-1">
-          <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Grant admin to existing user (email or user ID)</label>
-          <Input value={identifier} onChange={(e) => setIdentifier(e.target.value)} placeholder="helper@example.com" className="mt-1" />
+          <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Grant admin to existing user (email or user ID)
+          </label>
+          <Input
+            value={identifier}
+            onChange={(e) => setIdentifier(e.target.value)}
+            placeholder="helper@example.com"
+            className="mt-1"
+          />
         </div>
         <Button type="submit" variant="secondary" disabled={busy || !identifier.trim()}>
           {busy ? "Granting…" : "Grant admin"}
@@ -184,7 +233,9 @@ function TeamPage() {
           </button>
         </div>
         <ul className="divide-y divide-border">
-          {loading && <li className="px-4 py-6 text-center text-sm text-muted-foreground">Loading…</li>}
+          {loading && (
+            <li className="px-4 py-6 text-center text-sm text-muted-foreground">Loading…</li>
+          )}
           {!loading && admins.length === 0 && (
             <li className="px-4 py-6 text-center text-sm text-muted-foreground">No admins yet.</li>
           )}
@@ -192,13 +243,22 @@ function TeamPage() {
             const name = a.full_name || a.display_name || "(no name)";
             const label = a.email || name;
             return (
-              <li key={a.user_id} className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
+              <li
+                key={a.user_id}
+                className="flex flex-wrap items-center justify-between gap-3 px-4 py-3"
+              >
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-sm font-medium">{name}</div>
-                  <div className="truncate text-xs text-muted-foreground">{a.email || "(no email)"}</div>
-                  <div className="truncate font-mono text-[10px] text-muted-foreground/70">{a.user_id}</div>
+                  <div className="truncate text-xs text-muted-foreground">
+                    {a.email || "(no email)"}
+                  </div>
+                  <div className="truncate font-mono text-[10px] text-muted-foreground/70">
+                    {a.user_id}
+                  </div>
                   {a.last_sign_in_at && (
-                    <div className="text-[10px] text-muted-foreground">Last sign-in: {new Date(a.last_sign_in_at).toLocaleString()}</div>
+                    <div className="text-[10px] text-muted-foreground">
+                      Last sign-in: {new Date(a.last_sign_in_at).toLocaleString()}
+                    </div>
                   )}
                 </div>
                 <div className="flex shrink-0 flex-wrap gap-2">

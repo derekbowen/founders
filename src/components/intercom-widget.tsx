@@ -95,7 +95,9 @@ export function IntercomWidget() {
 
   // Push updated metadata on every client-side navigation.
   useEffect(() => {
-    const isBooted = (window as unknown as { __intercomBooted?: () => boolean }).__intercomBooted?.();
+    const isBooted = (
+      window as unknown as { __intercomBooted?: () => boolean }
+    ).__intercomBooted?.();
     if (!isBooted) return;
     try {
       update(deriveContext(pathname));

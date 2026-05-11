@@ -83,10 +83,7 @@ export async function verifyStandardWebhook(
   try {
     secretBytes = base64ToBytes(cleanedSecret);
   } catch (e) {
-    throw new StandardWebhookError(
-      "invalid_secret",
-      "Could not base64-decode webhook secret",
-    );
+    throw new StandardWebhookError("invalid_secret", "Could not base64-decode webhook secret");
   }
 
   const rawBody = await request.text();
@@ -94,7 +91,10 @@ export async function verifyStandardWebhook(
 
   // Header may contain multiple space-separated signatures (key rotation).
   // Compare against any. Each is in the form `v1,<base64>`.
-  const provided = sigHeader.split(" ").map((s) => s.trim()).filter(Boolean);
+  const provided = sigHeader
+    .split(" ")
+    .map((s) => s.trim())
+    .filter(Boolean);
   const matched = provided.some((entry) => {
     const idx = entry.indexOf(",");
     if (idx < 0) return false;
@@ -126,9 +126,16 @@ function bytesToBase64(bytes: Uint8Array): string {
 }
 
 async function hmacSha256Base64(secretBytes: Uint8Array, data: string): Promise<string> {
+  // Web Crypto on Workers/Node 18+ expects a BufferSource; the explicit
+  // .buffer slice avoids the SharedArrayBuffer/ArrayBuffer type mismatch
+  // some TS configs flag for raw Uint8Array.
+  const keyData = secretBytes.buffer.slice(
+    secretBytes.byteOffset,
+    secretBytes.byteOffset + secretBytes.byteLength,
+  ) as ArrayBuffer;
   const key = await crypto.subtle.importKey(
     "raw",
-    secretBytes,
+    keyData,
     { name: "HMAC", hash: "SHA-256" },
     false,
     ["sign"],

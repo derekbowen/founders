@@ -53,7 +53,10 @@ export default defineConfig(async ({ command }) => {
       ],
     },
     server: {
-      host: "::",
+      // Bind to IPv4 (0.0.0.0) so the dev server starts in environments
+      // without IPv6 (containers, Codespaces, sandboxes). Still reachable
+      // from external network interfaces.
+      host: "0.0.0.0",
       port: Number(process.env.PORT) || 8080,
       strictPort: true,
     },
@@ -61,6 +64,42 @@ export default defineConfig(async ({ command }) => {
       // Serve built JS/CSS under /fw-assets/ so the reverse proxy can route
       // this app's static assets without colliding with other apps on the same domain.
       assetsDir: "fw-assets",
+      chunkSizeWarningLimit: 600,
+      rollupOptions: {
+        output: {
+          // Pull heavy vendor groups into stable, cacheable chunks instead of
+          // inlining them all into the main bundle.
+          manualChunks: {
+            "vendor-react": ["react", "react-dom", "react/jsx-runtime"],
+            "vendor-tanstack": [
+              "@tanstack/react-router",
+              "@tanstack/react-start",
+              "@tanstack/react-query",
+            ],
+            "vendor-radix": [
+              "@radix-ui/react-accordion",
+              "@radix-ui/react-alert-dialog",
+              "@radix-ui/react-avatar",
+              "@radix-ui/react-checkbox",
+              "@radix-ui/react-collapsible",
+              "@radix-ui/react-dialog",
+              "@radix-ui/react-dropdown-menu",
+              "@radix-ui/react-label",
+              "@radix-ui/react-popover",
+              "@radix-ui/react-select",
+              "@radix-ui/react-slot",
+              "@radix-ui/react-switch",
+              "@radix-ui/react-tabs",
+              "@radix-ui/react-tooltip",
+            ],
+            "vendor-charts": ["recharts"],
+            "vendor-forms": ["react-hook-form", "@hookform/resolvers", "zod"],
+            "vendor-supabase": ["@supabase/supabase-js"],
+            "vendor-stripe": ["stripe"],
+            "vendor-email": ["@react-email/components", "react-email"],
+          },
+        },
+      },
     },
   };
 });

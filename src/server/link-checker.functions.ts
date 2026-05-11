@@ -5,17 +5,37 @@ import { z } from "zod";
 
 async function assertAdmin(userId: string) {
   const { data } = await supabaseAdmin
-    .from("user_roles").select("role").eq("user_id", userId).eq("role", "admin").maybeSingle();
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId)
+    .eq("role", "admin")
+    .maybeSingle();
   if (!data) throw new Error("Forbidden");
 }
 
 // Allowlisted internal path prefixes we won't flag (Sharetribe + sibling Lovable apps + assets)
 const INTERNAL_ALLOWED_PREFIXES = [
-  "/s", "/l/", "/signup", "/login", "/inbox", "/auth/", "/account/",
-  "/profile/", "/messages/", "/listings/", "/saved-listings",
-  "/amenity/", "/amenities", "/public-pools/", "/referral", "/admin",
-  "/sitemap.xml", "/pools-directory-sitemap.xml", "/landing-page",
-  "/fw-assets/", "/api/",
+  "/s",
+  "/l/",
+  "/signup",
+  "/login",
+  "/inbox",
+  "/auth/",
+  "/account/",
+  "/profile/",
+  "/messages/",
+  "/listings/",
+  "/saved-listings",
+  "/amenity/",
+  "/amenities",
+  "/public-pools/",
+  "/referral",
+  "/admin",
+  "/sitemap.xml",
+  "/pools-directory-sitemap.xml",
+  "/landing-page",
+  "/fw-assets/",
+  "/api/",
 ];
 
 export type BrokenLink = {
@@ -30,7 +50,10 @@ export type BrokenLink = {
 
 const MD_LINK_RE = /\[([^\]]+)\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g;
 
-function classifyHref(href: string): { kind: "external" | "internal" | "anchor" | "mail" | "tel" | "malformed"; path?: string } {
+function classifyHref(href: string): {
+  kind: "external" | "internal" | "anchor" | "mail" | "tel" | "malformed";
+  path?: string;
+} {
   const h = href.trim();
   if (!h) return { kind: "malformed" };
   if (h.startsWith("#")) return { kind: "anchor" };
@@ -43,7 +66,9 @@ function classifyHref(href: string): { kind: "external" | "internal" | "anchor" 
         return { kind: "internal", path: u.pathname };
       }
       return { kind: "external" };
-    } catch { return { kind: "malformed" }; }
+    } catch {
+      return { kind: "malformed" };
+    }
   }
   if (h.startsWith("/")) return { kind: "internal", path: h.split(/[?#]/)[0] };
   return { kind: "malformed" };
@@ -57,16 +82,18 @@ function isAllowedInternal(path: string): boolean {
 export const scanBrokenLinks = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({
-      offset: z.number().int().min(0).default(0),
-      batchSize: z.number().int().min(10).max(500).default(200),
-      urlPrefix: z.string().trim().max(200).optional(),
-      urlContains: z.string().trim().max(200).optional(),
-      pageIds: z.array(z.string().uuid()).max(2000).optional(),
-      onlyMissingPPage: z.boolean().optional(),
-      rangeStart: z.string().trim().max(200).optional(),
-      rangeEnd: z.string().trim().max(200).optional(),
-    }).parse(d ?? {}),
+    z
+      .object({
+        offset: z.number().int().min(0).default(0),
+        batchSize: z.number().int().min(10).max(500).default(200),
+        urlPrefix: z.string().trim().max(200).optional(),
+        urlContains: z.string().trim().max(200).optional(),
+        pageIds: z.array(z.string().uuid()).max(2000).optional(),
+        onlyMissingPPage: z.boolean().optional(),
+        rangeStart: z.string().trim().max(200).optional(),
+        rangeEnd: z.string().trim().max(200).optional(),
+      })
+      .parse(d ?? {}),
   )
   .handler(async ({ data, context }) => {
     await assertAdmin((context as any).userId);
@@ -97,11 +124,19 @@ export const scanBrokenLinks = createServerFn({ method: "POST" })
       .order("url_path", { ascending: true })
       .range(data.offset, data.offset + data.batchSize - 1);
 
-    const list = (pages || []) as Array<{ id: string; url_path: string; title: string | null; body_markdown: string | null }>;
+    const list = (pages || []) as Array<{
+      id: string;
+      url_path: string;
+      title: string | null;
+      body_markdown: string | null;
+    }>;
 
     // Collect every distinct internal /p/ href referenced in this batch
     const referencedPPaths = new Set<string>();
-    const perPage: Array<{ page: typeof list[number]; links: Array<{ href: string; label: string }> }> = [];
+    const perPage: Array<{
+      page: (typeof list)[number];
+      links: Array<{ href: string; label: string }>;
+    }> = [];
     for (const p of list) {
       const body = p.body_markdown || "";
       const links: Array<{ href: string; label: string }> = [];
@@ -132,24 +167,50 @@ export const scanBrokenLinks = createServerFn({ method: "POST" })
     for (const { page, links } of perPage) {
       for (const { href, label } of links) {
         const c = classifyHref(href);
-        if (c.kind === "external" || c.kind === "anchor" || c.kind === "mail" || c.kind === "tel") continue;
+        if (c.kind === "external" || c.kind === "anchor" || c.kind === "mail" || c.kind === "tel")
+          continue;
         if (c.kind === "malformed") {
-          broken.push({ page_id: page.id, page_url: page.url_path, page_title: page.title, href, label, reason: "malformed", suggestion: null });
+          broken.push({
+            page_id: page.id,
+            page_url: page.url_path,
+            page_title: page.title,
+            href,
+            label,
+            reason: "malformed",
+            suggestion: null,
+          });
           continue;
         }
         const path = c.path!;
         if (path.startsWith("/p/")) {
           if (!existing.has(path)) {
-            broken.push({ page_id: page.id, page_url: page.url_path, page_title: page.title, href, label, reason: "missing_p_page" });
+            broken.push({
+              page_id: page.id,
+              page_url: page.url_path,
+              page_title: page.title,
+              href,
+              label,
+              reason: "missing_p_page",
+            });
           }
         } else if (!isAllowedInternal(path)) {
-          broken.push({ page_id: page.id, page_url: page.url_path, page_title: page.title, href, label, reason: "unknown_internal_path", suggestion: null });
+          broken.push({
+            page_id: page.id,
+            page_url: page.url_path,
+            page_title: page.title,
+            href,
+            label,
+            reason: "unknown_internal_path",
+            suggestion: null,
+          });
         }
       }
     }
 
     // Optional post-filter: only return missing_p_page issues
-    const filteredBroken = data.onlyMissingPPage ? broken.filter((b) => b.reason === "missing_p_page") : broken;
+    const filteredBroken = data.onlyMissingPPage
+      ? broken.filter((b) => b.reason === "missing_p_page")
+      : broken;
     broken.length = 0;
     broken.push(...filteredBroken);
 
@@ -160,16 +221,46 @@ export const scanBrokenLinks = createServerFn({ method: "POST" })
     //   (c) token overlap (Jaccard) on (broken-slug-tokens ∪ label-tokens) vs candidate slug+title tokens
     //   (d) prefix/contains bonus, length-distance penalty
     const STOP = new Set([
-      "the","a","an","and","or","of","in","at","to","for","by","on","near","me","you","your",
-      "is","are","with","best","top","find","how","what","pool","pools","rental","rentals",
+      "the",
+      "a",
+      "an",
+      "and",
+      "or",
+      "of",
+      "in",
+      "at",
+      "to",
+      "for",
+      "by",
+      "on",
+      "near",
+      "me",
+      "you",
+      "your",
+      "is",
+      "are",
+      "with",
+      "best",
+      "top",
+      "find",
+      "how",
+      "what",
+      "pool",
+      "pools",
+      "rental",
+      "rentals",
     ]);
     const slugify = (s: string) =>
-      (s || "").toLowerCase().normalize("NFKD")
+      (s || "")
+        .toLowerCase()
+        .normalize("NFKD")
         .replace(/[\u0300-\u036f]/g, "")
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/^-+|-+$/g, "");
     const tokenize = (s: string) =>
-      slugify(s).split("-").filter((t) => t && !STOP.has(t) && t.length > 1);
+      slugify(s)
+        .split("-")
+        .filter((t) => t && !STOP.has(t) && t.length > 1);
 
     // Group broken links by (slug, labelSlug) so we score each unique pair once.
     type Pair = { slug: string; label: string; labelSlug: string };
@@ -200,27 +291,47 @@ export const scanBrokenLinks = createServerFn({ method: "POST" })
       const legacyTry = async (s: string) => {
         if (!s) return null;
         const { data } = await sb
-          .from("content_pages").select("url_path").contains("legacy_slugs", [s])
-          .eq("status", "published").limit(1);
-        return data && data.length ? (data[0] as any).url_path as string : null;
+          .from("content_pages")
+          .select("url_path")
+          .contains("legacy_slugs", [s])
+          .eq("status", "published")
+          .limit(1);
+        return data && data.length ? ((data[0] as any).url_path as string) : null;
       };
       const legacyHit = (await legacyTry(slug)) || (await legacyTry(labelSlug));
       if (legacyHit) {
-        suggestions.set(pairKey(pair), { href: legacyHit, reason: "legacy slug match", score: 100 });
+        suggestions.set(pairKey(pair), {
+          href: legacyHit,
+          reason: "legacy slug match",
+          score: 100,
+        });
         continue;
       }
 
       // 2) Pull candidates by ilike on the most distinctive tokens (longest first)
       const ranked = [...queryTokens].sort((a, b) => b.length - a.length).slice(0, 3);
-      const candidates = new Map<string, { url_path: string; slug: string; title: string | null }>();
+      const candidates = new Map<
+        string,
+        { url_path: string; slug: string; title: string | null }
+      >();
       for (const tok of ranked) {
         const safe = tok.replace(/[%_]/g, "");
         if (safe.length < 3) continue;
         const [{ data: bySlug }, { data: byTitle }] = await Promise.all([
-          sb.from("content_pages").select("url_path, slug, title")
-            .ilike("slug", `%${safe}%`).eq("status", "published").like("url_path", "/p/%").limit(15),
-          sb.from("content_pages").select("url_path, slug, title")
-            .ilike("title", `%${safe}%`).eq("status", "published").like("url_path", "/p/%").limit(15),
+          sb
+            .from("content_pages")
+            .select("url_path, slug, title")
+            .ilike("slug", `%${safe}%`)
+            .eq("status", "published")
+            .like("url_path", "/p/%")
+            .limit(15),
+          sb
+            .from("content_pages")
+            .select("url_path, slug, title")
+            .ilike("title", `%${safe}%`)
+            .eq("status", "published")
+            .like("url_path", "/p/%")
+            .limit(15),
         ]);
         for (const r of [...(bySlug || []), ...(byTitle || [])] as any[]) {
           if (r?.url_path) candidates.set(r.url_path, r);
@@ -246,8 +357,13 @@ export const scanBrokenLinks = createServerFn({ method: "POST" })
         const lenPenalty = Math.min(0.15, Math.abs((c.slug || "").length - slug.length) / 200);
         const score = jaccard + exactSlug + labelExact + prefix - lenPenalty;
         if (score > 0.25 && (!best || score > best.score)) {
-          const reason = exactSlug ? "exact slug" : labelExact ? "label matches slug"
-            : inter > 1 ? `${inter} shared terms` : "similar content";
+          const reason = exactSlug
+            ? "exact slug"
+            : labelExact
+              ? "label matches slug"
+              : inter > 1
+                ? `${inter} shared terms`
+                : "similar content";
           best = { href: c.url_path, reason, score: Math.round(score * 100) / 100 };
         }
       }
@@ -275,17 +391,23 @@ export const scanBrokenLinks = createServerFn({ method: "POST" })
 export const fixBrokenLink = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({
-      pageId: z.string().uuid(),
-      href: z.string().min(1).max(2000),
-      action: z.enum(["replace", "unlink", "remove"]),
-      newHref: z.string().min(1).max(2000).optional(),
-    }).parse(d),
+    z
+      .object({
+        pageId: z.string().uuid(),
+        href: z.string().min(1).max(2000),
+        action: z.enum(["replace", "unlink", "remove"]),
+        newHref: z.string().min(1).max(2000).optional(),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }) => {
     await assertAdmin((context as any).userId);
     const sb = supabaseAdmin as any;
-    const { data: page } = await sb.from("content_pages").select("id, body_markdown").eq("id", data.pageId).maybeSingle();
+    const { data: page } = await sb
+      .from("content_pages")
+      .select("id, body_markdown")
+      .eq("id", data.pageId)
+      .maybeSingle();
     if (!page || !page.body_markdown) return { ok: false, error: "Page or body not found" };
 
     const body: string = page.body_markdown;
@@ -298,18 +420,31 @@ export const fixBrokenLink = createServerFn({ method: "POST" })
     let next = body;
     if (data.action === "replace") {
       if (!data.newHref) return { ok: false, error: "newHref required" };
-      next = body.replace(re, (_, label) => { replaced++; return `[${label}](${data.newHref})`; });
+      next = body.replace(re, (_, label) => {
+        replaced++;
+        return `[${label}](${data.newHref})`;
+      });
     } else if (data.action === "unlink") {
-      next = body.replace(re, (_, label) => { replaced++; return label; });
+      next = body.replace(re, (_, label) => {
+        replaced++;
+        return label;
+      });
     } else if (data.action === "remove") {
-      next = body.replace(re, () => { replaced++; return ""; });
+      next = body.replace(re, () => {
+        replaced++;
+        return "";
+      });
     }
 
     if (!replaced) return { ok: false, error: "Link not found in body" };
 
-    const { error } = await sb.from("content_pages").update({
-      body_markdown: next, updated_at: new Date().toISOString(),
-    }).eq("id", data.pageId);
+    const { error } = await sb
+      .from("content_pages")
+      .update({
+        body_markdown: next,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", data.pageId);
     if (error) return { ok: false, error: error.message };
     return { ok: true, replaced };
   });
@@ -317,14 +452,21 @@ export const fixBrokenLink = createServerFn({ method: "POST" })
 export const bulkFixBrokenLinks = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({
-      action: z.enum(["replace", "unlink", "remove"]),
-      items: z.array(z.object({
-        pageId: z.string().uuid(),
-        href: z.string().min(1).max(2000),
-        newHref: z.string().min(1).max(2000).optional(),
-      })).min(1).max(2000),
-    }).parse(d),
+    z
+      .object({
+        action: z.enum(["replace", "unlink", "remove"]),
+        items: z
+          .array(
+            z.object({
+              pageId: z.string().uuid(),
+              href: z.string().min(1).max(2000),
+              newHref: z.string().min(1).max(2000).optional(),
+            }),
+          )
+          .min(1)
+          .max(2000),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }) => {
     await assertAdmin((context as any).userId);
@@ -348,31 +490,54 @@ export const bulkFixBrokenLinks = createServerFn({ method: "POST" })
     // Fetch page bodies in chunks
     for (let i = 0; i < pageIds.length; i += 100) {
       const chunk = pageIds.slice(i, i + 100);
-      const { data: pages } = await sb.from("content_pages").select("id, body_markdown").in("id", chunk);
+      const { data: pages } = await sb
+        .from("content_pages")
+        .select("id, body_markdown")
+        .in("id", chunk);
       for (const p of (pages || []) as Array<{ id: string; body_markdown: string | null }>) {
         const items = byPage.get(p.id) || [];
         let body = p.body_markdown || "";
-        if (!body) { linksSkipped += items.length; continue; }
+        if (!body) {
+          linksSkipped += items.length;
+          continue;
+        }
         let pageReplaced = 0;
         for (const it of items) {
           const esc = it.href.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
           const re = new RegExp(`\\[([^\\]]+)\\]\\(${esc}(?:\\s+"[^"]*")?\\)`, "g");
           let hits = 0;
           if (data.action === "replace") {
-            body = body.replace(re, (_, label) => { hits++; return `[${label}](${it.newHref})`; });
+            body = body.replace(re, (_, label) => {
+              hits++;
+              return `[${label}](${it.newHref})`;
+            });
           } else if (data.action === "unlink") {
-            body = body.replace(re, (_, label) => { hits++; return label; });
+            body = body.replace(re, (_, label) => {
+              hits++;
+              return label;
+            });
           } else {
-            body = body.replace(re, () => { hits++; return ""; });
+            body = body.replace(re, () => {
+              hits++;
+              return "";
+            });
           }
-          if (hits) pageReplaced += hits; else linksSkipped++;
+          if (hits) pageReplaced += hits;
+          else linksSkipped++;
         }
         if (pageReplaced > 0) {
-          const { error } = await sb.from("content_pages").update({
-            body_markdown: body, updated_at: new Date().toISOString(),
-          }).eq("id", p.id);
+          const { error } = await sb
+            .from("content_pages")
+            .update({
+              body_markdown: body,
+              updated_at: new Date().toISOString(),
+            })
+            .eq("id", p.id);
           if (error) errors.push({ pageId: p.id, error: error.message });
-          else { pagesUpdated++; linksFixed += pageReplaced; }
+          else {
+            pagesUpdated++;
+            linksFixed += pageReplaced;
+          }
         }
       }
     }

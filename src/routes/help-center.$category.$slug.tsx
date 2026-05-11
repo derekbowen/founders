@@ -3,13 +3,7 @@ import { Mail, Phone } from "lucide-react";
 import { getHelpArticle } from "@/server/help-center.functions";
 import { SiteHeader, SiteFooter } from "@/components/site-layout";
 import { Breadcrumbs } from "@/components/breadcrumbs";
-import {
-  buildMeta,
-  breadcrumbJsonLd,
-  ldJsonScript,
-  SITE_URL,
-  SITE_NAME,
-} from "@/lib/seo";
+import { buildMeta, breadcrumbJsonLd, ldJsonScript, SITE_URL, SITE_NAME } from "@/lib/seo";
 
 export const Route = createFileRoute("/help-center/$category/$slug")({
   loader: async ({ params }) => {
@@ -223,32 +217,24 @@ function HelpArticlePage() {
             {article.title}
           </h1>
           {article.excerpt && (
-            <p className="mt-4 text-lg text-muted-foreground">
-              {article.excerpt}
-            </p>
+            <p className="mt-4 text-lg text-muted-foreground">{article.excerpt}</p>
           )}
 
           {article.content && (
-            <div className="mt-8 max-w-none text-foreground">
-              {renderMarkdown(article.content)}
-            </div>
+            <div className="mt-8 max-w-none text-foreground">{renderMarkdown(article.content)}</div>
           )}
         </article>
 
         {/* Contact card */}
         <div className="mt-12 rounded-2xl border border-border bg-card p-6">
-          <h2 className="text-lg font-semibold text-foreground">
-            Still need help?
-          </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Our support team is here to help.
-          </p>
+          <h2 className="text-lg font-semibold text-foreground">Still need help?</h2>
+          <p className="mt-1 text-sm text-muted-foreground">Our support team is here to help.</p>
           <div className="mt-4 flex flex-wrap gap-4 text-sm">
             <a
-              href="mailto:support@poolrentalnearme.com"
+              href="mailto:support@founders.click"
               className="inline-flex items-center gap-2 font-medium text-primary hover:underline"
             >
-              <Mail className="h-4 w-4" /> support@poolrentalnearme.com
+              <Mail className="h-4 w-4" /> support@founders.click
             </a>
             <a
               href="tel:+18664203702"
@@ -262,9 +248,7 @@ function HelpArticlePage() {
         {/* Related */}
         {related.length > 0 && (
           <section className="mt-12">
-            <h2 className="text-xl font-bold text-foreground">
-              More in {category?.name}
-            </h2>
+            <h2 className="text-xl font-bold text-foreground">More in {category?.name}</h2>
             <ul className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
               {related.map((r: { slug: string; title: string }) => (
                 <li key={r.slug}>

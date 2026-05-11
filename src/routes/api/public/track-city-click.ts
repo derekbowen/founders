@@ -83,7 +83,8 @@ export const Route = createFileRoute("/api/public/track-city-click")({
           "cache-control": "no-store",
         };
         if (setCookie) {
-          resHeaders["set-cookie"] = `prnm_vid=${visitorHash}; Path=/; Max-Age=${60 * 60 * 24 * 90}; SameSite=Lax; HttpOnly; Secure`;
+          resHeaders["set-cookie"] =
+            `prnm_vid=${visitorHash}; Path=/; Max-Age=${60 * 60 * 24 * 90}; SameSite=Lax; HttpOnly; Secure`;
         }
         return new Response("ok", { status: 204, headers: resHeaders });
       },

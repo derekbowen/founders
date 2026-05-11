@@ -19,6 +19,7 @@ import { Route as ReferralRouteImport } from './routes/referral'
 import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AppRouteImport } from './routes/app'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as HelpCenterIndexRouteImport } from './routes/help-center.index'
@@ -26,6 +27,7 @@ import { Route as VerifyUidRouteImport } from './routes/verify.$uid'
 import { Route as PSlugRouteImport } from './routes/p.$slug'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth.reset-password'
+import { Route as AppDashboardRouteImport } from './routes/app.dashboard'
 import { Route as AdminTeamRouteImport } from './routes/admin.team'
 import { Route as AdminSiteFooterRouteImport } from './routes/admin.site-footer'
 import { Route as AdminSeoHealthRouteImport } from './routes/admin.seo-health'
@@ -58,8 +60,10 @@ import { Route as AdminBlogRouteImport } from './routes/admin.blog'
 import { Route as AccountLearningRouteImport } from './routes/account.learning'
 import { Route as AccountBillingRouteImport } from './routes/account.billing'
 import { Route as HelpCenterCategoryIndexRouteImport } from './routes/help-center.$category.index'
+import { Route as AppPagesIndexRouteImport } from './routes/app.pages.index'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as HelpCenterCategorySlugRouteImport } from './routes/help-center.$category.$slug'
+import { Route as AppPagesNewRouteImport } from './routes/app.pages.new'
 import { Route as ApiPublicTrackCityClickRouteImport } from './routes/api/public/track-city-click'
 import { Route as ApiPublicBackfillContentPagesRouteImport } from './routes/api/public/backfill-content-pages'
 import { Route as ApiBillingWebhookRouteImport } from './routes/api/billing.webhook'
@@ -67,6 +71,7 @@ import { Route as AdminLearningUserIdRouteImport } from './routes/admin.learning
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
+import { Route as AppPagesIdEditRouteImport } from './routes/app.pages.$id.edit'
 import { Route as ApiPublicHooksSyncListingsRouteImport } from './routes/api/public/hooks.sync-listings'
 import { Route as ApiPublicHooksSeoSelfTestRouteImport } from './routes/api/public/hooks.seo-self-test'
 import { Route as ApiPublicHooksSeoFixWorkerRouteImport } from './routes/api/public/hooks/seo-fix-worker'
@@ -124,6 +129,11 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppRoute = AppRouteImport.update({
+  id: '/app',
+  path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -158,6 +168,11 @@ const AuthResetPasswordRoute = AuthResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
   getParentRoute: () => AuthRoute,
+} as any)
+const AppDashboardRoute = AppDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AppRoute,
 } as any)
 const AdminTeamRoute = AdminTeamRouteImport.update({
   id: '/team',
@@ -320,6 +335,11 @@ const HelpCenterCategoryIndexRoute = HelpCenterCategoryIndexRouteImport.update({
   path: '/help-center/$category/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppPagesIndexRoute = AppPagesIndexRouteImport.update({
+  id: '/pages/',
+  path: '/pages/',
+  getParentRoute: () => AppRoute,
+} as any)
 const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   id: '/lovable/email/suppression',
   path: '/lovable/email/suppression',
@@ -329,6 +349,11 @@ const HelpCenterCategorySlugRoute = HelpCenterCategorySlugRouteImport.update({
   id: '/help-center/$category/$slug',
   path: '/help-center/$category/$slug',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppPagesNewRoute = AppPagesNewRouteImport.update({
+  id: '/pages/new',
+  path: '/pages/new',
+  getParentRoute: () => AppRoute,
 } as any)
 const ApiPublicTrackCityClickRoute = ApiPublicTrackCityClickRouteImport.update({
   id: '/api/public/track-city-click',
@@ -367,6 +392,11 @@ const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
   id: '/lovable/email/auth/webhook',
   path: '/lovable/email/auth/webhook',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppPagesIdEditRoute = AppPagesIdEditRouteImport.update({
+  id: '/pages/$id/edit',
+  path: '/pages/$id/edit',
+  getParentRoute: () => AppRoute,
 } as any)
 const ApiPublicHooksSyncListingsRoute =
   ApiPublicHooksSyncListingsRouteImport.update({
@@ -407,6 +437,7 @@ const ApiCertificatesUidPdfRoute = ApiCertificatesUidPdfRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/app': typeof AppRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
   '/onboarding': typeof OnboardingRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
@@ -448,6 +479,7 @@ export interface FileRoutesByFullPath {
   '/admin/seo-health': typeof AdminSeoHealthRoute
   '/admin/site-footer': typeof AdminSiteFooterRoute
   '/admin/team': typeof AdminTeamRoute
+  '/app/dashboard': typeof AppDashboardRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/p/$slug': typeof PSlugRoute
@@ -457,8 +489,10 @@ export interface FileRoutesByFullPath {
   '/api/billing/webhook': typeof ApiBillingWebhookRoute
   '/api/public/backfill-content-pages': typeof ApiPublicBackfillContentPagesRoute
   '/api/public/track-city-click': typeof ApiPublicTrackCityClickRoute
+  '/app/pages/new': typeof AppPagesNewRoute
   '/help-center/$category/$slug': typeof HelpCenterCategorySlugRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/app/pages/': typeof AppPagesIndexRoute
   '/help-center/$category/': typeof HelpCenterCategoryIndexRoute
   '/api/certificates/$uid/pdf': typeof ApiCertificatesUidPdfRoute
   '/api/public/hooks/competitor-radar-scan': typeof ApiPublicHooksCompetitorRadarScanRoute
@@ -466,6 +500,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/seo-fix-worker': typeof ApiPublicHooksSeoFixWorkerRoute
   '/api/public/hooks/seo-self-test': typeof ApiPublicHooksSeoSelfTestRoute
   '/api/public/hooks/sync-listings': typeof ApiPublicHooksSyncListingsRoute
+  '/app/pages/$id/edit': typeof AppPagesIdEditRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -473,6 +508,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/app': typeof AppRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
   '/onboarding': typeof OnboardingRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
@@ -514,6 +550,7 @@ export interface FileRoutesByTo {
   '/admin/seo-health': typeof AdminSeoHealthRoute
   '/admin/site-footer': typeof AdminSiteFooterRoute
   '/admin/team': typeof AdminTeamRoute
+  '/app/dashboard': typeof AppDashboardRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/p/$slug': typeof PSlugRoute
@@ -523,8 +560,10 @@ export interface FileRoutesByTo {
   '/api/billing/webhook': typeof ApiBillingWebhookRoute
   '/api/public/backfill-content-pages': typeof ApiPublicBackfillContentPagesRoute
   '/api/public/track-city-click': typeof ApiPublicTrackCityClickRoute
+  '/app/pages/new': typeof AppPagesNewRoute
   '/help-center/$category/$slug': typeof HelpCenterCategorySlugRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/app/pages': typeof AppPagesIndexRoute
   '/help-center/$category': typeof HelpCenterCategoryIndexRoute
   '/api/certificates/$uid/pdf': typeof ApiCertificatesUidPdfRoute
   '/api/public/hooks/competitor-radar-scan': typeof ApiPublicHooksCompetitorRadarScanRoute
@@ -532,6 +571,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/seo-fix-worker': typeof ApiPublicHooksSeoFixWorkerRoute
   '/api/public/hooks/seo-self-test': typeof ApiPublicHooksSeoSelfTestRoute
   '/api/public/hooks/sync-listings': typeof ApiPublicHooksSyncListingsRoute
+  '/app/pages/$id/edit': typeof AppPagesIdEditRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -540,6 +580,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/app': typeof AppRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
   '/onboarding': typeof OnboardingRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
@@ -581,6 +622,7 @@ export interface FileRoutesById {
   '/admin/seo-health': typeof AdminSeoHealthRoute
   '/admin/site-footer': typeof AdminSiteFooterRoute
   '/admin/team': typeof AdminTeamRoute
+  '/app/dashboard': typeof AppDashboardRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/p/$slug': typeof PSlugRoute
@@ -590,8 +632,10 @@ export interface FileRoutesById {
   '/api/billing/webhook': typeof ApiBillingWebhookRoute
   '/api/public/backfill-content-pages': typeof ApiPublicBackfillContentPagesRoute
   '/api/public/track-city-click': typeof ApiPublicTrackCityClickRoute
+  '/app/pages/new': typeof AppPagesNewRoute
   '/help-center/$category/$slug': typeof HelpCenterCategorySlugRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/app/pages/': typeof AppPagesIndexRoute
   '/help-center/$category/': typeof HelpCenterCategoryIndexRoute
   '/api/certificates/$uid/pdf': typeof ApiCertificatesUidPdfRoute
   '/api/public/hooks/competitor-radar-scan': typeof ApiPublicHooksCompetitorRadarScanRoute
@@ -599,6 +643,7 @@ export interface FileRoutesById {
   '/api/public/hooks/seo-fix-worker': typeof ApiPublicHooksSeoFixWorkerRoute
   '/api/public/hooks/seo-self-test': typeof ApiPublicHooksSeoSelfTestRoute
   '/api/public/hooks/sync-listings': typeof ApiPublicHooksSyncListingsRoute
+  '/app/pages/$id/edit': typeof AppPagesIdEditRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -608,6 +653,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/app'
     | '/auth'
     | '/onboarding'
     | '/privacy-policy'
@@ -649,6 +695,7 @@ export interface FileRouteTypes {
     | '/admin/seo-health'
     | '/admin/site-footer'
     | '/admin/team'
+    | '/app/dashboard'
     | '/auth/reset-password'
     | '/email/unsubscribe'
     | '/p/$slug'
@@ -658,8 +705,10 @@ export interface FileRouteTypes {
     | '/api/billing/webhook'
     | '/api/public/backfill-content-pages'
     | '/api/public/track-city-click'
+    | '/app/pages/new'
     | '/help-center/$category/$slug'
     | '/lovable/email/suppression'
+    | '/app/pages/'
     | '/help-center/$category/'
     | '/api/certificates/$uid/pdf'
     | '/api/public/hooks/competitor-radar-scan'
@@ -667,6 +716,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/seo-fix-worker'
     | '/api/public/hooks/seo-self-test'
     | '/api/public/hooks/sync-listings'
+    | '/app/pages/$id/edit'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/send'
@@ -674,6 +724,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
+    | '/app'
     | '/auth'
     | '/onboarding'
     | '/privacy-policy'
@@ -715,6 +766,7 @@ export interface FileRouteTypes {
     | '/admin/seo-health'
     | '/admin/site-footer'
     | '/admin/team'
+    | '/app/dashboard'
     | '/auth/reset-password'
     | '/email/unsubscribe'
     | '/p/$slug'
@@ -724,8 +776,10 @@ export interface FileRouteTypes {
     | '/api/billing/webhook'
     | '/api/public/backfill-content-pages'
     | '/api/public/track-city-click'
+    | '/app/pages/new'
     | '/help-center/$category/$slug'
     | '/lovable/email/suppression'
+    | '/app/pages'
     | '/help-center/$category'
     | '/api/certificates/$uid/pdf'
     | '/api/public/hooks/competitor-radar-scan'
@@ -733,6 +787,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/seo-fix-worker'
     | '/api/public/hooks/seo-self-test'
     | '/api/public/hooks/sync-listings'
+    | '/app/pages/$id/edit'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/send'
@@ -740,6 +795,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/app'
     | '/auth'
     | '/onboarding'
     | '/privacy-policy'
@@ -781,6 +837,7 @@ export interface FileRouteTypes {
     | '/admin/seo-health'
     | '/admin/site-footer'
     | '/admin/team'
+    | '/app/dashboard'
     | '/auth/reset-password'
     | '/email/unsubscribe'
     | '/p/$slug'
@@ -790,8 +847,10 @@ export interface FileRouteTypes {
     | '/api/billing/webhook'
     | '/api/public/backfill-content-pages'
     | '/api/public/track-city-click'
+    | '/app/pages/new'
     | '/help-center/$category/$slug'
     | '/lovable/email/suppression'
+    | '/app/pages/'
     | '/help-center/$category/'
     | '/api/certificates/$uid/pdf'
     | '/api/public/hooks/competitor-radar-scan'
@@ -799,6 +858,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/seo-fix-worker'
     | '/api/public/hooks/seo-self-test'
     | '/api/public/hooks/sync-listings'
+    | '/app/pages/$id/edit'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/send'
@@ -807,6 +867,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
+  AppRoute: typeof AppRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
   OnboardingRoute: typeof OnboardingRoute
   PrivacyPolicyRoute: typeof PrivacyPolicyRoute
@@ -912,6 +973,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin': {
       id: '/admin'
       path: '/admin'
@@ -960,6 +1028,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/auth/reset-password'
       preLoaderRoute: typeof AuthResetPasswordRouteImport
       parentRoute: typeof AuthRoute
+    }
+    '/app/dashboard': {
+      id: '/app/dashboard'
+      path: '/dashboard'
+      fullPath: '/app/dashboard'
+      preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof AppRoute
     }
     '/admin/team': {
       id: '/admin/team'
@@ -1185,6 +1260,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HelpCenterCategoryIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/pages/': {
+      id: '/app/pages/'
+      path: '/pages'
+      fullPath: '/app/pages/'
+      preLoaderRoute: typeof AppPagesIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/lovable/email/suppression': {
       id: '/lovable/email/suppression'
       path: '/lovable/email/suppression'
@@ -1198,6 +1280,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/help-center/$category/$slug'
       preLoaderRoute: typeof HelpCenterCategorySlugRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/app/pages/new': {
+      id: '/app/pages/new'
+      path: '/pages/new'
+      fullPath: '/app/pages/new'
+      preLoaderRoute: typeof AppPagesNewRouteImport
+      parentRoute: typeof AppRoute
     }
     '/api/public/track-city-click': {
       id: '/api/public/track-city-click'
@@ -1247,6 +1336,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/lovable/email/auth/webhook'
       preLoaderRoute: typeof LovableEmailAuthWebhookRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/app/pages/$id/edit': {
+      id: '/app/pages/$id/edit'
+      path: '/pages/$id/edit'
+      fullPath: '/app/pages/$id/edit'
+      preLoaderRoute: typeof AppPagesIdEditRouteImport
+      parentRoute: typeof AppRoute
     }
     '/api/public/hooks/sync-listings': {
       id: '/api/public/hooks/sync-listings'
@@ -1371,6 +1467,22 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface AppRouteChildren {
+  AppDashboardRoute: typeof AppDashboardRoute
+  AppPagesNewRoute: typeof AppPagesNewRoute
+  AppPagesIndexRoute: typeof AppPagesIndexRoute
+  AppPagesIdEditRoute: typeof AppPagesIdEditRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppDashboardRoute: AppDashboardRoute,
+  AppPagesNewRoute: AppPagesNewRoute,
+  AppPagesIndexRoute: AppPagesIndexRoute,
+  AppPagesIdEditRoute: AppPagesIdEditRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 interface AuthRouteChildren {
   AuthResetPasswordRoute: typeof AuthResetPasswordRoute
 }
@@ -1384,6 +1496,7 @@ const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
+  AppRoute: AppRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
   OnboardingRoute: OnboardingRoute,
   PrivacyPolicyRoute: PrivacyPolicyRoute,

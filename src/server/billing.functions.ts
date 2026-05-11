@@ -76,25 +76,53 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
       // First-time onboarding: create a draft workspace. Marketplace name +
       // domain are required at this point (collected on /onboarding).
       if (!data.marketplaceName) {
-        throw new Error(
-          "Marketplace name required to start checkout. Complete onboarding first.",
-        );
+        throw new Error("Marketplace name required to start checkout. Complete onboarding first.");
       }
-      const slug = slugify(data.marketplaceName);
-      const { data: created, error } = await sb
-        .from("workspaces")
-        .insert({
-          slug,
-          name: data.marketplaceName,
-          marketplace_domain: data.marketplaceDomain ?? null,
-          owner_user_id: userId,
-          plan: data.plan,
-          subscription_status: "incomplete",
-        })
-        .select("id")
-        .single();
-      if (error || !created) {
-        throw new Error(error?.message || "Could not create workspace.");
+      // Slug collision: workspaces.slug is UNIQUE. Two customers naming
+      // theirs "Pool Rental" would clash, so we retry up to 50 times with
+      // numeric suffixes.
+      const baseSlug = slugify(data.marketplaceName) || "workspace";
+      let slug = baseSlug;
+      let attempt = 1;
+      let created: { id: string } | null = null;
+      let lastErr: { code?: string; message?: string } | null = null;
+      while (attempt <= 50) {
+        const { data: c, error } = await sb
+          .from("workspaces")
+          .insert({
+            slug,
+            name: data.marketplaceName,
+            marketplace_domain: data.marketplaceDomain ?? null,
+            owner_user_id: userId,
+            plan: data.plan,
+            subscription_status: "incomplete",
+          })
+          .select("id")
+          .single();
+        if (!error && c) {
+          created = c;
+          break;
+        }
+        lastErr = error as { code?: string; message?: string };
+        // Postgres unique_violation = 23505. Disambiguate which constraint
+        // failed by inspecting the message text; the marketplace_domain
+        // collision is a user-facing problem, the slug collision is internal.
+        const msg = (error?.message || "").toLowerCase();
+        if (error?.code !== "23505") break;
+        if (msg.includes("marketplace_domain")) {
+          throw new Error(
+            "That marketplace domain is already in use. Use a different domain or contact support if you own it.",
+          );
+        }
+        if (msg.includes("workspaces_slug_key") || msg.includes("slug")) {
+          attempt += 1;
+          slug = `${baseSlug}-${attempt}`;
+          continue;
+        }
+        break;
+      }
+      if (!created) {
+        throw new Error(lastErr?.message || "Could not create workspace.");
       }
       workspaceId = created.id;
 
@@ -148,8 +176,8 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
       customer: stripeCustomerId,
       line_items: [{ price: priceId, quantity: 1 }],
       allow_promotion_codes: true,
-      success_url: `${SITE_URL}/account/billing?status=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${SITE_URL}/account/billing?status=cancel`,
+      success_url: `${SITE_URL}/app/dashboard?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${SITE_URL}/onboarding?plan=${data.plan}`,
       subscription_data: {
         // 14-day free trial, no card required (matches landing FAQ).
         trial_period_days: 14,
@@ -242,6 +270,22 @@ export async function handleStripeWebhookEvent(event: Stripe.Event): Promise<Web
         (await resolveWorkspaceByCustomer(sub.customer as string));
       if (!workspaceId) return { received: true, ignored: true };
 
+      // Stripe events can arrive out of order — drop anything older than the
+      // last one we recorded for this workspace, otherwise a delayed
+      // `subscription.updated` (active) can clobber a newer `subscription.deleted`.
+      const eventTimeMs = event.created * 1000;
+      const { data: existing } = await sb
+        .from("customer_subscriptions")
+        .select("last_event_at")
+        .eq("workspace_id", workspaceId)
+        .maybeSingle();
+      if (existing?.last_event_at) {
+        const lastMs = new Date(existing.last_event_at as string).getTime();
+        if (Number.isFinite(lastMs) && eventTimeMs < lastMs) {
+          return { received: true, ignored: true };
+        }
+      }
+
       const item = sub.items.data[0];
       const priceId = item?.price?.id ?? null;
       const plan = priceId ? planForPriceId(priceId) : null;
@@ -253,31 +297,27 @@ export async function handleStripeWebhookEvent(event: Stripe.Event): Promise<Web
       const currentPeriodEnd = sub.current_period_end
         ? new Date(sub.current_period_end * 1000).toISOString()
         : null;
-      const canceledAt = sub.canceled_at
-        ? new Date(sub.canceled_at * 1000).toISOString()
-        : null;
+      const canceledAt = sub.canceled_at ? new Date(sub.canceled_at * 1000).toISOString() : null;
 
-      await sb
-        .from("customer_subscriptions")
-        .upsert(
-          {
-            workspace_id: workspaceId,
-            stripe_customer_id: sub.customer as string,
-            stripe_subscription_id: sub.id,
-            stripe_price_id: priceId,
-            plan: plan ?? "starter",
-            status,
-            cancel_at_period_end: sub.cancel_at_period_end ?? false,
-            current_period_start: currentPeriodStart,
-            current_period_end: currentPeriodEnd,
-            trial_ends_at: trialEnd,
-            canceled_at: canceledAt,
-            last_event_id: event.id,
-            last_event_at: new Date(event.created * 1000).toISOString(),
-            raw: sub as unknown as Record<string, unknown>,
-          },
-          { onConflict: "workspace_id" },
-        );
+      await sb.from("customer_subscriptions").upsert(
+        {
+          workspace_id: workspaceId,
+          stripe_customer_id: sub.customer as string,
+          stripe_subscription_id: sub.id,
+          stripe_price_id: priceId,
+          plan: plan ?? "starter",
+          status,
+          cancel_at_period_end: sub.cancel_at_period_end ?? false,
+          current_period_start: currentPeriodStart,
+          current_period_end: currentPeriodEnd,
+          trial_ends_at: trialEnd,
+          canceled_at: canceledAt,
+          last_event_id: event.id,
+          last_event_at: new Date(event.created * 1000).toISOString(),
+          raw: sub as unknown as Record<string, unknown>,
+        },
+        { onConflict: "workspace_id" },
+      );
 
       // Mirror onto workspaces for fast reads.
       const updates: Record<string, unknown> = {
@@ -292,10 +332,23 @@ export async function handleStripeWebhookEvent(event: Stripe.Event): Promise<Web
       return { received: true };
     }
 
-    case "invoice.payment_failed":
+    case "invoice.payment_failed": {
+      // Status flip is handled by the customer.subscription.updated event
+      // Stripe fires alongside; we log here so failures are visible in worker
+      // logs without grepping raw Stripe deliveries. (Dunning email TODO.)
+      const inv = event.data.object as Stripe.Invoice;
+      console.warn(
+        "[billing] invoice.payment_failed",
+        JSON.stringify({
+          invoiceId: inv.id,
+          customer: inv.customer,
+          amountDue: inv.amount_due,
+          attempt: inv.attempt_count,
+        }),
+      );
+      return { received: true };
+    }
     case "invoice.paid": {
-      // Stripe will fire customer.subscription.updated alongside, which
-      // covers the status change. Just record the event id for traceability.
       return { received: true };
     }
 
@@ -315,9 +368,11 @@ async function resolveWorkspaceByCustomer(customerId: string): Promise<string | 
 }
 
 function slugify(input: string): string {
-  return input
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 60) || `workspace-${Date.now()}`;
+  return (
+    input
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 60) || `workspace-${Date.now()}`
+  );
 }

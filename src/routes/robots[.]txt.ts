@@ -2,25 +2,35 @@ import { createFileRoute } from "@tanstack/react-router";
 import { SITE_URL } from "@/lib/seo";
 
 /**
- * Production host — only this hostname serves an indexable robots.txt.
- * Any other host (preview, *.lovable.app, EC2 IP, staging) gets a hard
- * Disallow: / so we don't fragment SEO across duplicate origins.
+ * Production hosts — only these hostnames serve an indexable robots.txt.
+ * Any other host (preview, *.lovable.app, EC2 IP, staging, raw workers.dev)
+ * gets a hard Disallow: / so we don't fragment SEO across duplicate origins.
+ *
+ * Keep in sync with PRODUCTION_HOSTS in src/start.ts.
  */
-const PROD_HOST = "poolrentalnearme.com";
+const PROD_HOSTS = new Set([
+  "founders.click",
+  "www.founders.click",
+  "poolrentalnearme.com",
+  "www.poolrentalnearme.com",
+]);
 
 export const Route = createFileRoute("/robots.txt")({
   server: {
     handlers: {
       GET: async ({ request }) => {
-        const host = (() => {
+        // Forwarded host wins (set by EC2 nginx reverse proxy); fall back to
+        // the direct request URL. This is what isProd is gated on.
+        const forwardedHost = request.headers.get("x-forwarded-host");
+        const host = (forwardedHost ?? (() => {
           try {
-            return new URL(request.url).hostname.toLowerCase();
+            return new URL(request.url).hostname;
           } catch {
             return "";
           }
-        })();
+        })()).split(":")[0]!.toLowerCase();
 
-        const isProd = host === PROD_HOST || host === `www.${PROD_HOST}`;
+        const isProd = PROD_HOSTS.has(host);
 
         const body = isProd
           ? `User-agent: *

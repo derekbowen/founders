@@ -49,7 +49,10 @@ const TOOL_SCHEMA = {
         title: { type: "string" },
         seo_title: { type: "string", description: "≤60 chars" },
         seo_description: { type: "string", description: "≤155 chars" },
-        body_markdown: { type: "string", description: "Full markdown body, 600-1200 words, no frontmatter" },
+        body_markdown: {
+          type: "string",
+          description: "Full markdown body, 600-1200 words, no frontmatter",
+        },
       },
       required: ["title", "seo_title", "seo_description", "body_markdown"],
       additionalProperties: false,
@@ -68,11 +71,26 @@ async function assertAdmin(userId: string) {
   if (!data) throw new Error("Admin role required");
 }
 
+// Admin tools currently publish into PRNM (founders.click staff workspace);
+// post-migration, content_pages.workspace_id is NOT NULL so the insert needs
+// an explicit value.
+async function resolvePrnmWorkspaceId(): Promise<string> {
+  const { data, error } = await (supabaseAdmin as any)
+    .from("workspaces")
+    .select("id")
+    .eq("slug", "pool-rental-near-me")
+    .maybeSingle();
+  if (error) throw new Error(`PRNM workspace lookup failed: ${error.message}`);
+  if (!data?.id) throw new Error("PRNM workspace not found — run SaaS migration first");
+  return data.id as string;
+}
+
 export const createQuickPage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => InputSchema.parse(data))
   .handler(async ({ data, context }) => {
     await assertAdmin(context.userId);
+    const workspaceId = await resolvePrnmWorkspaceId();
 
     const apiKey = process.env.OPENROUTER_API_KEY;
     if (!apiKey) throw new Error("OPENROUTER_API_KEY not configured");
@@ -80,13 +98,14 @@ export const createQuickPage = createServerFn({ method: "POST" })
     const baseSlug = slugify(data.slug || data.title);
     if (!baseSlug) throw new Error("Could not derive slug from title");
 
-    // Find a unique slug
+    // Find a unique slug — url_path is unique per (workspace_id, url_path) post-migration.
     let slug = baseSlug;
     let suffix = 1;
     while (true) {
-      const { data: existing } = await supabaseAdmin
+      const { data: existing } = await (supabaseAdmin as any)
         .from("content_pages")
         .select("id")
+        .eq("workspace_id", workspaceId)
         .eq("url_path", `/p/${slug}`)
         .maybeSingle();
       if (!existing) break;
@@ -148,6 +167,7 @@ seo_title (≤60 chars) and seo_description (≤155 chars) optimized for the top
     const { data: inserted, error: insErr } = await (supabaseAdmin as any)
       .from("content_pages")
       .insert({
+        workspace_id: workspaceId,
         slug,
         url_path,
         title: gen.title || data.title,

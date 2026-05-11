@@ -12,7 +12,8 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-driver-token",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, x-driver-token",
   "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
 };
 
@@ -72,7 +73,11 @@ Deno.serve(async (req) => {
       });
       const text = await r.text();
       let body: unknown = text;
-      try { body = JSON.parse(text); } catch { /* keep raw */ }
+      try {
+        body = JSON.parse(text);
+      } catch {
+        /* keep raw */
+      }
       results.push({ batch: i, status: r.status, pending, body });
 
       const attempted = (body as { attempted?: number })?.attempted ?? 0;

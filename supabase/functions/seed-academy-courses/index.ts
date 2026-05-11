@@ -15,7 +15,7 @@ function corsHeaders(origin: string | null) {
     "Access-Control-Allow-Origin": allow,
     "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Vary": "Origin",
+    Vary: "Origin",
   };
 }
 
@@ -30,11 +30,28 @@ Deno.serve(async (req) => {
     // Require admin auth
     const authHeader = req.headers.get("Authorization");
     const token = authHeader?.replace("Bearer ", "");
-    if (!token) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...cors, "Content-Type": "application/json" } });
+    if (!token)
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...cors, "Content-Type": "application/json" },
+      });
     const { data: u, error: uErr } = await sb.auth.getUser(token);
-    if (uErr || !u.user) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...cors, "Content-Type": "application/json" } });
-    const { data: role } = await sb.from("user_roles").select("role").eq("user_id", u.user.id).eq("role", "admin").maybeSingle();
-    if (!role) return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: { ...cors, "Content-Type": "application/json" } });
+    if (uErr || !u.user)
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...cors, "Content-Type": "application/json" },
+      });
+    const { data: role } = await sb
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", u.user.id)
+      .eq("role", "admin")
+      .maybeSingle();
+    if (!role)
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403,
+        headers: { ...cors, "Content-Type": "application/json" },
+      });
 
     const rows = (seed as any[]).map((r) => ({
       slug: r.slug,
@@ -55,11 +72,17 @@ Deno.serve(async (req) => {
       language: "en",
     }));
 
-    const { data, error } = await sb.from("courses").upsert(rows, { onConflict: "slug" }).select("slug");
+    const { data, error } = await sb
+      .from("courses")
+      .upsert(rows, { onConflict: "slug" })
+      .select("slug");
     if (error) throw error;
-    return new Response(JSON.stringify({ ok: true, count: data?.length ?? 0, slugs: data?.map((d: any) => d.slug) }), {
-      headers: { ...cors, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ ok: true, count: data?.length ?? 0, slugs: data?.map((d: any) => d.slug) }),
+      {
+        headers: { ...cors, "Content-Type": "application/json" },
+      },
+    );
   } catch (e) {
     return new Response(JSON.stringify({ error: e instanceof Error ? e.message : String(e) }), {
       status: 500,

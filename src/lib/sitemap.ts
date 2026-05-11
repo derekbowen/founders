@@ -76,7 +76,8 @@ export function buildUrlsetXml(urls: SitemapUrl[]): string {
         for (const img of u.images) {
           const inner = [`      <image:loc>${xmlEscape(img.loc)}</image:loc>`];
           if (img.title) inner.push(`      <image:title>${xmlEscape(img.title)}</image:title>`);
-          if (img.caption) inner.push(`      <image:caption>${xmlEscape(img.caption)}</image:caption>`);
+          if (img.caption)
+            inner.push(`      <image:caption>${xmlEscape(img.caption)}</image:caption>`);
           parts.push(`    <image:image>\n${inner.join("\n")}\n    </image:image>`);
         }
       }
@@ -119,7 +120,10 @@ export function sitemapResponse(xml: string, init?: ResponseInit): Response {
   return new Response(xml, {
     status: 200,
     ...init,
-    headers: { ...SITEMAP_RESPONSE_HEADERS, ...(init?.headers as Record<string, string> | undefined) },
+    headers: {
+      ...SITEMAP_RESPONSE_HEADERS,
+      ...(init?.headers as Record<string, string> | undefined),
+    },
   });
 }
 

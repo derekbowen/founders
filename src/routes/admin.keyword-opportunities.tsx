@@ -1,5 +1,5 @@
 import * as React from "react";
-import { createFileRoute, redirect, Link } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { checkAdminRole } from "@/server/admin-auth.functions";
 import {
@@ -16,24 +16,47 @@ export const Route = createFileRoute("/admin/keyword-opportunities")({
   beforeLoad: async () => {
     if (typeof window === "undefined") return;
     const { data, error } = await supabase.auth.getUser();
-    if (error || !data.user) throw redirect({ to: "/auth", search: { redirect: "/admin/keyword-opportunities", mode: "signin" } });
+    if (error || !data.user)
+      throw redirect({
+        to: "/auth",
+        search: { redirect: "/admin/keyword-opportunities", mode: "signin" },
+      });
     const { isAdmin } = await checkAdminRole();
     if (!isAdmin) throw redirect({ to: "/admin/no-access" });
   },
-  head: () => ({ meta: [{ title: "Keyword opportunities — Admin" }, { name: "robots", content: "noindex,nofollow" }] }),
+  head: () => ({
+    meta: [
+      { title: "Keyword opportunities — Admin" },
+      { name: "robots", content: "noindex,nofollow" },
+    ],
+  }),
   component: KeywordOpportunities,
 });
 
-type ParsedRow = { url_path: string; query: string; clicks: number; impressions: number; ctr: number | null; position: number | null };
+type ParsedRow = {
+  url_path: string;
+  query: string;
+  clicks: number;
+  impressions: number;
+  ctr: number | null;
+  position: number | null;
+};
 
 function parseGscCsv(csv: string): ParsedRow[] {
   const lines = csv.split(/\r?\n/).filter((l) => l.trim());
   if (!lines.length) return [];
   const sep = lines[0].includes("\t") ? "\t" : ",";
-  const header = lines[0].toLowerCase().split(sep).map((h) => h.trim().replace(/^"|"$/g, ""));
+  const header = lines[0]
+    .toLowerCase()
+    .split(sep)
+    .map((h) => h.trim().replace(/^"|"$/g, ""));
   const idx = {
-    page: header.findIndex((h) => h === "page" || h === "url" || h === "top pages" || h === "landing page"),
-    query: header.findIndex((h) => h === "query" || h === "queries" || h.includes("search term") || h.includes("keyword")),
+    page: header.findIndex(
+      (h) => h === "page" || h === "url" || h === "top pages" || h === "landing page",
+    ),
+    query: header.findIndex(
+      (h) => h === "query" || h === "queries" || h.includes("search term") || h.includes("keyword"),
+    ),
     impr: header.findIndex((h) => h.includes("impression")),
     clicks: header.findIndex((h) => h.includes("click")),
     pos: header.findIndex((h) => h.includes("position")),
@@ -42,12 +65,16 @@ function parseGscCsv(csv: string): ParsedRow[] {
   if (idx.query < 0 || idx.impr < 0) return [];
   const rows: ParsedRow[] = [];
   for (let i = 1; i < lines.length; i++) {
-    const cells = lines[i].split(sep === "\t" ? "\t" : /,(?=(?:[^"]*"[^"]*")*[^"]*$)/).map((c) => c.trim().replace(/^"|"$/g, ""));
+    const cells = lines[i]
+      .split(sep === "\t" ? "\t" : /,(?=(?:[^"]*"[^"]*")*[^"]*$)/)
+      .map((c) => c.trim().replace(/^"|"$/g, ""));
     const rawUrl = idx.page >= 0 ? cells[idx.page] : "";
     let url_path = "";
     try {
       url_path = rawUrl.startsWith("http") ? new URL(rawUrl).pathname : rawUrl;
-    } catch { url_path = rawUrl; }
+    } catch {
+      url_path = rawUrl;
+    }
     const query = cells[idx.query] || "";
     if (!query) continue;
     rows.push({
@@ -66,15 +93,28 @@ function KeywordOpportunities() {
   const [csv, setCsv] = React.useState("");
   const [importing, setImporting] = React.useState(false);
   const [importResult, setImportResult] = React.useState<string | null>(null);
-  const [stats, setStats] = React.useState<{ totalQueries: number; opportunities: number; top3: number } | null>(null);
+  const [stats, setStats] = React.useState<{
+    totalQueries: number;
+    opportunities: number;
+    top3: number;
+  } | null>(null);
   const [rows, setRows] = React.useState<KeywordRow[]>([]);
   const [loading, setLoading] = React.useState(false);
-  const [filters, setFilters] = React.useState({ minPosition: 5, maxPosition: 20, minImpressions: 50, pathLike: "" });
+  const [filters, setFilters] = React.useState({
+    minPosition: 5,
+    maxPosition: 20,
+    minImpressions: 50,
+    pathLike: "",
+  });
   const [fixing, setFixing] = React.useState<string | null>(null);
   const [fixResults, setFixResults] = React.useState<Record<string, string>>({});
 
   const loadStats = React.useCallback(async () => {
-    try { setStats(await getKeywordStats()); } catch { /* noop */ }
+    try {
+      setStats(await getKeywordStats());
+    } catch {
+      /* noop */
+    }
   }, []);
 
   const loadRows = React.useCallback(async () => {
@@ -82,31 +122,50 @@ function KeywordOpportunities() {
     try {
       const r = await findKeywordOpportunities({ data: { ...filters, limit: 200 } });
       setRows(r.rows);
-    } finally { setLoading(false); }
+    } finally {
+      setLoading(false);
+    }
   }, [filters]);
 
-  React.useEffect(() => { loadStats(); loadRows(); }, [loadStats, loadRows]);
+  React.useEffect(() => {
+    loadStats();
+    loadRows();
+  }, [loadStats, loadRows]);
 
   async function handleImport() {
     const parsed = parseGscCsv(csv);
-    if (!parsed.length) { setImportResult("Could not parse CSV. Need columns: Page, Query, Impressions (Clicks/Position optional)."); return; }
+    if (!parsed.length) {
+      setImportResult(
+        "Could not parse CSV. Need columns: Page, Query, Impressions (Clicks/Position optional).",
+      );
+      return;
+    }
     setImporting(true);
     try {
       const r = await importGscQueries({ data: { rows: parsed } });
-      setImportResult(r.ok ? `Imported ${r.upserted} of ${r.total} queries.` : `Error: ${(r as any).error}`);
+      setImportResult(
+        r.ok ? `Imported ${r.upserted} of ${r.total} queries.` : `Error: ${r.error}`,
+      );
       await loadStats();
       await loadRows();
-    } finally { setImporting(false); }
+    } finally {
+      setImporting(false);
+    }
   }
 
   async function handleAiFix(pageId: string) {
     setFixing(pageId);
     try {
       const r: any = await aiFixContentPage({ data: { id: pageId, mode: "full" } });
-      setFixResults((p) => ({ ...p, [pageId]: r.ok ? `✓ Rewritten (${r.newWords} words)` : `Error: ${r.error}` }));
+      setFixResults((p) => ({
+        ...p,
+        [pageId]: r.ok ? `✓ Rewritten (${r.newWords} words)` : `Error: ${r.error}`,
+      }));
     } catch (e: any) {
       setFixResults((p) => ({ ...p, [pageId]: `Error: ${e?.message || "failed"}` }));
-    } finally { setFixing(null); }
+    } finally {
+      setFixing(null);
+    }
   }
 
   // Group rows by url_path for the optimization view
@@ -132,19 +191,26 @@ function KeywordOpportunities() {
       <div className="mb-4">
         <h1 className="text-2xl font-bold sm:text-3xl">Keyword opportunities</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Find queries where you rank on page 2 (positions 5-20) — these are quick wins. Import GSC queries, then one-click rewrite the page with AI.
+          Find queries where you rank on page 2 (positions 5-20) — these are quick wins. Import GSC
+          queries, then one-click rewrite the page with AI.
         </p>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-3">
         <StatCard label="Total queries tracked" value={stats?.totalQueries ?? "—"} icon={Search} />
-        <StatCard label="Opportunities (pos 5-20)" value={stats?.opportunities ?? "—"} icon={TrendingUp} highlight />
+        <StatCard
+          label="Opportunities (pos 5-20)"
+          value={stats?.opportunities ?? "—"}
+          icon={TrendingUp}
+          highlight
+        />
         <StatCard label="Already in top 3" value={stats?.top3 ?? "—"} icon={Sparkles} />
       </div>
 
       <details className="mt-6 rounded-2xl border border-border bg-card p-4">
         <summary className="cursor-pointer text-sm font-semibold">
-          <Upload className="mr-2 inline h-4 w-4" /> Import GSC queries (Performance → Queries → Export → CSV)
+          <Upload className="mr-2 inline h-4 w-4" /> Import GSC queries (Performance → Queries →
+          Export → CSV)
         </summary>
         <div className="mt-3 space-y-3">
           <textarea
@@ -155,8 +221,11 @@ function KeywordOpportunities() {
             className="w-full rounded-lg border border-border bg-background p-3 font-mono text-xs"
           />
           <div className="flex flex-wrap items-center gap-3">
-            <button onClick={handleImport} disabled={importing || !csv.trim()}
-              className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50">
+            <button
+              onClick={handleImport}
+              disabled={importing || !csv.trim()}
+              className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+            >
               {importing && <Loader2 className="h-4 w-4 animate-spin" />}
               {importing ? "Importing…" : "Import"}
             </button>
@@ -166,15 +235,35 @@ function KeywordOpportunities() {
       </details>
 
       <div className="mt-6 grid gap-3 rounded-2xl border border-border bg-card p-4 sm:grid-cols-4">
-        <FilterInput label="Min position" type="number" value={filters.minPosition}
-          onChange={(v) => setFilters((f) => ({ ...f, minPosition: Number(v) || 5 }))} />
-        <FilterInput label="Max position" type="number" value={filters.maxPosition}
-          onChange={(v) => setFilters((f) => ({ ...f, maxPosition: Number(v) || 20 }))} />
-        <FilterInput label="Min impressions" type="number" value={filters.minImpressions}
-          onChange={(v) => setFilters((f) => ({ ...f, minImpressions: Number(v) || 0 }))} />
-        <FilterInput label="URL contains" type="text" value={filters.pathLike}
-          onChange={(v) => setFilters((f) => ({ ...f, pathLike: v }))} placeholder="/p/los-angeles" />
-        <button onClick={loadRows} className="col-span-full rounded-lg bg-secondary px-4 py-2 text-sm font-semibold sm:col-span-1 sm:col-start-4">
+        <FilterInput
+          label="Min position"
+          type="number"
+          value={filters.minPosition}
+          onChange={(v) => setFilters((f) => ({ ...f, minPosition: Number(v) || 5 }))}
+        />
+        <FilterInput
+          label="Max position"
+          type="number"
+          value={filters.maxPosition}
+          onChange={(v) => setFilters((f) => ({ ...f, maxPosition: Number(v) || 20 }))}
+        />
+        <FilterInput
+          label="Min impressions"
+          type="number"
+          value={filters.minImpressions}
+          onChange={(v) => setFilters((f) => ({ ...f, minImpressions: Number(v) || 0 }))}
+        />
+        <FilterInput
+          label="URL contains"
+          type="text"
+          value={filters.pathLike}
+          onChange={(v) => setFilters((f) => ({ ...f, pathLike: v }))}
+          placeholder="/p/los-angeles"
+        />
+        <button
+          onClick={loadRows}
+          className="col-span-full rounded-lg bg-secondary px-4 py-2 text-sm font-semibold sm:col-span-1 sm:col-start-4"
+        >
           Apply filters
         </button>
       </div>
@@ -204,9 +293,21 @@ function KeywordOpportunities() {
   );
 }
 
-function StatCard({ label, value, icon: Icon, highlight }: { label: string; value: React.ReactNode; icon: React.ComponentType<{ className?: string }>; highlight?: boolean }) {
+function StatCard({
+  label,
+  value,
+  icon: Icon,
+  highlight,
+}: {
+  label: string;
+  value: React.ReactNode;
+  icon: React.ComponentType<{ className?: string }>;
+  highlight?: boolean;
+}) {
   return (
-    <div className={`rounded-2xl border p-4 ${highlight ? "border-primary/40 bg-primary/5" : "border-border bg-card"}`}>
+    <div
+      className={`rounded-2xl border p-4 ${highlight ? "border-primary/40 bg-primary/5" : "border-border bg-card"}`}
+    >
       <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-muted-foreground">
         <Icon className="h-3.5 w-3.5" /> {label}
       </div>
@@ -215,19 +316,51 @@ function StatCard({ label, value, icon: Icon, highlight }: { label: string; valu
   );
 }
 
-function FilterInput({ label, value, onChange, type, placeholder }: { label: string; value: string | number; onChange: (v: string) => void; type: string; placeholder?: string }) {
+function FilterInput({
+  label,
+  value,
+  onChange,
+  type,
+  placeholder,
+}: {
+  label: string;
+  value: string | number;
+  onChange: (v: string) => void;
+  type: string;
+  placeholder?: string;
+}) {
   return (
     <label className="text-xs">
       <span className="block text-muted-foreground">{label}</span>
-      <input type={type} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder}
-        className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" />
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
+      />
     </label>
   );
 }
 
-function PageOpportunityCard({ urlPath, queries, totalImpressions, totalClicks, avgPosition, onFix, fixing, fixResult }: {
-  urlPath: string; queries: KeywordRow[]; totalImpressions: number; totalClicks: number; avgPosition: number;
-  onFix: (urlPath: string) => void; fixing: string | null; fixResult?: string;
+function PageOpportunityCard({
+  urlPath,
+  queries,
+  totalImpressions,
+  totalClicks,
+  avgPosition,
+  onFix,
+  fixing,
+  fixResult,
+}: {
+  urlPath: string;
+  queries: KeywordRow[];
+  totalImpressions: number;
+  totalClicks: number;
+  avgPosition: number;
+  onFix: (urlPath: string) => void;
+  fixing: string | null;
+  fixResult?: string;
 }) {
   const [pageId, setPageId] = React.useState<string | null>(null);
   const [loadingId, setLoadingId] = React.useState(false);
@@ -235,9 +368,18 @@ function PageOpportunityCard({ urlPath, queries, totalImpressions, totalClicks, 
   async function loadAndFix() {
     setLoadingId(true);
     try {
-      const { data } = await supabase.from("content_pages").select("id").eq("url_path", urlPath).maybeSingle();
-      if (data?.id) { setPageId(data.id); onFix(data.id); }
-    } finally { setLoadingId(false); }
+      const { data } = await supabase
+        .from("content_pages")
+        .select("id")
+        .eq("url_path", urlPath)
+        .maybeSingle();
+      if (data?.id) {
+        setPageId(data.id);
+        onFix(data.id);
+      }
+    } finally {
+      setLoadingId(false);
+    }
   }
 
   return (
@@ -245,16 +387,36 @@ function PageOpportunityCard({ urlPath, queries, totalImpressions, totalClicks, 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <Link to={urlPath as any} className="font-mono text-sm font-semibold text-primary hover:underline">{urlPath}</Link>
-            <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium">avg pos {avgPosition.toFixed(1)}</span>
-            <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium">{totalImpressions.toLocaleString()} impr</span>
-            <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium">{totalClicks} clicks</span>
+            <a
+              href={urlPath}
+              target="_blank"
+              rel="noreferrer"
+              className="font-mono text-sm font-semibold text-primary hover:underline"
+            >
+              {urlPath}
+            </a>
+            <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium">
+              avg pos {avgPosition.toFixed(1)}
+            </span>
+            <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium">
+              {totalImpressions.toLocaleString()} impr
+            </span>
+            <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium">
+              {totalClicks} clicks
+            </span>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={loadAndFix} disabled={loadingId || fixing === pageId}
-            className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground disabled:opacity-50">
-            {(loadingId || fixing === pageId) ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Sparkles className="h-3.5 w-3.5" />}
+          <button
+            onClick={loadAndFix}
+            disabled={loadingId || fixing === pageId}
+            className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground disabled:opacity-50"
+          >
+            {loadingId || fixing === pageId ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Sparkles className="h-3.5 w-3.5" />
+            )}
             AI rewrite
           </button>
         </div>
@@ -275,15 +437,25 @@ function PageOpportunityCard({ urlPath, queries, totalImpressions, totalClicks, 
             {queries.slice(0, 10).map((q) => (
               <tr key={q.id} className="border-t border-border/60">
                 <td className="py-1.5 pr-2">{q.query}</td>
-                <td className="py-1.5 px-2 text-right tabular-nums">{q.position?.toFixed(1) ?? "—"}</td>
-                <td className="py-1.5 px-2 text-right tabular-nums">{q.impressions.toLocaleString()}</td>
+                <td className="py-1.5 px-2 text-right tabular-nums">
+                  {q.position?.toFixed(1) ?? "—"}
+                </td>
+                <td className="py-1.5 px-2 text-right tabular-nums">
+                  {q.impressions.toLocaleString()}
+                </td>
                 <td className="py-1.5 px-2 text-right tabular-nums">{q.clicks}</td>
-                <td className="py-1.5 pl-2 text-right tabular-nums">{q.ctr ? `${(q.ctr * 100).toFixed(1)}%` : "—"}</td>
+                <td className="py-1.5 pl-2 text-right tabular-nums">
+                  {q.ctr ? `${(q.ctr * 100).toFixed(1)}%` : "—"}
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
-        {queries.length > 10 && <p className="mt-1 text-xs text-muted-foreground">…and {queries.length - 10} more queries</p>}
+        {queries.length > 10 && (
+          <p className="mt-1 text-xs text-muted-foreground">
+            …and {queries.length - 10} more queries
+          </p>
+        )}
       </div>
     </div>
   );

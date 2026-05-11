@@ -19,9 +19,7 @@ export interface CityRow {
 }
 
 export const getCityBySlug = createServerFn({ method: "GET" })
-  .inputValidator((data: unknown) =>
-    z.object({ slug: z.string().min(1) }).parse(data),
-  )
+  .inputValidator((data: unknown) => z.object({ slug: z.string().min(1) }).parse(data))
   .handler(async ({ data }): Promise<CityRow | null> => {
     const { data: row, error } = await (supabaseAdmin as any)
       .from("cities")

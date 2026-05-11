@@ -10,7 +10,12 @@ const client = new Firecrawl({ apiKey: FIRECRAWL_API_KEY });
 const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 const SOURCE_KEY_OVERRIDES: Record<string, string> = {
-  "saint-petersburg": "stpetersburg","saint-paul": "stpaul","saint-louis": "stlouis","saint-augustine": "staugustine","saint-george": "stgeorge","mount-pleasant": "mountpleasant",
+  "saint-petersburg": "stpetersburg",
+  "saint-paul": "stpaul",
+  "saint-louis": "stlouis",
+  "saint-augustine": "staugustine",
+  "saint-george": "stgeorge",
+  "mount-pleasant": "mountpleasant",
 };
 
 function deriveSourceKey(slug: string, name: string) {
@@ -19,8 +24,7 @@ function deriveSourceKey(slug: string, name: string) {
 
 function extractHeroUrl(html: string): string | null {
   if (!html) return null;
-  const re =
-    /https:\/\/sharetribe-assets\.imgix\.net\/[A-Za-z0-9._\/-]+\?[^"'\s)]+/g;
+  const re = /https:\/\/sharetribe-assets\.imgix\.net\/[A-Za-z0-9._\/-]+\?[^"'\s)]+/g;
   const candidates: string[] = [];
   let m: RegExpExecArray | null;
   while ((m = re.exec(html)) !== null) {
@@ -82,11 +86,7 @@ async function main() {
   const onlySlugs = slugsArg ? slugsArg.split("=")[1].split(",") : undefined;
   const force = args.includes("--force");
 
-  let q = sb
-    .from("cities")
-    .select("slug,name")
-    .eq("is_published", true)
-    .order("name");
+  let q = sb.from("cities").select("slug,name").eq("is_published", true).order("name");
   if (!force) q = q.is("hero_image_url", null);
   if (onlySlugs?.length) q = q.in("slug", onlySlugs);
   if (limit) q = q.limit(limit);
@@ -120,25 +120,19 @@ async function main() {
         }
         results.push(r);
         done++;
-        const tag =
-          r.status === "ok"
-            ? "✓"
-            : r.status === "miss"
-              ? "·"
-              : "✗";
-        console.log(`${tag} [${done}/${cities.length}] ${r.slug}  ${r.status}${(r as any).error ? `  ${(r as any).error}` : ""}`);
+        const tag = r.status === "ok" ? "✓" : r.status === "miss" ? "·" : "✗";
+        console.log(
+          `${tag} [${done}/${cities.length}] ${r.slug}  ${r.status}${(r as any).error ? `  ${(r as any).error}` : ""}`,
+        );
         await new Promise((res) => setTimeout(res, 100));
       }
     }),
   );
 
-  const summary = results.reduce<Record<string, number>>(
-    (acc, r) => {
-      acc[r.status] = (acc[r.status] || 0) + 1;
-      return acc;
-    },
-    {},
-  );
+  const summary = results.reduce<Record<string, number>>((acc, r) => {
+    acc[r.status] = (acc[r.status] || 0) + 1;
+    return acc;
+  }, {});
   console.log("\nSummary:", summary);
 
   const misses = results.filter((r) => r.status !== "ok");
