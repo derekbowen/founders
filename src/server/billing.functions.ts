@@ -240,6 +240,22 @@ export async function handleStripeWebhookEvent(event: Stripe.Event): Promise<Web
         (await resolveWorkspaceByCustomer(sub.customer as string));
       if (!workspaceId) return { received: true, ignored: true };
 
+      // Stripe events can arrive out of order — drop anything older than the
+      // last one we recorded for this workspace, otherwise a delayed
+      // `subscription.updated` (active) can clobber a newer `subscription.deleted`.
+      const eventTimeMs = event.created * 1000;
+      const { data: existing } = await sb
+        .from("customer_subscriptions")
+        .select("last_event_at")
+        .eq("workspace_id", workspaceId)
+        .maybeSingle();
+      if (existing?.last_event_at) {
+        const lastMs = new Date(existing.last_event_at as string).getTime();
+        if (Number.isFinite(lastMs) && eventTimeMs < lastMs) {
+          return { received: true, ignored: true };
+        }
+      }
+
       const item = sub.items.data[0];
       const priceId = item?.price?.id ?? null;
       const plan = priceId ? planForPriceId(priceId) : null;
@@ -286,10 +302,23 @@ export async function handleStripeWebhookEvent(event: Stripe.Event): Promise<Web
       return { received: true };
     }
 
-    case "invoice.payment_failed":
+    case "invoice.payment_failed": {
+      // Status flip is handled by the customer.subscription.updated event
+      // Stripe fires alongside; we log here so failures are visible in worker
+      // logs without grepping raw Stripe deliveries. (Dunning email TODO.)
+      const inv = event.data.object as Stripe.Invoice;
+      console.warn(
+        "[billing] invoice.payment_failed",
+        JSON.stringify({
+          invoiceId: inv.id,
+          customer: inv.customer,
+          amountDue: inv.amount_due,
+          attempt: inv.attempt_count,
+        }),
+      );
+      return { received: true };
+    }
     case "invoice.paid": {
-      // Stripe will fire customer.subscription.updated alongside, which
-      // covers the status change. Just record the event id for traceability.
       return { received: true };
     }
 

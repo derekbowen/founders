@@ -127,7 +127,7 @@ export async function requireFeatureAccess(
 
   const { data: memberships } = await sb
     .from("workspace_members")
-    .select("workspaces!inner(id, plan, is_internal)")
+    .select("workspaces!inner(id, plan, is_internal, subscription_status)")
     .eq("user_id", userId)
     .order("created_at", { ascending: false })
     .limit(1);
@@ -138,6 +138,15 @@ export async function requireFeatureAccess(
   }
   if (w.is_internal) {
     return { workspaceId: w.id, plan: w.plan as Plan };
+  }
+  // Block past_due / canceled / unpaid / paused / incomplete customers from
+  // gated server fns until they renew. UI elsewhere (account/billing) can
+  // show the renew flow without going through this gate.
+  const ACTIVE_STATUSES = new Set(["trialing", "active"]);
+  if (!ACTIVE_STATUSES.has(w.subscription_status as string)) {
+    throw new Error(
+      `Subscription is ${w.subscription_status}. Renew billing to continue using this feature.`,
+    );
   }
   if (!featureUnlocked(w.plan as Plan, feature)) {
     const planName = PLAN_FEATURES[w.plan as Plan].name;
