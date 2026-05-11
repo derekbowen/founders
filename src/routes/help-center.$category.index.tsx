@@ -1,18 +1,15 @@
 import { createFileRoute, Link, notFound, useRouter } from "@tanstack/react-router";
-import * as LucideIcons from "lucide-react";
 import { ChevronRight, Search } from "lucide-react";
 import { getHelpCategoryWithArticles } from "@/server/help-center.functions";
 import { SiteHeader, SiteFooter } from "@/components/site-layout";
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { getCategoryIcon } from "@/lib/category-icons";
 import {
   buildMeta,
   breadcrumbJsonLd,
   ldJsonScript,
   SITE_NAME,
 } from "@/lib/seo";
-
-type IconMap = Record<string, React.ComponentType<{ className?: string }>>;
-const ICONS = LucideIcons as unknown as IconMap;
 
 export const Route = createFileRoute("/help-center/$category/")({
   loader: async ({ params }) => {
@@ -86,7 +83,7 @@ export const Route = createFileRoute("/help-center/$category/")({
 function HelpCategoryPage() {
   const { category, articles } = Route.useLoaderData();
   const params = Route.useParams();
-  const Icon = (category.icon && ICONS[category.icon]) || ICONS.BookOpen;
+  const Icon = getCategoryIcon(category.icon);
 
   return (
     <div className="flex min-h-screen flex-col">

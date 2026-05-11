@@ -1,6 +1,6 @@
 import * as React from "react";
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
-import * as LucideIcons from "lucide-react";
+import { getCategoryIcon } from "@/lib/category-icons";
 import { Search, ChevronRight, Mail, Phone } from "lucide-react";
 import {
   listHelpCategories,
@@ -73,11 +73,8 @@ export const Route = createFileRoute("/help-center/")({
   ),
 });
 
-type IconMap = Record<string, React.ComponentType<{ className?: string }>>;
-const ICONS = LucideIcons as unknown as IconMap;
-
 function CategoryIcon({ name }: { name?: string | null }) {
-  const Icon = (name && ICONS[name]) || ICONS.BookOpen;
+  const Icon = getCategoryIcon(name);
   return <Icon className="h-6 w-6" />;
 }
 
@@ -265,7 +262,8 @@ function HelpCenterIndex() {
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link
-                to="/academy"
+                to="/help-center/$category"
+                params={{ category: "e-learning-academy" }}
                 className="inline-flex h-10 items-center justify-center rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground shadow hover:bg-primary-glow"
               >
                 Browse courses

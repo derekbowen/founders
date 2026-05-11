@@ -171,14 +171,14 @@ function AdminBlogPage() {
                           >
                             {busy[r.slug] ? "Expanding…" : "Expand with AI"}
                           </Button>
-                          <Link
-                            to="/blog/$slug"
-                            params={{ slug: r.slug }}
+                          <a
+                            href={`/blog/${r.slug}`}
                             target="_blank"
+                            rel="noreferrer"
                             className="text-sm underline self-center"
                           >
                             View
-                          </Link>
+                          </a>
                         </div>
                       </td>
                     </tr>

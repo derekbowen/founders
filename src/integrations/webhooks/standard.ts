@@ -126,9 +126,16 @@ function bytesToBase64(bytes: Uint8Array): string {
 }
 
 async function hmacSha256Base64(secretBytes: Uint8Array, data: string): Promise<string> {
+  // Web Crypto on Workers/Node 18+ expects a BufferSource; the explicit
+  // .buffer slice avoids the SharedArrayBuffer/ArrayBuffer type mismatch
+  // some TS configs flag for raw Uint8Array.
+  const keyData = secretBytes.buffer.slice(
+    secretBytes.byteOffset,
+    secretBytes.byteOffset + secretBytes.byteLength,
+  ) as ArrayBuffer;
   const key = await crypto.subtle.importKey(
     "raw",
-    secretBytes,
+    keyData,
     { name: "HMAC", hash: "SHA-256" },
     false,
     ["sign"],

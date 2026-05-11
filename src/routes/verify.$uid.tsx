@@ -57,13 +57,12 @@ function VerifyPage() {
             <div>
               <dt className="text-muted-foreground">Course</dt>
               <dd className="text-base text-foreground">
-                <Link
-                  to="/academy/$slug"
-                  params={{ slug: cert.course_slug }}
+                <a
+                  href={`/help-center/e-learning-academy/${cert.course_slug}`}
                   className="hover:text-primary hover:underline"
                 >
                   {cert.course_title}
-                </Link>
+                </a>
               </dd>
             </div>
             <div>

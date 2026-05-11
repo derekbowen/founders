@@ -116,7 +116,11 @@ function MyLearningPage() {
           {inProgress.length === 0 ? (
             <p className="mt-2 text-sm text-muted-foreground">
               You aren't enrolled in any active courses.{" "}
-              <Link to="/academy" className="text-primary hover:underline">
+              <Link
+                to="/help-center/$category"
+                params={{ category: "e-learning-academy" }}
+                className="text-primary hover:underline"
+              >
                 Browse the Academy
               </Link>
               .
@@ -145,9 +149,9 @@ function MyLearningPage() {
                       <Progress value={pct} aria-label={`${pct}% complete`} />
                     </div>
                     <Button asChild size="sm" variant="outline" className="mt-3">
-                      <Link to="/academy/$slug" params={{ slug: r.course_slug }}>
+                      <a href={`/help-center/e-learning-academy/${r.course_slug}`}>
                         Continue course
-                      </Link>
+                      </a>
                     </Button>
                   </li>
                 );

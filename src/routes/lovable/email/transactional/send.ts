@@ -3,6 +3,7 @@ import { render as renderAsync } from '@react-email/components'
 import { createClient } from '@supabase/supabase-js'
 import { createFileRoute } from '@tanstack/react-router'
 import { TEMPLATES } from '@/lib/email-templates/registry'
+import { SITE_NAME } from '@/lib/seo'
 
 // Sender domain — overridable via env so we can flip the brand
 // (poolrentalnearme.online → notify.founders.click) without a code change.
