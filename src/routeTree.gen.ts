@@ -60,6 +60,7 @@ import { Route as AdminBlogRouteImport } from './routes/admin.blog'
 import { Route as AccountLearningRouteImport } from './routes/account.learning'
 import { Route as AccountBillingRouteImport } from './routes/account.billing'
 import { Route as HelpCenterCategoryIndexRouteImport } from './routes/help-center.$category.index'
+import { Route as AppPagesIndexRouteImport } from './routes/app.pages.index'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as HelpCenterCategorySlugRouteImport } from './routes/help-center.$category.$slug'
 import { Route as AppPagesNewRouteImport } from './routes/app.pages.new'
@@ -70,6 +71,7 @@ import { Route as AdminLearningUserIdRouteImport } from './routes/admin.learning
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
+import { Route as AppPagesIdEditRouteImport } from './routes/app.pages.$id.edit'
 import { Route as ApiPublicHooksSyncListingsRouteImport } from './routes/api/public/hooks.sync-listings'
 import { Route as ApiPublicHooksSeoSelfTestRouteImport } from './routes/api/public/hooks.seo-self-test'
 import { Route as ApiPublicHooksSeoFixWorkerRouteImport } from './routes/api/public/hooks/seo-fix-worker'
@@ -333,6 +335,11 @@ const HelpCenterCategoryIndexRoute = HelpCenterCategoryIndexRouteImport.update({
   path: '/help-center/$category/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppPagesIndexRoute = AppPagesIndexRouteImport.update({
+  id: '/pages/',
+  path: '/pages/',
+  getParentRoute: () => AppRoute,
+} as any)
 const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   id: '/lovable/email/suppression',
   path: '/lovable/email/suppression',
@@ -385,6 +392,11 @@ const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
   id: '/lovable/email/auth/webhook',
   path: '/lovable/email/auth/webhook',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppPagesIdEditRoute = AppPagesIdEditRouteImport.update({
+  id: '/pages/$id/edit',
+  path: '/pages/$id/edit',
+  getParentRoute: () => AppRoute,
 } as any)
 const ApiPublicHooksSyncListingsRoute =
   ApiPublicHooksSyncListingsRouteImport.update({
@@ -480,6 +492,7 @@ export interface FileRoutesByFullPath {
   '/app/pages/new': typeof AppPagesNewRoute
   '/help-center/$category/$slug': typeof HelpCenterCategorySlugRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/app/pages/': typeof AppPagesIndexRoute
   '/help-center/$category/': typeof HelpCenterCategoryIndexRoute
   '/api/certificates/$uid/pdf': typeof ApiCertificatesUidPdfRoute
   '/api/public/hooks/competitor-radar-scan': typeof ApiPublicHooksCompetitorRadarScanRoute
@@ -487,6 +500,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/seo-fix-worker': typeof ApiPublicHooksSeoFixWorkerRoute
   '/api/public/hooks/seo-self-test': typeof ApiPublicHooksSeoSelfTestRoute
   '/api/public/hooks/sync-listings': typeof ApiPublicHooksSyncListingsRoute
+  '/app/pages/$id/edit': typeof AppPagesIdEditRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -549,6 +563,7 @@ export interface FileRoutesByTo {
   '/app/pages/new': typeof AppPagesNewRoute
   '/help-center/$category/$slug': typeof HelpCenterCategorySlugRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/app/pages': typeof AppPagesIndexRoute
   '/help-center/$category': typeof HelpCenterCategoryIndexRoute
   '/api/certificates/$uid/pdf': typeof ApiCertificatesUidPdfRoute
   '/api/public/hooks/competitor-radar-scan': typeof ApiPublicHooksCompetitorRadarScanRoute
@@ -556,6 +571,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/seo-fix-worker': typeof ApiPublicHooksSeoFixWorkerRoute
   '/api/public/hooks/seo-self-test': typeof ApiPublicHooksSeoSelfTestRoute
   '/api/public/hooks/sync-listings': typeof ApiPublicHooksSyncListingsRoute
+  '/app/pages/$id/edit': typeof AppPagesIdEditRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -619,6 +635,7 @@ export interface FileRoutesById {
   '/app/pages/new': typeof AppPagesNewRoute
   '/help-center/$category/$slug': typeof HelpCenterCategorySlugRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/app/pages/': typeof AppPagesIndexRoute
   '/help-center/$category/': typeof HelpCenterCategoryIndexRoute
   '/api/certificates/$uid/pdf': typeof ApiCertificatesUidPdfRoute
   '/api/public/hooks/competitor-radar-scan': typeof ApiPublicHooksCompetitorRadarScanRoute
@@ -626,6 +643,7 @@ export interface FileRoutesById {
   '/api/public/hooks/seo-fix-worker': typeof ApiPublicHooksSeoFixWorkerRoute
   '/api/public/hooks/seo-self-test': typeof ApiPublicHooksSeoSelfTestRoute
   '/api/public/hooks/sync-listings': typeof ApiPublicHooksSyncListingsRoute
+  '/app/pages/$id/edit': typeof AppPagesIdEditRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -690,6 +708,7 @@ export interface FileRouteTypes {
     | '/app/pages/new'
     | '/help-center/$category/$slug'
     | '/lovable/email/suppression'
+    | '/app/pages/'
     | '/help-center/$category/'
     | '/api/certificates/$uid/pdf'
     | '/api/public/hooks/competitor-radar-scan'
@@ -697,6 +716,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/seo-fix-worker'
     | '/api/public/hooks/seo-self-test'
     | '/api/public/hooks/sync-listings'
+    | '/app/pages/$id/edit'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/send'
@@ -759,6 +779,7 @@ export interface FileRouteTypes {
     | '/app/pages/new'
     | '/help-center/$category/$slug'
     | '/lovable/email/suppression'
+    | '/app/pages'
     | '/help-center/$category'
     | '/api/certificates/$uid/pdf'
     | '/api/public/hooks/competitor-radar-scan'
@@ -766,6 +787,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/seo-fix-worker'
     | '/api/public/hooks/seo-self-test'
     | '/api/public/hooks/sync-listings'
+    | '/app/pages/$id/edit'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/send'
@@ -828,6 +850,7 @@ export interface FileRouteTypes {
     | '/app/pages/new'
     | '/help-center/$category/$slug'
     | '/lovable/email/suppression'
+    | '/app/pages/'
     | '/help-center/$category/'
     | '/api/certificates/$uid/pdf'
     | '/api/public/hooks/competitor-radar-scan'
@@ -835,6 +858,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/seo-fix-worker'
     | '/api/public/hooks/seo-self-test'
     | '/api/public/hooks/sync-listings'
+    | '/app/pages/$id/edit'
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/send'
@@ -1236,6 +1260,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HelpCenterCategoryIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/pages/': {
+      id: '/app/pages/'
+      path: '/pages'
+      fullPath: '/app/pages/'
+      preLoaderRoute: typeof AppPagesIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/lovable/email/suppression': {
       id: '/lovable/email/suppression'
       path: '/lovable/email/suppression'
@@ -1305,6 +1336,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/lovable/email/auth/webhook'
       preLoaderRoute: typeof LovableEmailAuthWebhookRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/app/pages/$id/edit': {
+      id: '/app/pages/$id/edit'
+      path: '/pages/$id/edit'
+      fullPath: '/app/pages/$id/edit'
+      preLoaderRoute: typeof AppPagesIdEditRouteImport
+      parentRoute: typeof AppRoute
     }
     '/api/public/hooks/sync-listings': {
       id: '/api/public/hooks/sync-listings'
@@ -1432,11 +1470,15 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 interface AppRouteChildren {
   AppDashboardRoute: typeof AppDashboardRoute
   AppPagesNewRoute: typeof AppPagesNewRoute
+  AppPagesIndexRoute: typeof AppPagesIndexRoute
+  AppPagesIdEditRoute: typeof AppPagesIdEditRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppDashboardRoute: AppDashboardRoute,
   AppPagesNewRoute: AppPagesNewRoute,
+  AppPagesIndexRoute: AppPagesIndexRoute,
+  AppPagesIdEditRoute: AppPagesIdEditRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)

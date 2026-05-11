@@ -107,12 +107,16 @@ function AppDashboard() {
         <section className="mt-10">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold">Your pages</h2>
-            <Link
-              to="/app/pages/new"
-              className="text-xs font-medium text-primary hover:underline"
-            >
-              New page →
-            </Link>
+            <div className="flex items-center gap-3 text-xs font-medium">
+              {pages && pages.length > 0 && (
+                <Link to="/app/pages" className="text-muted-foreground hover:text-foreground">
+                  View all →
+                </Link>
+              )}
+              <Link to="/app/pages/new" className="text-primary hover:underline">
+                New page →
+              </Link>
+            </div>
           </div>
 
           {pages === null ? (

@@ -78,21 +78,51 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
       if (!data.marketplaceName) {
         throw new Error("Marketplace name required to start checkout. Complete onboarding first.");
       }
-      const slug = slugify(data.marketplaceName);
-      const { data: created, error } = await sb
-        .from("workspaces")
-        .insert({
-          slug,
-          name: data.marketplaceName,
-          marketplace_domain: data.marketplaceDomain ?? null,
-          owner_user_id: userId,
-          plan: data.plan,
-          subscription_status: "incomplete",
-        })
-        .select("id")
-        .single();
-      if (error || !created) {
-        throw new Error(error?.message || "Could not create workspace.");
+      // Slug collision: workspaces.slug is UNIQUE. Two customers naming
+      // theirs "Pool Rental" would clash, so we retry up to 50 times with
+      // numeric suffixes.
+      const baseSlug = slugify(data.marketplaceName) || "workspace";
+      let slug = baseSlug;
+      let attempt = 1;
+      let created: { id: string } | null = null;
+      let lastErr: { code?: string; message?: string } | null = null;
+      while (attempt <= 50) {
+        const { data: c, error } = await sb
+          .from("workspaces")
+          .insert({
+            slug,
+            name: data.marketplaceName,
+            marketplace_domain: data.marketplaceDomain ?? null,
+            owner_user_id: userId,
+            plan: data.plan,
+            subscription_status: "incomplete",
+          })
+          .select("id")
+          .single();
+        if (!error && c) {
+          created = c;
+          break;
+        }
+        lastErr = error as { code?: string; message?: string };
+        // Postgres unique_violation = 23505. Disambiguate which constraint
+        // failed by inspecting the message text; the marketplace_domain
+        // collision is a user-facing problem, the slug collision is internal.
+        const msg = (error?.message || "").toLowerCase();
+        if (error?.code !== "23505") break;
+        if (msg.includes("marketplace_domain")) {
+          throw new Error(
+            "That marketplace domain is already in use. Use a different domain or contact support if you own it.",
+          );
+        }
+        if (msg.includes("workspaces_slug_key") || msg.includes("slug")) {
+          attempt += 1;
+          slug = `${baseSlug}-${attempt}`;
+          continue;
+        }
+        break;
+      }
+      if (!created) {
+        throw new Error(lastErr?.message || "Could not create workspace.");
       }
       workspaceId = created.id;
 
