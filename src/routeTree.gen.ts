@@ -19,6 +19,7 @@ import { Route as ReferralRouteImport } from './routes/referral'
 import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AppRouteImport } from './routes/app'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as HelpCenterIndexRouteImport } from './routes/help-center.index'
@@ -26,6 +27,7 @@ import { Route as VerifyUidRouteImport } from './routes/verify.$uid'
 import { Route as PSlugRouteImport } from './routes/p.$slug'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth.reset-password'
+import { Route as AppDashboardRouteImport } from './routes/app.dashboard'
 import { Route as AdminTeamRouteImport } from './routes/admin.team'
 import { Route as AdminSiteFooterRouteImport } from './routes/admin.site-footer'
 import { Route as AdminSeoHealthRouteImport } from './routes/admin.seo-health'
@@ -60,6 +62,7 @@ import { Route as AccountBillingRouteImport } from './routes/account.billing'
 import { Route as HelpCenterCategoryIndexRouteImport } from './routes/help-center.$category.index'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as HelpCenterCategorySlugRouteImport } from './routes/help-center.$category.$slug'
+import { Route as AppPagesNewRouteImport } from './routes/app.pages.new'
 import { Route as ApiPublicTrackCityClickRouteImport } from './routes/api/public/track-city-click'
 import { Route as ApiPublicBackfillContentPagesRouteImport } from './routes/api/public/backfill-content-pages'
 import { Route as ApiBillingWebhookRouteImport } from './routes/api/billing.webhook'
@@ -124,6 +127,11 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppRoute = AppRouteImport.update({
+  id: '/app',
+  path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -158,6 +166,11 @@ const AuthResetPasswordRoute = AuthResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
   getParentRoute: () => AuthRoute,
+} as any)
+const AppDashboardRoute = AppDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AppRoute,
 } as any)
 const AdminTeamRoute = AdminTeamRouteImport.update({
   id: '/team',
@@ -330,6 +343,11 @@ const HelpCenterCategorySlugRoute = HelpCenterCategorySlugRouteImport.update({
   path: '/help-center/$category/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppPagesNewRoute = AppPagesNewRouteImport.update({
+  id: '/pages/new',
+  path: '/pages/new',
+  getParentRoute: () => AppRoute,
+} as any)
 const ApiPublicTrackCityClickRoute = ApiPublicTrackCityClickRouteImport.update({
   id: '/api/public/track-city-click',
   path: '/api/public/track-city-click',
@@ -407,6 +425,7 @@ const ApiCertificatesUidPdfRoute = ApiCertificatesUidPdfRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/app': typeof AppRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
   '/onboarding': typeof OnboardingRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
@@ -448,6 +467,7 @@ export interface FileRoutesByFullPath {
   '/admin/seo-health': typeof AdminSeoHealthRoute
   '/admin/site-footer': typeof AdminSiteFooterRoute
   '/admin/team': typeof AdminTeamRoute
+  '/app/dashboard': typeof AppDashboardRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/p/$slug': typeof PSlugRoute
@@ -457,6 +477,7 @@ export interface FileRoutesByFullPath {
   '/api/billing/webhook': typeof ApiBillingWebhookRoute
   '/api/public/backfill-content-pages': typeof ApiPublicBackfillContentPagesRoute
   '/api/public/track-city-click': typeof ApiPublicTrackCityClickRoute
+  '/app/pages/new': typeof AppPagesNewRoute
   '/help-center/$category/$slug': typeof HelpCenterCategorySlugRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/help-center/$category/': typeof HelpCenterCategoryIndexRoute
@@ -473,6 +494,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/app': typeof AppRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
   '/onboarding': typeof OnboardingRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
@@ -514,6 +536,7 @@ export interface FileRoutesByTo {
   '/admin/seo-health': typeof AdminSeoHealthRoute
   '/admin/site-footer': typeof AdminSiteFooterRoute
   '/admin/team': typeof AdminTeamRoute
+  '/app/dashboard': typeof AppDashboardRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/p/$slug': typeof PSlugRoute
@@ -523,6 +546,7 @@ export interface FileRoutesByTo {
   '/api/billing/webhook': typeof ApiBillingWebhookRoute
   '/api/public/backfill-content-pages': typeof ApiPublicBackfillContentPagesRoute
   '/api/public/track-city-click': typeof ApiPublicTrackCityClickRoute
+  '/app/pages/new': typeof AppPagesNewRoute
   '/help-center/$category/$slug': typeof HelpCenterCategorySlugRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/help-center/$category': typeof HelpCenterCategoryIndexRoute
@@ -540,6 +564,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/app': typeof AppRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
   '/onboarding': typeof OnboardingRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
@@ -581,6 +606,7 @@ export interface FileRoutesById {
   '/admin/seo-health': typeof AdminSeoHealthRoute
   '/admin/site-footer': typeof AdminSiteFooterRoute
   '/admin/team': typeof AdminTeamRoute
+  '/app/dashboard': typeof AppDashboardRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/p/$slug': typeof PSlugRoute
@@ -590,6 +616,7 @@ export interface FileRoutesById {
   '/api/billing/webhook': typeof ApiBillingWebhookRoute
   '/api/public/backfill-content-pages': typeof ApiPublicBackfillContentPagesRoute
   '/api/public/track-city-click': typeof ApiPublicTrackCityClickRoute
+  '/app/pages/new': typeof AppPagesNewRoute
   '/help-center/$category/$slug': typeof HelpCenterCategorySlugRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/help-center/$category/': typeof HelpCenterCategoryIndexRoute
@@ -608,6 +635,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/app'
     | '/auth'
     | '/onboarding'
     | '/privacy-policy'
@@ -649,6 +677,7 @@ export interface FileRouteTypes {
     | '/admin/seo-health'
     | '/admin/site-footer'
     | '/admin/team'
+    | '/app/dashboard'
     | '/auth/reset-password'
     | '/email/unsubscribe'
     | '/p/$slug'
@@ -658,6 +687,7 @@ export interface FileRouteTypes {
     | '/api/billing/webhook'
     | '/api/public/backfill-content-pages'
     | '/api/public/track-city-click'
+    | '/app/pages/new'
     | '/help-center/$category/$slug'
     | '/lovable/email/suppression'
     | '/help-center/$category/'
@@ -674,6 +704,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
+    | '/app'
     | '/auth'
     | '/onboarding'
     | '/privacy-policy'
@@ -715,6 +746,7 @@ export interface FileRouteTypes {
     | '/admin/seo-health'
     | '/admin/site-footer'
     | '/admin/team'
+    | '/app/dashboard'
     | '/auth/reset-password'
     | '/email/unsubscribe'
     | '/p/$slug'
@@ -724,6 +756,7 @@ export interface FileRouteTypes {
     | '/api/billing/webhook'
     | '/api/public/backfill-content-pages'
     | '/api/public/track-city-click'
+    | '/app/pages/new'
     | '/help-center/$category/$slug'
     | '/lovable/email/suppression'
     | '/help-center/$category'
@@ -740,6 +773,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/app'
     | '/auth'
     | '/onboarding'
     | '/privacy-policy'
@@ -781,6 +815,7 @@ export interface FileRouteTypes {
     | '/admin/seo-health'
     | '/admin/site-footer'
     | '/admin/team'
+    | '/app/dashboard'
     | '/auth/reset-password'
     | '/email/unsubscribe'
     | '/p/$slug'
@@ -790,6 +825,7 @@ export interface FileRouteTypes {
     | '/api/billing/webhook'
     | '/api/public/backfill-content-pages'
     | '/api/public/track-city-click'
+    | '/app/pages/new'
     | '/help-center/$category/$slug'
     | '/lovable/email/suppression'
     | '/help-center/$category/'
@@ -807,6 +843,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
+  AppRoute: typeof AppRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
   OnboardingRoute: typeof OnboardingRoute
   PrivacyPolicyRoute: typeof PrivacyPolicyRoute
@@ -912,6 +949,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin': {
       id: '/admin'
       path: '/admin'
@@ -960,6 +1004,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/auth/reset-password'
       preLoaderRoute: typeof AuthResetPasswordRouteImport
       parentRoute: typeof AuthRoute
+    }
+    '/app/dashboard': {
+      id: '/app/dashboard'
+      path: '/dashboard'
+      fullPath: '/app/dashboard'
+      preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof AppRoute
     }
     '/admin/team': {
       id: '/admin/team'
@@ -1199,6 +1250,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HelpCenterCategorySlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/pages/new': {
+      id: '/app/pages/new'
+      path: '/pages/new'
+      fullPath: '/app/pages/new'
+      preLoaderRoute: typeof AppPagesNewRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/api/public/track-city-click': {
       id: '/api/public/track-city-click'
       path: '/api/public/track-city-click'
@@ -1371,6 +1429,18 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface AppRouteChildren {
+  AppDashboardRoute: typeof AppDashboardRoute
+  AppPagesNewRoute: typeof AppPagesNewRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppDashboardRoute: AppDashboardRoute,
+  AppPagesNewRoute: AppPagesNewRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 interface AuthRouteChildren {
   AuthResetPasswordRoute: typeof AuthResetPasswordRoute
 }
@@ -1384,6 +1454,7 @@ const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
+  AppRoute: AppRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
   OnboardingRoute: OnboardingRoute,
   PrivacyPolicyRoute: PrivacyPolicyRoute,

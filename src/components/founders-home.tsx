@@ -57,7 +57,7 @@ function Header() {
         <div className="flex items-center gap-2">
           <Link
             to="/auth"
-            search={{ redirect: "/account/billing", mode: "signin" } as never}
+            search={{ redirect: "/app/dashboard", mode: "signin" } as never}
             className="hidden h-9 items-center justify-center rounded-full border border-border px-4 text-sm font-medium hover:bg-muted sm:inline-flex"
           >
             Log in

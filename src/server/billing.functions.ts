@@ -146,8 +146,8 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
       customer: stripeCustomerId,
       line_items: [{ price: priceId, quantity: 1 }],
       allow_promotion_codes: true,
-      success_url: `${SITE_URL}/account/billing?status=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${SITE_URL}/account/billing?status=cancel`,
+      success_url: `${SITE_URL}/app/dashboard?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${SITE_URL}/onboarding?plan=${data.plan}`,
       subscription_data: {
         // 14-day free trial, no card required (matches landing FAQ).
         trial_period_days: 14,
