@@ -130,18 +130,16 @@ export const markCourseComplete = createServerFn({ method: "POST" })
     if (insertErr) throw new Error(insertErr.message);
 
     // Mark progress 100% and log a 'completed' event
-    await supabase
-      .from("course_progress")
-      .upsert(
-        {
-          user_id: userId,
-          course_slug: data.course_slug,
-          progress_pct: 100,
-          completed_at: new Date().toISOString(),
-          last_activity_at: new Date().toISOString(),
-        },
-        { onConflict: "user_id,course_slug" },
-      );
+    await supabase.from("course_progress").upsert(
+      {
+        user_id: userId,
+        course_slug: data.course_slug,
+        progress_pct: 100,
+        completed_at: new Date().toISOString(),
+        last_activity_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id,course_slug" },
+    );
     await supabase
       .from("course_progress_events")
       .insert({ user_id: userId, course_slug: data.course_slug, event_type: "completed" });
@@ -213,20 +211,20 @@ export const recordHeartbeat = createServerFn({ method: "POST" })
         },
         { onConflict: "user_id,course_slug" },
       )
-      .select("course_slug, progress_pct, total_seconds_spent, started_at, last_activity_at, completed_at")
+      .select(
+        "course_slug, progress_pct, total_seconds_spent, started_at, last_activity_at, completed_at",
+      )
       .single();
 
     if (error) throw new Error(error.message);
 
     // Log events: 'started' on first heartbeat, 'heartbeat' otherwise
-    await supabase
-      .from("course_progress_events")
-      .insert({
-        user_id: userId,
-        course_slug: data.course_slug,
-        event_type: isFirst ? "started" : "heartbeat",
-        metadata: { seconds_delta: data.seconds_delta, progress_pct: nextPct },
-      });
+    await supabase.from("course_progress_events").insert({
+      user_id: userId,
+      course_slug: data.course_slug,
+      event_type: isFirst ? "started" : "heartbeat",
+      metadata: { seconds_delta: data.seconds_delta, progress_pct: nextPct },
+    });
 
     return upserted as CourseProgress;
   });
@@ -248,14 +246,12 @@ export const logProgressEvent = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => LogEventInput.parse(input))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context as { supabase: any; userId: string };
-    const { error } = await supabase
-      .from("course_progress_events")
-      .insert({
-        user_id: userId,
-        course_slug: data.course_slug,
-        event_type: data.event_type,
-        metadata: data.metadata ?? null,
-      });
+    const { error } = await supabase.from("course_progress_events").insert({
+      user_id: userId,
+      course_slug: data.course_slug,
+      event_type: data.event_type,
+      metadata: data.metadata ?? null,
+    });
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -267,7 +263,9 @@ export const getMyCourseProgress = createServerFn({ method: "POST" })
     const { supabase, userId } = context as { supabase: any; userId: string };
     const { data: row } = await supabase
       .from("course_progress")
-      .select("course_slug, progress_pct, total_seconds_spent, started_at, last_activity_at, completed_at")
+      .select(
+        "course_slug, progress_pct, total_seconds_spent, started_at, last_activity_at, completed_at",
+      )
       .eq("user_id", userId)
       .eq("course_slug", data.course_slug)
       .maybeSingle();
@@ -280,7 +278,9 @@ export const listMyProgress = createServerFn({ method: "POST" })
     const { supabase, userId } = context as { supabase: any; userId: string };
     const { data: rows } = await supabase
       .from("course_progress")
-      .select("course_slug, progress_pct, total_seconds_spent, started_at, last_activity_at, completed_at")
+      .select(
+        "course_slug, progress_pct, total_seconds_spent, started_at, last_activity_at, completed_at",
+      )
       .eq("user_id", userId)
       .order("last_activity_at", { ascending: false });
     return { rows: (rows ?? []) as CourseProgress[] };
@@ -291,7 +291,6 @@ export const listMyProgress = createServerFn({ method: "POST" })
 // ============================================================
 
 // requireAdmin moved to ./learning.server
-
 
 export type AdminCourseSummary = {
   course_slug: string;
@@ -388,7 +387,13 @@ export const adminListLearners = createServerFn({ method: "POST" })
           .from("profiles")
           .select("user_id, display_name, full_name")
           .in("user_id", idList)
-      : { data: [] as Array<{ user_id: string; display_name: string | null; full_name: string | null }> };
+      : {
+          data: [] as Array<{
+            user_id: string;
+            display_name: string | null;
+            full_name: string | null;
+          }>,
+        };
 
     const profileMap = new Map<string, { display_name: string | null; full_name: string | null }>();
     for (const p of profiles ?? [])
@@ -450,9 +455,7 @@ export type AdminLearnerDetail = {
 
 export const adminGetLearnerDetail = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
-    z.object({ user_id: z.string().uuid() }).parse(input),
-  )
+  .inputValidator((input: unknown) => z.object({ user_id: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
     const { userId } = context as { userId: string };
     await requireAdmin(userId);
@@ -465,7 +468,9 @@ export const adminGetLearnerDetail = createServerFn({ method: "POST" })
         .maybeSingle(),
       supabaseAdmin
         .from("course_progress")
-        .select("course_slug, progress_pct, total_seconds_spent, started_at, last_activity_at, completed_at")
+        .select(
+          "course_slug, progress_pct, total_seconds_spent, started_at, last_activity_at, completed_at",
+        )
         .eq("user_id", data.user_id)
         .order("last_activity_at", { ascending: false }),
       supabaseAdmin
@@ -594,7 +599,9 @@ export const verifyCertificate = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { data: row, error } = await supabaseAdmin
       .from("course_completions")
-      .select("certificate_uid, course_slug, course_title, learner_name, completed_at, revoked_at, revoke_reason")
+      .select(
+        "certificate_uid, course_slug, course_title, learner_name, completed_at, revoked_at, revoke_reason",
+      )
       .eq("certificate_uid", data.certificate_uid)
       .maybeSingle();
     if (error) throw new Error(error.message);

@@ -1,78 +1,71 @@
-import * as React from 'react'
-import { createFileRoute, useSearch } from '@tanstack/react-router'
-import { z } from 'zod'
+import * as React from "react";
+import { createFileRoute, useSearch } from "@tanstack/react-router";
+import { z } from "zod";
 
 const searchSchema = z.object({
   token: z.string().optional(),
-})
+});
 
-export const Route = createFileRoute('/unsubscribe')({
+export const Route = createFileRoute("/unsubscribe")({
   validateSearch: searchSchema,
   component: UnsubscribePage,
   head: () => ({
     meta: [
-      { title: 'Unsubscribe — Pool Rental Near Me' },
-      { name: 'robots', content: 'noindex,nofollow' },
+      { title: "Unsubscribe — Pool Rental Near Me" },
+      { name: "robots", content: "noindex,nofollow" },
     ],
   }),
-})
+});
 
-type Status =
-  | 'validating'
-  | 'ready'
-  | 'submitting'
-  | 'success'
-  | 'already'
-  | 'invalid'
-  | 'error'
+type Status = "validating" | "ready" | "submitting" | "success" | "already" | "invalid" | "error";
 
 function UnsubscribePage() {
-  const { token } = useSearch({ from: '/unsubscribe' })
-  const [status, setStatus] = React.useState<Status>('validating')
+  const { token } = useSearch({ from: "/unsubscribe" });
+  const [status, setStatus] = React.useState<Status>("validating");
 
   React.useEffect(() => {
     if (!token) {
-      setStatus('invalid')
-      return
+      setStatus("invalid");
+      return;
     }
-    let cancelled = false
+    let cancelled = false;
     fetch(`/email/unsubscribe?token=${encodeURIComponent(token)}`)
       .then(async (r) => {
-        const body = await r.json().catch(() => ({}))
-        if (cancelled) return
+        const body = await r.json().catch(() => ({}));
+        if (cancelled) return;
         if (!r.ok) {
-          setStatus('invalid')
-          return
+          setStatus("invalid");
+          return;
         }
-        if (body.valid) setStatus('ready')
-        else if (body.reason === 'already_unsubscribed') setStatus('already')
-        else setStatus('invalid')
+        if (body.valid) setStatus("ready");
+        else if (body.reason === "already_unsubscribed") setStatus("already");
+        else setStatus("invalid");
       })
-      .catch(() => !cancelled && setStatus('error'))
+      .catch(() => !cancelled && setStatus("error"));
     return () => {
-      cancelled = true
-    }
-  }, [token])
+      cancelled = true;
+    };
+  }, [token]);
 
   async function confirm() {
-    if (!token) return
-    setStatus('submitting')
+    if (!token) return;
+    setStatus("submitting");
     try {
-      const r = await fetch('/email/unsubscribe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const r = await fetch("/email/unsubscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token }),
-      })
-      const body = await r.json().catch(() => ({}))
+      });
+      const body = await r.json().catch(() => ({}));
       if (!r.ok) {
-        setStatus('error')
-        return
+        setStatus("error");
+        return;
       }
-      if (body.success) setStatus('success')
-      else if (body.reason === 'already_unsubscribed') setStatus('already')
-      else setStatus('error')
+      if (body.success) setStatus("success");
+      else if (body.reason === "already_unsubscribed") setStatus("already");
+      else setStatus("error");
     } catch {
-      setStatus('error')
+      setStatus("error");
     }
   }
 
@@ -81,11 +74,11 @@ function UnsubscribePage() {
       <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 shadow-sm text-center">
         <h1 className="text-2xl font-bold text-foreground">Unsubscribe</h1>
 
-        {status === 'validating' && (
+        {status === "validating" && (
           <p className="mt-4 text-muted-foreground">Checking your link…</p>
         )}
 
-        {status === 'ready' && (
+        {status === "ready" && (
           <>
             <p className="mt-4 text-muted-foreground">
               Click below to stop receiving emails from Pool Rental Near Me.
@@ -99,34 +92,30 @@ function UnsubscribePage() {
           </>
         )}
 
-        {status === 'submitting' && (
-          <p className="mt-4 text-muted-foreground">Processing…</p>
-        )}
+        {status === "submitting" && <p className="mt-4 text-muted-foreground">Processing…</p>}
 
-        {status === 'success' && (
+        {status === "success" && (
           <p className="mt-4 text-foreground">
             You've been unsubscribed. We won't email you again.
           </p>
         )}
 
-        {status === 'already' && (
+        {status === "already" && (
           <p className="mt-4 text-foreground">
             You're already unsubscribed. No further action needed.
           </p>
         )}
 
-        {status === 'invalid' && (
-          <p className="mt-4 text-destructive">
-            This unsubscribe link is invalid or expired.
-          </p>
+        {status === "invalid" && (
+          <p className="mt-4 text-destructive">This unsubscribe link is invalid or expired.</p>
         )}
 
-        {status === 'error' && (
+        {status === "error" && (
           <p className="mt-4 text-destructive">
             Something went wrong. Please try the link again or contact support.
           </p>
         )}
       </div>
     </div>
-  )
+  );
 }

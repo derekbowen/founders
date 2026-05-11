@@ -1,4 +1,4 @@
-import * as React from 'react'
+import * as React from "react";
 
 import {
   Body,
@@ -9,19 +9,19 @@ import {
   Html,
   Preview,
   Text,
-} from '@react-email/components'
+} from "@react-email/components";
 import {
   DEFAULT_BRANDING,
   type Branding,
   BrandHeader,
   BrandFooter,
   buttonStyle,
-} from './_branding'
+} from "./_branding";
 
 interface MagicLinkEmailProps {
-  siteName?: string
-  confirmationUrl: string
-  branding?: Branding
+  siteName?: string;
+  confirmationUrl: string;
+  branding?: Branding;
 }
 
 export const MagicLinkEmail = ({
@@ -29,7 +29,7 @@ export const MagicLinkEmail = ({
   branding = DEFAULT_BRANDING,
   siteName,
 }: MagicLinkEmailProps) => {
-  const name = siteName || branding.siteName
+  const name = siteName || branding.siteName;
   return (
     <Html lang="en" dir="ltr">
       <Head />
@@ -51,13 +51,13 @@ export const MagicLinkEmail = ({
         </Container>
       </Body>
     </Html>
-  )
-}
+  );
+};
 
-export default MagicLinkEmail
+export default MagicLinkEmail;
 
-const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif' }
-const container = { padding: '20px 25px' }
-const h1 = { fontSize: '22px', fontWeight: 'bold' as const, color: '#000000', margin: '0 0 20px' }
-const text = { fontSize: '14px', color: '#55575d', lineHeight: '1.5', margin: '0 0 25px' }
-const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0' }
+const main = { backgroundColor: "#ffffff", fontFamily: "Arial, sans-serif" };
+const container = { padding: "20px 25px" };
+const h1 = { fontSize: "22px", fontWeight: "bold" as const, color: "#000000", margin: "0 0 20px" };
+const text = { fontSize: "14px", color: "#55575d", lineHeight: "1.5", margin: "0 0 25px" };
+const footer = { fontSize: "12px", color: "#999999", margin: "30px 0 0" };

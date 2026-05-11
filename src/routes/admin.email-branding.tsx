@@ -2,7 +2,11 @@ import * as React from "react";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { checkAdminRole } from "@/server/admin-auth.functions";
-import { getEmailBranding, updateEmailBranding, previewAuthEmail } from "@/server/email-branding.functions";
+import {
+  getEmailBranding,
+  updateEmailBranding,
+  previewAuthEmail,
+} from "@/server/email-branding.functions";
 import { AdminLayout } from "@/components/admin-layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,16 +19,16 @@ export const Route = createFileRoute("/admin/email-branding")({
     if (typeof window === "undefined") return;
     const { data, error } = await supabase.auth.getUser();
     if (error || !data.user) {
-      throw redirect({ to: "/auth", search: { redirect: "/admin/email-branding", mode: "signin" } });
+      throw redirect({
+        to: "/auth",
+        search: { redirect: "/admin/email-branding", mode: "signin" },
+      });
     }
     const { isAdmin } = await checkAdminRole();
     if (!isAdmin) throw redirect({ to: "/admin/no-access" });
   },
   head: () => ({
-    meta: [
-      { title: "Email Branding — Admin" },
-      { name: "robots", content: "noindex,nofollow" },
-    ],
+    meta: [{ title: "Email Branding — Admin" }, { name: "robots", content: "noindex,nofollow" }],
   }),
   component: EmailBrandingPage,
 });
@@ -84,8 +88,7 @@ function EmailBrandingPage() {
     })();
   }, []);
 
-  const set = <K extends keyof Form>(k: K, v: Form[K]) =>
-    setForm((f) => ({ ...f, [k]: v }));
+  const set = <K extends keyof Form>(k: K, v: Form[K]) => setForm((f) => ({ ...f, [k]: v }));
 
   async function loadPreview(type: string) {
     setPreviewLoading(true);
@@ -94,13 +97,17 @@ function EmailBrandingPage() {
       const { html } = await previewAuthEmail({ data: { type } } as any);
       setPreviewHtml(html);
     } catch (e: any) {
-      setPreviewHtml(`<p style="padding:24px;font-family:sans-serif;color:#888">Preview unavailable: ${e?.message || "error"}</p>`);
+      setPreviewHtml(
+        `<p style="padding:24px;font-family:sans-serif;color:#888">Preview unavailable: ${e?.message || "error"}</p>`,
+      );
     } finally {
       setPreviewLoading(false);
     }
   }
 
-  React.useEffect(() => { void loadPreview(previewType); }, [previewType]);
+  React.useEffect(() => {
+    void loadPreview(previewType);
+  }, [previewType]);
 
   async function handleSave() {
     setSaving(true);
@@ -139,26 +146,44 @@ function EmailBrandingPage() {
           <div>
             <h2 className="text-lg font-semibold">Branding</h2>
             <p className="text-xs text-muted-foreground">
-              Applied to all auth emails (signup, magic link, password reset, invite, email change, reauthentication).
+              Applied to all auth emails (signup, magic link, password reset, invite, email change,
+              reauthentication).
             </p>
           </div>
 
           <div className="grid gap-2">
             <Label htmlFor="site_name">Site name</Label>
-            <Input id="site_name" value={form.site_name} onChange={(e) => set("site_name", e.target.value)} />
-            <p className="text-[11px] text-muted-foreground">Shown in subjects, body copy, and previews.</p>
+            <Input
+              id="site_name"
+              value={form.site_name}
+              onChange={(e) => set("site_name", e.target.value)}
+            />
+            <p className="text-[11px] text-muted-foreground">
+              Shown in subjects, body copy, and previews.
+            </p>
           </div>
 
           <div className="grid gap-2">
             <Label htmlFor="sender_name">Sender name</Label>
-            <Input id="sender_name" value={form.sender_name} onChange={(e) => set("sender_name", e.target.value)} />
+            <Input
+              id="sender_name"
+              value={form.sender_name}
+              onChange={(e) => set("sender_name", e.target.value)}
+            />
             <p className="text-[11px] text-muted-foreground">"From" name on the email envelope.</p>
           </div>
 
           <div className="grid gap-2">
             <Label htmlFor="logo_url">Logo URL</Label>
-            <Input id="logo_url" placeholder="https://…/logo.png" value={form.logo_url} onChange={(e) => set("logo_url", e.target.value)} />
-            <p className="text-[11px] text-muted-foreground">Optional. Renders at the top of every email (~40px tall).</p>
+            <Input
+              id="logo_url"
+              placeholder="https://…/logo.png"
+              value={form.logo_url}
+              onChange={(e) => set("logo_url", e.target.value)}
+            />
+            <p className="text-[11px] text-muted-foreground">
+              Optional. Renders at the top of every email (~40px tall).
+            </p>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -171,7 +196,11 @@ function EmailBrandingPage() {
                   onChange={(e) => set("primary_color", e.target.value)}
                   className="h-10 w-12 cursor-pointer rounded border border-border bg-background"
                 />
-                <Input id="primary_color" value={form.primary_color} onChange={(e) => set("primary_color", e.target.value)} />
+                <Input
+                  id="primary_color"
+                  value={form.primary_color}
+                  onChange={(e) => set("primary_color", e.target.value)}
+                />
               </div>
             </div>
             <div className="grid gap-2">
@@ -183,7 +212,11 @@ function EmailBrandingPage() {
                   onChange={(e) => set("primary_text_color", e.target.value)}
                   className="h-10 w-12 cursor-pointer rounded border border-border bg-background"
                 />
-                <Input id="primary_text_color" value={form.primary_text_color} onChange={(e) => set("primary_text_color", e.target.value)} />
+                <Input
+                  id="primary_text_color"
+                  value={form.primary_text_color}
+                  onChange={(e) => set("primary_text_color", e.target.value)}
+                />
               </div>
             </div>
           </div>
@@ -197,7 +230,9 @@ function EmailBrandingPage() {
               value={form.footer_text}
               onChange={(e) => set("footer_text", e.target.value)}
             />
-            <p className="text-[11px] text-muted-foreground">Optional. Appears below the body of every auth email.</p>
+            <p className="text-[11px] text-muted-foreground">
+              Optional. Appears below the body of every auth email.
+            </p>
           </div>
 
           <div className="flex justify-end pt-2">

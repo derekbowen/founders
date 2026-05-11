@@ -45,7 +45,7 @@ export function buildMeta({
   // (potentially legacy) request path. This keeps social shares deduplicated
   // when a page is reachable via multiple URLs that 301 to one canonical.
   const url = canonicalUrl;
-  const resolvedImage = image === null ? null : image ?? DEFAULT_OG_IMAGE;
+  const resolvedImage = image === null ? null : (image ?? DEFAULT_OG_IMAGE);
   const meta: Array<Record<string, string>> = [
     { title },
     { name: "description", content: description },
@@ -67,9 +67,7 @@ export function buildMeta({
   if (noindex) {
     meta.push({ name: "robots", content: "noindex, nofollow" });
   }
-  const links: Array<Record<string, string>> = [
-    { rel: "canonical", href: canonicalUrl },
-  ];
+  const links: Array<Record<string, string>> = [{ rel: "canonical", href: canonicalUrl }];
   if (prevPath) links.push({ rel: "prev", href: `${SITE_URL}${prevPath}` });
   if (nextPath) links.push({ rel: "next", href: `${SITE_URL}${nextPath}` });
   if (hreflang?.length) {

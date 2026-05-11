@@ -34,7 +34,9 @@ export type DirectoryProvider = {
 export const listServiceCategories = createServerFn({ method: "GET" }).handler(async () => {
   const { data } = await supabaseAdmin
     .from("service_categories")
-    .select("slug, name, plural_name, icon, hero_image_url, intro_markdown, seo_title, seo_description, sort_order")
+    .select(
+      "slug, name, plural_name, icon, hero_image_url, intro_markdown, seo_title, seo_description, sort_order",
+    )
     .eq("is_published", true)
     .order("sort_order");
   const cats = (data ?? []) as ServiceCategory[];
@@ -42,7 +44,8 @@ export const listServiceCategories = createServerFn({ method: "GET" }).handler(a
   const countsRes = await (supabaseAdmin as any).rpc("count_providers_by_category");
   const counts = countsRes?.data ?? null;
   const countMap = new Map<string, number>();
-  if (Array.isArray(counts)) for (const r of counts as any[]) countMap.set(r.primary_category, Number(r.n) || 0);
+  if (Array.isArray(counts))
+    for (const r of counts as any[]) countMap.set(r.primary_category, Number(r.n) || 0);
   return { categories: cats.map((c) => ({ ...c, provider_count: countMap.get(c.slug) ?? 0 })) };
 });
 
@@ -50,10 +53,17 @@ export const getCategoryWithProviders = createServerFn({ method: "GET" })
   .inputValidator((d) => z.object({ slug: z.string().min(1) }).parse(d))
   .handler(async ({ data }) => {
     const [{ data: cat }, { data: provs }] = await Promise.all([
-      supabaseAdmin.from("service_categories").select("*").eq("slug", data.slug).eq("is_published", true).maybeSingle(),
+      supabaseAdmin
+        .from("service_categories")
+        .select("*")
+        .eq("slug", data.slug)
+        .eq("is_published", true)
+        .maybeSingle(),
       supabaseAdmin
         .from("providers")
-        .select("slug, name, business_type, city, state_code, logo_url, hero_image_url, description, primary_category, secondary_categories, is_featured, featured_until, listing_paid_until, plan, rating, rating_count")
+        .select(
+          "slug, name, business_type, city, state_code, logo_url, hero_image_url, description, primary_category, secondary_categories, is_featured, featured_until, listing_paid_until, plan, rating, rating_count",
+        )
         .eq("is_published", true)
         .or(`primary_category.eq.${data.slug},secondary_categories.cs.{${data.slug}}`)
         .order("is_featured", { ascending: false })
@@ -68,23 +78,85 @@ export const getCategoryWithProviders = createServerFn({ method: "GET" })
   });
 
 const STATE_NAMES: Record<string, string> = {
-  AL:"Alabama",AK:"Alaska",AZ:"Arizona",AR:"Arkansas",CA:"California",CO:"Colorado",CT:"Connecticut",DE:"Delaware",FL:"Florida",GA:"Georgia",HI:"Hawaii",ID:"Idaho",IL:"Illinois",IN:"Indiana",IA:"Iowa",KS:"Kansas",KY:"Kentucky",LA:"Louisiana",ME:"Maine",MD:"Maryland",MA:"Massachusetts",MI:"Michigan",MN:"Minnesota",MS:"Mississippi",MO:"Missouri",MT:"Montana",NE:"Nebraska",NV:"Nevada",NH:"New Hampshire",NJ:"New Jersey",NM:"New Mexico",NY:"New York",NC:"North Carolina",ND:"North Dakota",OH:"Ohio",OK:"Oklahoma",OR:"Oregon",PA:"Pennsylvania",RI:"Rhode Island",SC:"South Carolina",SD:"South Dakota",TN:"Tennessee",TX:"Texas",UT:"Utah",VT:"Vermont",VA:"Virginia",WA:"Washington",WV:"West Virginia",WI:"Wisconsin",WY:"Wyoming",DC:"District of Columbia",
+  AL: "Alabama",
+  AK: "Alaska",
+  AZ: "Arizona",
+  AR: "Arkansas",
+  CA: "California",
+  CO: "Colorado",
+  CT: "Connecticut",
+  DE: "Delaware",
+  FL: "Florida",
+  GA: "Georgia",
+  HI: "Hawaii",
+  ID: "Idaho",
+  IL: "Illinois",
+  IN: "Indiana",
+  IA: "Iowa",
+  KS: "Kansas",
+  KY: "Kentucky",
+  LA: "Louisiana",
+  ME: "Maine",
+  MD: "Maryland",
+  MA: "Massachusetts",
+  MI: "Michigan",
+  MN: "Minnesota",
+  MS: "Mississippi",
+  MO: "Missouri",
+  MT: "Montana",
+  NE: "Nebraska",
+  NV: "Nevada",
+  NH: "New Hampshire",
+  NJ: "New Jersey",
+  NM: "New Mexico",
+  NY: "New York",
+  NC: "North Carolina",
+  ND: "North Dakota",
+  OH: "Ohio",
+  OK: "Oklahoma",
+  OR: "Oregon",
+  PA: "Pennsylvania",
+  RI: "Rhode Island",
+  SC: "South Carolina",
+  SD: "South Dakota",
+  TN: "Tennessee",
+  TX: "Texas",
+  UT: "Utah",
+  VT: "Vermont",
+  VA: "Virginia",
+  WA: "Washington",
+  WV: "West Virginia",
+  WI: "Wisconsin",
+  WY: "Wyoming",
+  DC: "District of Columbia",
 };
 export const stateName = (code: string) => STATE_NAMES[code.toUpperCase()] ?? code.toUpperCase();
 
 function citySlugify(s: string): string {
-  return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+  return s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
 export const getCategoryStateProviders = createServerFn({ method: "GET" })
-  .inputValidator((d) => z.object({ slug: z.string().min(1), state: z.string().length(2) }).parse(d))
+  .inputValidator((d) =>
+    z.object({ slug: z.string().min(1), state: z.string().length(2) }).parse(d),
+  )
   .handler(async ({ data }) => {
     const stateCode = data.state.toUpperCase();
     const [{ data: cat }, { data: rows }] = await Promise.all([
-      supabaseAdmin.from("service_categories").select("*").eq("slug", data.slug).eq("is_published", true).maybeSingle(),
+      supabaseAdmin
+        .from("service_categories")
+        .select("*")
+        .eq("slug", data.slug)
+        .eq("is_published", true)
+        .maybeSingle(),
       supabaseAdmin
         .from("providers")
-        .select("slug, name, business_type, city, city_slug, state_code, logo_url, hero_image_url, description, primary_category, secondary_categories, is_featured, featured_until, listing_paid_until, plan, rating, rating_count")
+        .select(
+          "slug, name, business_type, city, city_slug, state_code, logo_url, hero_image_url, description, primary_category, secondary_categories, is_featured, featured_until, listing_paid_until, plan, rating, rating_count",
+        )
         .eq("is_published", true)
         .eq("state_code", stateCode)
         .or(`primary_category.eq.${data.slug},secondary_categories.cs.{${data.slug}}`)
@@ -107,20 +179,33 @@ export const getCategoryStateProviders = createServerFn({ method: "GET" })
       stateCode,
       stateName: stateName(stateCode),
       providers: provs,
-      cities: [...cityMap.values()].sort((a, b) => b.count - a.count || a.name.localeCompare(b.name)),
+      cities: [...cityMap.values()].sort(
+        (a, b) => b.count - a.count || a.name.localeCompare(b.name),
+      ),
     };
   });
 
 export const getCategoryCityProviders = createServerFn({ method: "GET" })
-  .inputValidator((d) => z.object({ slug: z.string().min(1), state: z.string().length(2), city: z.string().min(1) }).parse(d))
+  .inputValidator((d) =>
+    z
+      .object({ slug: z.string().min(1), state: z.string().length(2), city: z.string().min(1) })
+      .parse(d),
+  )
   .handler(async ({ data }) => {
     const stateCode = data.state.toUpperCase();
     const citySlug = data.city.toLowerCase();
     const [{ data: cat }, { data: provs }] = await Promise.all([
-      supabaseAdmin.from("service_categories").select("*").eq("slug", data.slug).eq("is_published", true).maybeSingle(),
+      supabaseAdmin
+        .from("service_categories")
+        .select("*")
+        .eq("slug", data.slug)
+        .eq("is_published", true)
+        .maybeSingle(),
       supabaseAdmin
         .from("providers")
-        .select("slug, name, business_type, city, city_slug, state_code, logo_url, hero_image_url, description, primary_category, secondary_categories, is_featured, featured_until, listing_paid_until, plan, rating, rating_count, address, phone, website_url")
+        .select(
+          "slug, name, business_type, city, city_slug, state_code, logo_url, hero_image_url, description, primary_category, secondary_categories, is_featured, featured_until, listing_paid_until, plan, rating, rating_count, address, phone, website_url",
+        )
         .eq("is_published", true)
         .eq("state_code", stateCode)
         .or(`primary_category.eq.${data.slug},secondary_categories.cs.{${data.slug}}`)
@@ -134,7 +219,8 @@ export const getCategoryCityProviders = createServerFn({ method: "GET" })
       if (p.city) return citySlugify(p.city) === citySlug;
       return false;
     });
-    const displayCity = filtered[0]?.city || citySlug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+    const displayCity =
+      filtered[0]?.city || citySlug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
     return {
       category: (cat as ServiceCategory | null) ?? null,
       stateCode,
@@ -171,7 +257,9 @@ export const listCategoryGeoCoverage = createServerFn({ method: "GET" })
         .map(([code, cm]) => ({
           code,
           name: stateName(code),
-          cities: [...cm.values()].sort((a, b) => b.count - a.count || a.name.localeCompare(b.name)),
+          cities: [...cm.values()].sort(
+            (a, b) => b.count - a.count || a.name.localeCompare(b.name),
+          ),
         }))
         .sort((a, b) => a.name.localeCompare(b.name)),
     };
@@ -214,7 +302,11 @@ export const submitProviderListing = createServerFn({ method: "POST" })
     let slug = baseSlug;
     // ensure uniqueness
     for (let i = 0; i < 5; i++) {
-      const { data: exists } = await supabaseAdmin.from("providers").select("id").eq("slug", slug).maybeSingle();
+      const { data: exists } = await supabaseAdmin
+        .from("providers")
+        .select("id")
+        .eq("slug", slug)
+        .maybeSingle();
       if (!exists) break;
       slug = `${baseSlug}-${Math.floor(Math.random() * 9000) + 1000}`;
     }
@@ -242,18 +334,28 @@ export const submitProviderListing = createServerFn({ method: "POST" })
 
 // --- Admin ---
 async function requireAdmin(userId: string) {
-  const { data } = await supabaseAdmin.from("user_roles").select("role").eq("user_id", userId).eq("role", "admin").maybeSingle();
+  const { data } = await supabaseAdmin
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId)
+    .eq("role", "admin")
+    .maybeSingle();
   if (!data) throw new Error("Not authorized");
 }
 
 export const adminListPendingProviders = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({
-    page: z.number().int().min(1).default(1),
-    pageSize: z.number().int().min(10).max(200).default(50),
-    status: z.enum(["pending","approved","rejected","all"]).default("all"),
-    search: z.string().trim().max(120).default(""),
-  }).partial().parse(d ?? {}))
+  .inputValidator((d) =>
+    z
+      .object({
+        page: z.number().int().min(1).default(1),
+        pageSize: z.number().int().min(10).max(200).default(50),
+        status: z.enum(["pending", "approved", "rejected", "all"]).default("all"),
+        search: z.string().trim().max(120).default(""),
+      })
+      .partial()
+      .parse(d ?? {}),
+  )
   .handler(async ({ context, data }) => {
     const { userId } = context as { userId: string };
     await requireAdmin(userId);
@@ -266,14 +368,19 @@ export const adminListPendingProviders = createServerFn({ method: "GET" })
 
     let q = supabaseAdmin
       .from("providers")
-      .select("id, slug, name, primary_category, city, state_code, email, submitter_email, description, website_url, phone, services, created_at, submission_status, is_published, is_featured, plan, featured_until, listing_paid_until, gsc_impressions, gsc_clicks, gsc_position, ai_content_generated_at, source_type", { count: "exact" })
+      .select(
+        "id, slug, name, primary_category, city, state_code, email, submitter_email, description, website_url, phone, services, created_at, submission_status, is_published, is_featured, plan, featured_until, listing_paid_until, gsc_impressions, gsc_clicks, gsc_position, ai_content_generated_at, source_type",
+        { count: "exact" },
+      )
       .order("submission_status", { ascending: true })
       .order("created_at", { ascending: false })
       .range(from, to);
     if (status !== "all") q = q.eq("submission_status", status);
     if (search) {
       const esc = search.replace(/[%_,]/g, "");
-      q = q.or(`name.ilike.%${esc}%,slug.ilike.%${esc}%,city.ilike.%${esc}%,state_code.ilike.%${esc}%,email.ilike.%${esc}%`);
+      q = q.or(
+        `name.ilike.%${esc}%,slug.ilike.%${esc}%,city.ilike.%${esc}%,state_code.ilike.%${esc}%,email.ilike.%${esc}%`,
+      );
     }
     const { data: rows, count } = await q;
     return { providers: rows ?? [], total: count ?? 0, page, pageSize };
@@ -282,10 +389,14 @@ export const adminListPendingProviders = createServerFn({ method: "GET" })
 // ============ Scrape competitor directory URL → create provider ============
 export const adminScrapeProviderUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({
-    url: z.string().url(),
-    autoCreate: z.boolean().default(true),
-  }).parse(d))
+  .inputValidator((d) =>
+    z
+      .object({
+        url: z.string().url(),
+        autoCreate: z.boolean().default(true),
+      })
+      .parse(d),
+  )
   .handler(async ({ context, data }) => {
     const { userId } = context as { userId: string };
     await requireAdmin(userId);
@@ -295,7 +406,12 @@ export const adminScrapeProviderUrl = createServerFn({ method: "POST" })
     const sourceType = guessSourceType(data.url);
     const { data: job } = await supabaseAdmin
       .from("provider_scrape_jobs")
-      .insert({ source_url: data.url, source_type: sourceType, status: "running", created_by: userId })
+      .insert({
+        source_url: data.url,
+        source_type: sourceType,
+        status: "running",
+        created_by: userId,
+      })
       .select("id")
       .single();
     const jobId = job?.id as string;
@@ -307,13 +423,18 @@ export const adminScrapeProviderUrl = createServerFn({ method: "POST" })
         body: JSON.stringify({
           url: data.url,
           formats: [
-            { type: "json", prompt: "Extract a single business listing as JSON with fields: name (string), description (string, 2-4 sentences), website (string|null), phone (string|null), email (string|null), address (string|null), city (string|null), state_code (2-letter US state, string|null), services (string[]), rating (number|null), rating_count (integer|null), logo_url (string|null), hero_image_url (string|null), gallery_urls (string[])." }
+            {
+              type: "json",
+              prompt:
+                "Extract a single business listing as JSON with fields: name (string), description (string, 2-4 sentences), website (string|null), phone (string|null), email (string|null), address (string|null), city (string|null), state_code (2-letter US state, string|null), services (string[]), rating (number|null), rating_count (integer|null), logo_url (string|null), hero_image_url (string|null), gallery_urls (string[]).",
+            },
           ],
           onlyMainContent: true,
         }),
       });
       const payload: any = await res.json();
-      if (!res.ok || !payload?.success) throw new Error(payload?.error || `Firecrawl ${res.status}`);
+      if (!res.ok || !payload?.success)
+        throw new Error(payload?.error || `Firecrawl ${res.status}`);
       const j = payload.data?.json ?? payload.json ?? {};
 
       let providerId: string | null = null;
@@ -321,42 +442,54 @@ export const adminScrapeProviderUrl = createServerFn({ method: "POST" })
         const slug = slugify(`${j.name}-${j.city ?? ""}-${j.state_code ?? ""}`);
         const upsert = await supabaseAdmin
           .from("providers")
-          .upsert({
-            slug,
-            name: j.name,
-            description: j.description ?? null,
-            website_url: j.website ?? null,
-            phone: j.phone ?? null,
-            email: j.email ?? null,
-            address: j.address ?? null,
-            city: j.city ?? null,
-            state_code: j.state_code ?? null,
-            services: Array.isArray(j.services) ? j.services : [],
-            rating: typeof j.rating === "number" ? j.rating : null,
-            rating_count: typeof j.rating_count === "number" ? j.rating_count : null,
-            logo_url: j.logo_url ?? null,
-            hero_image_url: j.hero_image_url ?? null,
-            gallery_urls: Array.isArray(j.gallery_urls) ? j.gallery_urls : [],
-            source_url: data.url,
-            source_type: sourceType,
-            scraped_at: new Date().toISOString(),
-            submission_status: "pending",
-            is_published: false,
-          }, { onConflict: "slug" })
+          .upsert(
+            {
+              slug,
+              name: j.name,
+              description: j.description ?? null,
+              website_url: j.website ?? null,
+              phone: j.phone ?? null,
+              email: j.email ?? null,
+              address: j.address ?? null,
+              city: j.city ?? null,
+              state_code: j.state_code ?? null,
+              services: Array.isArray(j.services) ? j.services : [],
+              rating: typeof j.rating === "number" ? j.rating : null,
+              rating_count: typeof j.rating_count === "number" ? j.rating_count : null,
+              logo_url: j.logo_url ?? null,
+              hero_image_url: j.hero_image_url ?? null,
+              gallery_urls: Array.isArray(j.gallery_urls) ? j.gallery_urls : [],
+              source_url: data.url,
+              source_type: sourceType,
+              scraped_at: new Date().toISOString(),
+              submission_status: "pending",
+              is_published: false,
+            },
+            { onConflict: "slug" },
+          )
           .select("id")
           .single();
         providerId = (upsert.data as any)?.id ?? null;
       }
 
-      await supabaseAdmin.from("provider_scrape_jobs").update({
-        status: "success", provider_id: providerId, raw: j,
-      }).eq("id", jobId);
+      await supabaseAdmin
+        .from("provider_scrape_jobs")
+        .update({
+          status: "success",
+          provider_id: providerId,
+          raw: j,
+        })
+        .eq("id", jobId);
 
       return { ok: true, jobId, providerId, extracted: j };
     } catch (e: any) {
-      await supabaseAdmin.from("provider_scrape_jobs").update({
-        status: "failed", error: String(e?.message ?? e),
-      }).eq("id", jobId);
+      await supabaseAdmin
+        .from("provider_scrape_jobs")
+        .update({
+          status: "failed",
+          error: String(e?.message ?? e),
+        })
+        .eq("id", jobId);
       throw e;
     }
   });
@@ -376,15 +509,23 @@ export const adminListScrapeJobs = createServerFn({ method: "GET" })
 // ============ GSC import (CSV upload from user) ============
 export const adminImportGscRows = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({
-    rows: z.array(z.object({
-      slug: z.string(),
-      impressions: z.number().int().nonnegative(),
-      clicks: z.number().int().nonnegative(),
-      position: z.number().nullable().optional(),
-      kind: z.enum(["provider", "page"]).optional(),
-    })).max(5000),
-  }).parse(d))
+  .inputValidator((d) =>
+    z
+      .object({
+        rows: z
+          .array(
+            z.object({
+              slug: z.string(),
+              impressions: z.number().int().nonnegative(),
+              clicks: z.number().int().nonnegative(),
+              position: z.number().nullable().optional(),
+              kind: z.enum(["provider", "page"]).optional(),
+            }),
+          )
+          .max(5000),
+      })
+      .parse(d),
+  )
   .handler(async ({ context, data }) => {
     await requireAdmin((context as any).userId);
     const now = new Date().toISOString();
@@ -396,12 +537,15 @@ export const adminImportGscRows = createServerFn({ method: "POST" })
       const matchVal = kind === "page" ? `/p/${r.slug.replace(/^\/+/, "")}` : r.slug;
       const { error, count } = await (supabaseAdmin as any)
         .from(table)
-        .update({
-          gsc_impressions: r.impressions,
-          gsc_clicks: r.clicks,
-          gsc_position: r.position ?? null,
-          gsc_updated_at: now,
-        }, { count: "exact" })
+        .update(
+          {
+            gsc_impressions: r.impressions,
+            gsc_clicks: r.clicks,
+            gsc_position: r.position ?? null,
+            gsc_updated_at: now,
+          },
+          { count: "exact" },
+        )
         .eq(matchCol, matchVal);
       if (!error && (count ?? 0) > 0) updated += 1;
     }
@@ -423,7 +567,8 @@ export const adminGenerateProviderContent = createServerFn({ method: "POST" })
       .single();
     if (!p) throw new Error("Provider not found");
 
-    const sys = "You write SEO-optimized, factual long-form content for a pool services directory. Use second person, friendly founder-mentor tone. No banned words: leverage, utilize, seamlessly, robust, dive into, elevate, game-changer, unlock, journey, landscape, bustling, thriving, vibrant, state-of-the-art, cutting-edge. No em dashes. Output valid JSON only.";
+    const sys =
+      "You write SEO-optimized, factual long-form content for a pool services directory. Use second person, friendly founder-mentor tone. No banned words: leverage, utilize, seamlessly, robust, dive into, elevate, game-changer, unlock, journey, landscape, bustling, thriving, vibrant, state-of-the-art, cutting-edge. No em dashes. Output valid JSON only.";
     const user = `Write content for ${p.name}${p.city ? ` in ${p.city}, ${p.state_code}` : ""}. Category: ${p.primary_category ?? "pool services"}. Services: ${(p.services ?? []).join(", ") || "general pool services"}. Existing description: ${p.description ?? "(none)"}.
 
 Return JSON with shape: { "long_description": string (700-900 words, markdown, no headings above h3), "faq": Array<{question: string, answer: string}> (5 items, locally relevant) }.`;
@@ -433,18 +578,24 @@ Return JSON with shape: { "long_description": string (700-900 words, markdown, n
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
-        messages: [{ role: "system", content: sys }, { role: "user", content: user }],
+        messages: [
+          { role: "system", content: sys },
+          { role: "user", content: user },
+        ],
         response_format: { type: "json_object" },
       }),
     });
     if (!r.ok) throw new Error(`AI gateway ${r.status}: ${await r.text()}`);
     const j: any = await r.json();
     const content = JSON.parse(j.choices?.[0]?.message?.content ?? "{}");
-    await supabaseAdmin.from("providers").update({
-      long_description: content.long_description ?? null,
-      faq: Array.isArray(content.faq) ? content.faq : [],
-      ai_content_generated_at: new Date().toISOString(),
-    }).eq("id", data.id);
+    await supabaseAdmin
+      .from("providers")
+      .update({
+        long_description: content.long_description ?? null,
+        faq: Array.isArray(content.faq) ? content.faq : [],
+        ai_content_generated_at: new Date().toISOString(),
+      })
+      .eq("id", data.id);
     return { ok: true };
   });
 
@@ -466,7 +617,14 @@ export const adminListProvidersMissingAI = createServerFn({ method: "GET" })
 
 export const adminBulkGenerateProviderContent = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ limit: z.number().int().min(1).max(50).default(10), onlyMissing: z.boolean().default(true) }).parse(d))
+  .inputValidator((d) =>
+    z
+      .object({
+        limit: z.number().int().min(1).max(50).default(10),
+        onlyMissing: z.boolean().default(true),
+      })
+      .parse(d),
+  )
   .handler(async ({ context, data }) => {
     await requireAdmin((context as any).userId);
     const apiKey = process.env.OPENROUTER_API_KEY;
@@ -485,38 +643,63 @@ export const adminBulkGenerateProviderContent = createServerFn({ method: "POST" 
     const results: Array<{ id: string; ok: boolean; error?: string }> = [];
     for (const p of rows ?? []) {
       try {
-        const sys = "You write SEO-optimized, factual long-form content for a pool services directory. Use second person, friendly founder-mentor tone. No banned words: leverage, utilize, seamlessly, robust, dive into, elevate, game-changer, unlock, journey, landscape, bustling, thriving, vibrant, state-of-the-art, cutting-edge. No em dashes. Output valid JSON only.";
+        const sys =
+          "You write SEO-optimized, factual long-form content for a pool services directory. Use second person, friendly founder-mentor tone. No banned words: leverage, utilize, seamlessly, robust, dive into, elevate, game-changer, unlock, journey, landscape, bustling, thriving, vibrant, state-of-the-art, cutting-edge. No em dashes. Output valid JSON only.";
         const user = `Write content for ${p.name}${p.city ? ` in ${p.city}, ${p.state_code}` : ""}. Category: ${p.primary_category ?? "pool services"}. Services: ${(p.services ?? []).join(", ") || "general pool services"}. Existing description: ${p.description ?? "(none)"}.\n\nReturn JSON: { "long_description": string (700-900 words, markdown, no headings above h3), "faq": Array<{question:string,answer:string}> (5 items) }.`;
         const r = await fetch("https://openrouter.ai/api/v1/chat/completions", {
           method: "POST",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
           body: JSON.stringify({
             model: "google/gemini-2.5-flash",
-            messages: [{ role: "system", content: sys }, { role: "user", content: user }],
+            messages: [
+              { role: "system", content: sys },
+              { role: "user", content: user },
+            ],
             response_format: { type: "json_object" },
           }),
         });
-        if (r.status === 429) { results.push({ id: p.id, ok: false, error: "rate limited" }); await new Promise(rs => setTimeout(rs, 3000)); continue; }
+        if (r.status === 429) {
+          results.push({ id: p.id, ok: false, error: "rate limited" });
+          await new Promise((rs) => setTimeout(rs, 3000));
+          continue;
+        }
         if (r.status === 402) throw new Error("AI credits exhausted");
-        if (!r.ok) { results.push({ id: p.id, ok: false, error: `gateway ${r.status}` }); continue; }
+        if (!r.ok) {
+          results.push({ id: p.id, ok: false, error: `gateway ${r.status}` });
+          continue;
+        }
         const j: any = await r.json();
         const content = JSON.parse(j.choices?.[0]?.message?.content ?? "{}");
-        await supabaseAdmin.from("providers").update({
-          long_description: content.long_description ?? null,
-          faq: Array.isArray(content.faq) ? content.faq : [],
-          ai_content_generated_at: new Date().toISOString(),
-        }).eq("id", p.id);
+        await supabaseAdmin
+          .from("providers")
+          .update({
+            long_description: content.long_description ?? null,
+            faq: Array.isArray(content.faq) ? content.faq : [],
+            ai_content_generated_at: new Date().toISOString(),
+          })
+          .eq("id", p.id);
         results.push({ id: p.id, ok: true });
       } catch (e: any) {
         results.push({ id: p.id, ok: false, error: e?.message || String(e) });
       }
-      await new Promise(rs => setTimeout(rs, 800));
+      await new Promise((rs) => setTimeout(rs, 800));
     }
-    return { ok: true, attempted: results.length, succeeded: results.filter(r => r.ok).length, results };
+    return {
+      ok: true,
+      attempted: results.length,
+      succeeded: results.filter((r) => r.ok).length,
+      results,
+    };
   });
 
 function guessSourceType(url: string): string {
-  const h = (() => { try { return new URL(url).hostname; } catch { return ""; } })();
+  const h = (() => {
+    try {
+      return new URL(url).hostname;
+    } catch {
+      return "";
+    }
+  })();
   if (h.includes("yelp")) return "yelp";
   if (h.includes("google")) return "google";
   if (h.includes("bbb.org")) return "bbb";
@@ -526,7 +709,6 @@ function guessSourceType(url: string): string {
   return "web";
 }
 
-
 export const adminUpdateProvider = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) =>
@@ -534,9 +716,14 @@ export const adminUpdateProvider = createServerFn({ method: "POST" })
       .object({
         id: z.string().uuid(),
         action: z.enum([
-          "approve", "reject", "publish", "unpublish",
-          "feature", "unfeature",
-          "mark_paid", "mark_unpaid",
+          "approve",
+          "reject",
+          "publish",
+          "unpublish",
+          "feature",
+          "unfeature",
+          "mark_paid",
+          "mark_unpaid",
           "delete",
         ]),
       })
@@ -574,8 +761,14 @@ export const adminUpdateProvider = createServerFn({ method: "POST" })
       patch.is_featured = false;
       patch.featured_until = null;
       // downgrade plan back to paid if still within paid window, else free
-      const { data: row } = await sb.from("providers").select("listing_paid_until").eq("id", data.id).maybeSingle();
-      const paidUntil = (row as any)?.listing_paid_until ? new Date((row as any).listing_paid_until).getTime() : 0;
+      const { data: row } = await sb
+        .from("providers")
+        .select("listing_paid_until")
+        .eq("id", data.id)
+        .maybeSingle();
+      const paidUntil = (row as any)?.listing_paid_until
+        ? new Date((row as any).listing_paid_until).getTime()
+        : 0;
       patch.plan = paidUntil > Date.now() ? "paid" : "free";
     }
     if (data.action === "mark_paid") {
@@ -719,7 +912,11 @@ export const adminReviewProviderClaim = createServerFn({ method: "POST" })
         claim_status: "claimed",
         claimed_at: new Date().toISOString(),
       };
-      if (data.apply_proposed && claim.proposed_updates && typeof claim.proposed_updates === "object") {
+      if (
+        data.apply_proposed &&
+        claim.proposed_updates &&
+        typeof claim.proposed_updates === "object"
+      ) {
         Object.assign(patch, claim.proposed_updates as Record<string, unknown>);
       }
       const { error: provErr } = await (supabaseAdmin.from("providers") as any)
@@ -787,11 +984,17 @@ export const submitProviderPlanRequest = createServerFn({ method: "POST" })
   });
 
 export const getProviderStatus = createServerFn({ method: "GET" })
-  .inputValidator((d) => z.object({ slug: z.string().min(1).max(120), email: z.string().email().max(160).optional() }).parse(d))
+  .inputValidator((d) =>
+    z
+      .object({ slug: z.string().min(1).max(120), email: z.string().email().max(160).optional() })
+      .parse(d),
+  )
   .handler(async ({ data }) => {
     const { data: prov } = await supabaseAdmin
       .from("providers")
-      .select("id, slug, name, city, state_code, primary_category, is_published, is_featured, plan, claim_status, submission_status, listing_paid_until, featured_until, claimed_at")
+      .select(
+        "id, slug, name, city, state_code, primary_category, is_published, is_featured, plan, claim_status, submission_status, listing_paid_until, featured_until, claimed_at",
+      )
       .eq("slug", data.slug)
       .maybeSingle();
     if (!prov) return { provider: null, claims: [], plan_requests: [] };
@@ -806,12 +1009,15 @@ export const getProviderStatus = createServerFn({ method: "GET" })
         .limit(20),
       (supabaseAdmin as any)
         .from("provider_plan_requests")
-        .select("id, status, requested_plan, amount_usd, payment_method, payment_reference, requester_email, created_at, reviewed_at, admin_notes")
+        .select(
+          "id, status, requested_plan, amount_usd, payment_method, payment_reference, requester_email, created_at, reviewed_at, admin_notes",
+        )
         .eq("provider_id", prov.id)
         .order("created_at", { ascending: false })
         .limit(20),
     ]);
-    const filterFn = (r: any) => !filterEmail || (r.claimer_email || r.requester_email || "").toLowerCase() === filterEmail;
+    const filterFn = (r: any) =>
+      !filterEmail || (r.claimer_email || r.requester_email || "").toLowerCase() === filterEmail;
     return {
       provider: prov,
       claims: ((claims as any[]) ?? []).filter(filterFn),
@@ -836,18 +1042,24 @@ export const adminListPlanRequests = createServerFn({ method: "GET" })
 export const adminReviewPlanRequest = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) =>
-    z.object({
-      id: z.string().uuid(),
-      action: z.enum(["approve", "reject", "delete"]),
-      admin_notes: z.string().max(2000).optional(),
-    }).parse(d),
+    z
+      .object({
+        id: z.string().uuid(),
+        action: z.enum(["approve", "reject", "delete"]),
+        admin_notes: z.string().max(2000).optional(),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }) => {
     const { userId } = context as { userId: string };
     await requireAdmin(userId);
     const sb = supabaseAdmin as any;
 
-    const { data: req } = await sb.from("provider_plan_requests").select("*").eq("id", data.id).maybeSingle();
+    const { data: req } = await sb
+      .from("provider_plan_requests")
+      .select("*")
+      .eq("id", data.id)
+      .maybeSingle();
     if (!req) throw new Error("Request not found");
 
     if (data.action === "delete") {
@@ -857,7 +1069,8 @@ export const adminReviewPlanRequest = createServerFn({ method: "POST" })
     }
 
     const newStatus = data.action === "approve" ? "approved" : "rejected";
-    const { error: updErr } = await sb.from("provider_plan_requests")
+    const { error: updErr } = await sb
+      .from("provider_plan_requests")
       .update({
         status: newStatus,
         admin_notes: data.admin_notes ?? null,

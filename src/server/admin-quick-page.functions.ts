@@ -49,7 +49,10 @@ const TOOL_SCHEMA = {
         title: { type: "string" },
         seo_title: { type: "string", description: "≤60 chars" },
         seo_description: { type: "string", description: "≤155 chars" },
-        body_markdown: { type: "string", description: "Full markdown body, 600-1200 words, no frontmatter" },
+        body_markdown: {
+          type: "string",
+          description: "Full markdown body, 600-1200 words, no frontmatter",
+        },
       },
       required: ["title", "seo_title", "seo_description", "body_markdown"],
       additionalProperties: false,

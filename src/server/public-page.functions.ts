@@ -26,7 +26,10 @@ function normalizeHost(raw: string | null | undefined): string | null {
   // X-Forwarded-Host can contain a comma-separated chain; take the first.
   const first = raw.split(",")[0].trim();
   if (!first) return null;
-  return first.toLowerCase().replace(/:\d+$/, "").replace(/^www\./, "");
+  return first
+    .toLowerCase()
+    .replace(/:\d+$/, "")
+    .replace(/^www\./, "");
 }
 
 function readIncomingHost(): string | null {
@@ -83,7 +86,9 @@ export const getPublicPage = createServerFn({ method: "GET" })
     const url_path = `/p/${data.slug}`;
     const { data: page } = await sb
       .from("content_pages")
-      .select("title, seo_title, seo_description, hero_image_url, body_markdown, url_path, updated_at, status")
+      .select(
+        "title, seo_title, seo_description, hero_image_url, body_markdown, url_path, updated_at, status",
+      )
       .eq("workspace_id", workspace.id)
       .eq("url_path", url_path)
       .eq("status", "published")

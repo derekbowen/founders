@@ -9,8 +9,12 @@
 
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import {
-  validateUSPhone, validateEmail, isStoplistedUrl, formatPhoneForDisplay,
-  containsBusinessEntity, scoreCandidate,
+  validateUSPhone,
+  validateEmail,
+  isStoplistedUrl,
+  formatPhoneForDisplay,
+  containsBusinessEntity,
+  scoreCandidate,
 } from "./lead-validators.server";
 
 const sb = () => supabaseAdmin as any;
@@ -59,7 +63,10 @@ function extractFactsFromListing(markdown: string, url: string): ListingFacts {
     // fallback: try URL slug like /pools/austin-tx/...
     const urlSlug = url.match(/\/([a-z]+(?:-[a-z]+)*)-([a-z]{2})(?:\/|$)/);
     if (urlSlug) {
-      host_city = urlSlug[1].split("-").map((s) => s[0].toUpperCase() + s.slice(1)).join(" ");
+      host_city = urlSlug[1]
+        .split("-")
+        .map((s) => s[0].toUpperCase() + s.slice(1))
+        .join(" ");
       host_state = urlSlug[2].toUpperCase();
     }
   }
@@ -80,7 +87,12 @@ function extractFactsFromListing(markdown: string, url: string): ListingFacts {
   }
 
   const urls = Array.from(new Set(markdown.match(URL_RE) || []))
-    .filter((u) => !/swimply|peerspace|giggster|googleapis|google\.com|gstatic|cloudfront|sentry|stripe|cloudflare|facebook\.com\/tr|fbcdn/i.test(u))
+    .filter(
+      (u) =>
+        !/swimply|peerspace|giggster|googleapis|google\.com|gstatic|cloudfront|sentry|stripe|cloudflare|facebook\.com\/tr|fbcdn/i.test(
+          u,
+        ),
+    )
     .filter((u) => !isStoplistedUrl(u))
     .slice(0, 10);
 
@@ -106,7 +118,10 @@ async function firecrawlScrape(url: string): Promise<string> {
   return doc?.markdown || "";
 }
 
-async function firecrawlSearch(query: string, limit = 5): Promise<Array<{ url: string; title: string; description: string }>> {
+async function firecrawlSearch(
+  query: string,
+  limit = 5,
+): Promise<Array<{ url: string; title: string; description: string }>> {
   const fcKey = process.env.FIRECRAWL_API_KEY;
   if (!fcKey) return [];
   try {
@@ -118,11 +133,13 @@ async function firecrawlSearch(query: string, limit = 5): Promise<Array<{ url: s
     if (!resp.ok) return [];
     const json = await resp.json();
     const results = (json?.data?.web || json?.data || json?.web || []) as any[];
-    return results.map((r) => ({
-      url: r.url || "",
-      title: r.title || "",
-      description: r.description || r.snippet || "",
-    })).filter((r) => r.url);
+    return results
+      .map((r) => ({
+        url: r.url || "",
+        title: r.title || "",
+        description: r.description || r.snippet || "",
+      }))
+      .filter((r) => r.url);
   } catch {
     return [];
   }
@@ -185,20 +202,22 @@ Return ONLY the JSON array, no prose.`;
     const cleaned = text.replace(/```json\s*|\s*```/g, "").trim();
     const arr = JSON.parse(cleaned);
     if (!Array.isArray(arr)) return [];
-    return arr.map((c: any) => {
-      const src = searchResults[c.result_index];
-      return {
-        candidate_name: c.candidate_name || null,
-        candidate_business_name: c.candidate_business_name || null,
-        candidate_email: c.candidate_email || null,
-        candidate_phone: c.candidate_phone || null,
-        candidate_website: c.candidate_website || src?.url || null,
-        candidate_social_url: c.candidate_social_url || null,
-        candidate_source: src?.source || "web_search",
-        candidate_evidence: c.candidate_evidence || "",
-        match_confidence: Math.min(100, Math.max(0, Number(c.match_confidence) || 0)),
-      } as Candidate;
-    }).filter((c) => c.match_confidence >= 40);
+    return arr
+      .map((c: any) => {
+        const src = searchResults[c.result_index];
+        return {
+          candidate_name: c.candidate_name || null,
+          candidate_business_name: c.candidate_business_name || null,
+          candidate_email: c.candidate_email || null,
+          candidate_phone: c.candidate_phone || null,
+          candidate_website: c.candidate_website || src?.url || null,
+          candidate_social_url: c.candidate_social_url || null,
+          candidate_source: src?.source || "web_search",
+          candidate_evidence: c.candidate_evidence || "",
+          match_confidence: Math.min(100, Math.max(0, Number(c.match_confidence) || 0)),
+        } as Candidate;
+      })
+      .filter((c) => c.match_confidence >= 40);
   } catch (e) {
     console.error("[host-matcher] gemini parse failed", e);
     return [];
@@ -209,7 +228,9 @@ Return ONLY the JSON array, no prose.`;
  * Main entry: match a single competitor URL.
  * Returns number of candidates inserted.
  */
-export async function matchCompetitorUrl(competitor_url_id: string): Promise<{ ok: boolean; inserted: number; reason?: string }> {
+export async function matchCompetitorUrl(
+  competitor_url_id: string,
+): Promise<{ ok: boolean; inserted: number; reason?: string }> {
   const { data: row } = await sb()
     .from("competitor_urls")
     .select("id, url, site_id")
@@ -218,12 +239,16 @@ export async function matchCompetitorUrl(competitor_url_id: string): Promise<{ o
   if (!row) return { ok: false, inserted: 0, reason: "url not found" };
 
   const { data: site } = await sb()
-    .from("competitor_sites").select("domain").eq("id", row.site_id).maybeSingle();
+    .from("competitor_sites")
+    .select("domain")
+    .eq("id", row.site_id)
+    .maybeSingle();
   const domain = site?.domain || null;
 
   // Skip if we already have matches for this URL
   const { count: existing } = await sb()
-    .from("competitor_host_matches").select("id", { count: "exact", head: true })
+    .from("competitor_host_matches")
+    .select("id", { count: "exact", head: true })
     .eq("competitor_url_id", competitor_url_id);
   if ((existing || 0) > 0) return { ok: true, inserted: 0, reason: "already matched" };
 
@@ -235,7 +260,11 @@ export async function matchCompetitorUrl(competitor_url_id: string): Promise<{ o
   }
 
   const facts = extractFactsFromListing(markdown, row.url);
-  if (!facts.host_first_name && facts.raw_contact.emails.length === 0 && facts.raw_contact.phones.length === 0) {
+  if (
+    !facts.host_first_name &&
+    facts.raw_contact.emails.length === 0 &&
+    facts.raw_contact.phones.length === 0
+  ) {
     return { ok: true, inserted: 0, reason: "no signals to match on" };
   }
 
@@ -243,9 +272,15 @@ export async function matchCompetitorUrl(competitor_url_id: string): Promise<{ o
   const queries: { q: string; source: string }[] = [];
   const cityQual = facts.host_city ? `"${facts.host_city}"` : "";
   if (facts.host_first_name && facts.host_city) {
-    queries.push({ q: `"${facts.host_first_name}" ${cityQual} pool rental OR backyard`, source: "google" });
+    queries.push({
+      q: `"${facts.host_first_name}" ${cityQual} pool rental OR backyard`,
+      source: "google",
+    });
     queries.push({ q: `${facts.host_first_name} ${cityQual} site:yelp.com`, source: "yelp" });
-    queries.push({ q: `${facts.host_first_name} ${cityQual} site:facebook.com/pages`, source: "facebook_page" });
+    queries.push({
+      q: `${facts.host_first_name} ${cityQual} site:facebook.com/pages`,
+      source: "facebook_page",
+    });
   }
   for (const email of facts.raw_contact.emails) {
     queries.push({ q: `"${email}"`, source: "listing_description" });
@@ -278,11 +313,17 @@ export async function matchCompetitorUrl(competitor_url_id: string): Promise<{ o
   // Deterministic scoring overrides the LLM's confidence — the LLM hallucinates.
   const cleaned = candidates
     .map((c) => {
-      const emailV = c.candidate_email ? validateEmail(c.candidate_email, { firstName: facts.host_first_name }) : { ok: false };
+      const emailV = c.candidate_email
+        ? validateEmail(c.candidate_email, { firstName: facts.host_first_name })
+        : { ok: false };
       const phoneV = c.candidate_phone ? validateUSPhone(c.candidate_phone) : { ok: false };
       const listingIsUS = !!facts.host_state;
-      const websiteBad = c.candidate_website ? isStoplistedUrl(c.candidate_website, { listingIsUS }) : false;
-      const socialBad = c.candidate_social_url ? isStoplistedUrl(c.candidate_social_url, { listingIsUS }) : false;
+      const websiteBad = c.candidate_website
+        ? isStoplistedUrl(c.candidate_website, { listingIsUS })
+        : false;
+      const socialBad = c.candidate_social_url
+        ? isStoplistedUrl(c.candidate_social_url, { listingIsUS })
+        : false;
 
       // Business entity filter — kill GmbH/LLC/d.o.o./Foundation unless host first name appears
       let candidate_name = c.candidate_name;
@@ -293,7 +334,10 @@ export async function matchCompetitorUrl(competitor_url_id: string): Promise<{ o
         }
       }
 
-      const cleanPhone = phoneV.ok && (phoneV as any).normalized ? formatPhoneForDisplay((phoneV as any).normalized) : null;
+      const cleanPhone =
+        phoneV.ok && (phoneV as any).normalized
+          ? formatPhoneForDisplay((phoneV as any).normalized)
+          : null;
       const cleanWebsite = websiteBad ? null : c.candidate_website;
       const cleanSocial = socialBad ? null : c.candidate_social_url;
       const cleanEmail = emailV.ok ? c.candidate_email : null;
@@ -324,21 +368,25 @@ export async function matchCompetitorUrl(competitor_url_id: string): Promise<{ o
         candidate_evidence: [
           c.candidate_evidence || "",
           `[score ${breakdown.total}: ${breakdown.checks.map((k) => `${k.label}=${k.points}/${k.max}`).join("; ")}]`,
-        ].filter(Boolean).join(" "),
+        ]
+          .filter(Boolean)
+          .join(" "),
       };
     })
     // Must have SOMETHING after validation: a name + city, or a validated email/phone, or a clean website
-    .filter((c) =>
-      c.candidate_email ||
-      c.candidate_phone ||
-      c.candidate_website ||
-      c.candidate_social_url ||
-      (c.candidate_name && (facts.host_first_name || facts.host_city)),
+    .filter(
+      (c) =>
+        c.candidate_email ||
+        c.candidate_phone ||
+        c.candidate_website ||
+        c.candidate_social_url ||
+        (c.candidate_name && (facts.host_first_name || facts.host_city)),
     )
     // Drop sub-40 outright — never insert obvious junk
     .filter((c) => c.match_confidence >= 40);
 
-  if (cleaned.length === 0) return { ok: true, inserted: 0, reason: "all candidates failed validation" };
+  if (cleaned.length === 0)
+    return { ok: true, inserted: 0, reason: "all candidates failed validation" };
 
   const rows = cleaned.map((c) => ({
     competitor_url_id,
@@ -359,12 +407,19 @@ export async function matchCompetitorUrl(competitor_url_id: string): Promise<{ o
 }
 
 /** Run matcher for many URLs. Used by daily scan and manual batch. */
-export async function matchManyCompetitorUrls(ids: string[], maxConcurrent = 2): Promise<{ processed: number; matched: number }> {
+export async function matchManyCompetitorUrls(
+  ids: string[],
+  maxConcurrent = 2,
+): Promise<{ processed: number; matched: number }> {
   let processed = 0;
   let matched = 0;
   for (let i = 0; i < ids.length; i += maxConcurrent) {
     const batch = ids.slice(i, i + maxConcurrent);
-    const results = await Promise.all(batch.map((id) => matchCompetitorUrl(id).catch((e) => ({ ok: false, inserted: 0, reason: e?.message }))));
+    const results = await Promise.all(
+      batch.map((id) =>
+        matchCompetitorUrl(id).catch((e) => ({ ok: false, inserted: 0, reason: e?.message })),
+      ),
+    );
     for (const r of results) {
       processed++;
       if (r.ok && r.inserted > 0) matched++;

@@ -14,9 +14,7 @@ export const Route = createFileRoute("/verify/$uid")({
       <SiteHeader />
       <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-16 text-center">
         <h1 className="text-2xl font-bold text-foreground">Certificate not found</h1>
-        <p className="mt-2 text-muted-foreground">
-          We couldn't find a certificate with that ID.
-        </p>
+        <p className="mt-2 text-muted-foreground">We couldn't find a certificate with that ID.</p>
       </main>
       <SiteFooter />
     </div>

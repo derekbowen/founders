@@ -2,12 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import {
-  type Feature,
-  type Plan,
-  featureUnlocked,
-  PLAN_FEATURES,
-} from "@/lib/plans";
+import { type Feature, type Plan, featureUnlocked, PLAN_FEATURES } from "@/lib/plans";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Workspace + plan helpers.

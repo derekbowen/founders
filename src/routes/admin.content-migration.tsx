@@ -12,7 +12,11 @@ import { AdminLayout } from "@/components/admin-layout";
 export const Route = createFileRoute("/admin/content-migration")({
   beforeLoad: async () => {
     const { data, error } = await supabase.auth.getUser();
-    if (error || !data.user) throw redirect({ to: "/auth", search: { redirect: "/admin/content-migration", mode: "signin" } });
+    if (error || !data.user)
+      throw redirect({
+        to: "/auth",
+        search: { redirect: "/admin/content-migration", mode: "signin" },
+      });
     const { isAdmin } = await checkAdminRole();
     if (!isAdmin) throw redirect({ to: "/admin/no-access" });
   },
@@ -109,133 +113,122 @@ function AdminContentMigration() {
 
   return (
     <AdminLayout>
-        <h1 className="text-3xl font-bold">Content migration scraper</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Pulls one pending row at a time via Firecrawl so you can review
-          before bulk-running.
-        </p>
+      <h1 className="text-3xl font-bold">Content migration scraper</h1>
+      <p className="mt-2 text-sm text-muted-foreground">
+        Pulls one pending row at a time via Firecrawl so you can review before bulk-running.
+      </p>
 
-        <div className="mt-6 flex items-center gap-3">
-          <label className="text-sm font-medium">template_type:</label>
-          <select
-            value={templateType}
-            onChange={(e) => setTemplateType(e.target.value)}
-            className="rounded border border-border bg-background px-2 py-1 text-sm"
+      <div className="mt-6 flex items-center gap-3">
+        <label className="text-sm font-medium">template_type:</label>
+        <select
+          value={templateType}
+          onChange={(e) => setTemplateType(e.target.value)}
+          className="rounded border border-border bg-background px-2 py-1 text-sm"
+        >
+          <option value="host_acq_city">host_acq_city</option>
+          <option value="public_pool">public_pool</option>
+          <option value="event_guide">event_guide</option>
+          <option value="resource">resource</option>
+        </select>
+        <button
+          onClick={loadNext}
+          disabled={busy}
+          className="rounded-full border border-border px-4 py-1.5 text-sm"
+        >
+          Reload next
+        </button>
+        <button
+          onClick={() => setAutoRun((v) => !v)}
+          disabled={!next?.id && !autoRun}
+          className={`rounded-full px-4 py-1.5 text-sm font-semibold ${
+            autoRun
+              ? "bg-destructive text-destructive-foreground"
+              : "bg-primary text-primary-foreground"
+          }`}
+        >
+          {autoRun ? "Stop auto-run" : "Auto-run all"}
+        </button>
+      </div>
+
+      {progress && (
+        <div className="mt-6">
+          <div className="flex items-center justify-between text-sm">
+            <span className="font-medium">
+              Progress: {progress.scraped} / {progress.total}
+            </span>
+            <span className="text-muted-foreground">
+              {progress.pending} pending
+              {progress.total > 0 && ` · ${Math.round((progress.scraped / progress.total) * 100)}%`}
+            </span>
+          </div>
+          <div className="mt-2 h-3 w-full overflow-hidden rounded-full bg-muted">
+            <div
+              className={`h-full bg-primary transition-all duration-500 ${
+                autoRun ? "animate-pulse" : ""
+              }`}
+              style={{
+                width: `${
+                  progress.total > 0 ? Math.min(100, (progress.scraped / progress.total) * 100) : 0
+                }%`,
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      {error && (
+        <div className="mt-4 rounded border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
+          {error}
+        </div>
+      )}
+
+      {next ? (
+        <div className="mt-6 rounded-2xl border border-border p-5">
+          <div className="text-sm text-muted-foreground">Next pending</div>
+          <div className="mt-1 font-mono text-sm">{next.url_path}</div>
+          <a
+            href={next.source_url}
+            target="_blank"
+            rel="noreferrer"
+            className="mt-1 block text-xs text-primary underline"
           >
-            <option value="host_acq_city">host_acq_city</option>
-            <option value="public_pool">public_pool</option>
-            <option value="event_guide">event_guide</option>
-            <option value="resource">resource</option>
-          </select>
+            {next.source_url}
+          </a>
           <button
-            onClick={loadNext}
+            onClick={runScrape}
             disabled={busy}
-            className="rounded-full border border-border px-4 py-1.5 text-sm"
+            className="mt-4 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground"
           >
-            Reload next
-          </button>
-          <button
-            onClick={() => setAutoRun((v) => !v)}
-            disabled={!next?.id && !autoRun}
-            className={`rounded-full px-4 py-1.5 text-sm font-semibold ${
-              autoRun
-                ? "bg-destructive text-destructive-foreground"
-                : "bg-primary text-primary-foreground"
-            }`}
-          >
-            {autoRun ? "Stop auto-run" : "Auto-run all"}
+            {busy ? "Scraping…" : "Scrape this page"}
           </button>
         </div>
+      ) : (
+        <p className="mt-6 text-sm text-muted-foreground">No pending rows for {templateType}.</p>
+      )}
 
-        {progress && (
-          <div className="mt-6">
-            <div className="flex items-center justify-between text-sm">
-              <span className="font-medium">
-                Progress: {progress.scraped} / {progress.total}
-              </span>
-              <span className="text-muted-foreground">
-                {progress.pending} pending
-                {progress.total > 0 &&
-                  ` · ${Math.round((progress.scraped / progress.total) * 100)}%`}
-              </span>
-            </div>
-            <div className="mt-2 h-3 w-full overflow-hidden rounded-full bg-muted">
-              <div
-                className={`h-full bg-primary transition-all duration-500 ${
-                  autoRun ? "animate-pulse" : ""
-                }`}
-                style={{
-                  width: `${
-                    progress.total > 0
-                      ? Math.min(
-                          100,
-                          (progress.scraped / progress.total) * 100,
-                        )
-                      : 0
-                  }%`,
-                }}
-              />
-            </div>
-          </div>
-        )}
-
-        {error && (
-          <div className="mt-4 rounded border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
-            {error}
-          </div>
-        )}
-
-        {next ? (
-          <div className="mt-6 rounded-2xl border border-border p-5">
-            <div className="text-sm text-muted-foreground">Next pending</div>
-            <div className="mt-1 font-mono text-sm">{next.url_path}</div>
-            <a
-              href={next.source_url}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-1 block text-xs text-primary underline"
-            >
-              {next.source_url}
-            </a>
-            <button
-              onClick={runScrape}
-              disabled={busy}
-              className="mt-4 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground"
-            >
-              {busy ? "Scraping…" : "Scrape this page"}
-            </button>
-          </div>
-        ) : (
-          <p className="mt-6 text-sm text-muted-foreground">
-            No pending rows for {templateType}.
-          </p>
-        )}
-
-        {scraped && (
-          <div className="mt-8 rounded-2xl border border-border p-5">
-            <div className="text-sm text-muted-foreground">Scraped result</div>
-            <div className="mt-1 font-semibold">{scraped.title}</div>
-            <div className="text-xs text-muted-foreground">
-              {scraped.seo_description}
-            </div>
-            <details className="mt-3">
-              <summary className="cursor-pointer text-sm">
-                body_markdown ({scraped.body_markdown?.length ?? 0} chars)
-              </summary>
-              <pre className="mt-2 max-h-96 overflow-auto rounded bg-muted p-3 text-xs whitespace-pre-wrap">
-                {scraped.body_markdown}
-              </pre>
-            </details>
-            <details className="mt-3">
-              <summary className="cursor-pointer text-sm">
-                raw_html ({scraped.raw_html?.length ?? 0} chars)
-              </summary>
-              <pre className="mt-2 max-h-96 overflow-auto rounded bg-muted p-3 text-xs">
-                {scraped.raw_html?.slice(0, 5000)}
-              </pre>
-            </details>
-          </div>
-        )}
-      </AdminLayout>
+      {scraped && (
+        <div className="mt-8 rounded-2xl border border-border p-5">
+          <div className="text-sm text-muted-foreground">Scraped result</div>
+          <div className="mt-1 font-semibold">{scraped.title}</div>
+          <div className="text-xs text-muted-foreground">{scraped.seo_description}</div>
+          <details className="mt-3">
+            <summary className="cursor-pointer text-sm">
+              body_markdown ({scraped.body_markdown?.length ?? 0} chars)
+            </summary>
+            <pre className="mt-2 max-h-96 overflow-auto rounded bg-muted p-3 text-xs whitespace-pre-wrap">
+              {scraped.body_markdown}
+            </pre>
+          </details>
+          <details className="mt-3">
+            <summary className="cursor-pointer text-sm">
+              raw_html ({scraped.raw_html?.length ?? 0} chars)
+            </summary>
+            <pre className="mt-2 max-h-96 overflow-auto rounded bg-muted p-3 text-xs">
+              {scraped.raw_html?.slice(0, 5000)}
+            </pre>
+          </details>
+        </div>
+      )}
+    </AdminLayout>
   );
 }

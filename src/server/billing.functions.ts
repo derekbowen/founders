@@ -76,9 +76,7 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
       // First-time onboarding: create a draft workspace. Marketplace name +
       // domain are required at this point (collected on /onboarding).
       if (!data.marketplaceName) {
-        throw new Error(
-          "Marketplace name required to start checkout. Complete onboarding first.",
-        );
+        throw new Error("Marketplace name required to start checkout. Complete onboarding first.");
       }
       const slug = slugify(data.marketplaceName);
       const { data: created, error } = await sb
@@ -253,31 +251,27 @@ export async function handleStripeWebhookEvent(event: Stripe.Event): Promise<Web
       const currentPeriodEnd = sub.current_period_end
         ? new Date(sub.current_period_end * 1000).toISOString()
         : null;
-      const canceledAt = sub.canceled_at
-        ? new Date(sub.canceled_at * 1000).toISOString()
-        : null;
+      const canceledAt = sub.canceled_at ? new Date(sub.canceled_at * 1000).toISOString() : null;
 
-      await sb
-        .from("customer_subscriptions")
-        .upsert(
-          {
-            workspace_id: workspaceId,
-            stripe_customer_id: sub.customer as string,
-            stripe_subscription_id: sub.id,
-            stripe_price_id: priceId,
-            plan: plan ?? "starter",
-            status,
-            cancel_at_period_end: sub.cancel_at_period_end ?? false,
-            current_period_start: currentPeriodStart,
-            current_period_end: currentPeriodEnd,
-            trial_ends_at: trialEnd,
-            canceled_at: canceledAt,
-            last_event_id: event.id,
-            last_event_at: new Date(event.created * 1000).toISOString(),
-            raw: sub as unknown as Record<string, unknown>,
-          },
-          { onConflict: "workspace_id" },
-        );
+      await sb.from("customer_subscriptions").upsert(
+        {
+          workspace_id: workspaceId,
+          stripe_customer_id: sub.customer as string,
+          stripe_subscription_id: sub.id,
+          stripe_price_id: priceId,
+          plan: plan ?? "starter",
+          status,
+          cancel_at_period_end: sub.cancel_at_period_end ?? false,
+          current_period_start: currentPeriodStart,
+          current_period_end: currentPeriodEnd,
+          trial_ends_at: trialEnd,
+          canceled_at: canceledAt,
+          last_event_id: event.id,
+          last_event_at: new Date(event.created * 1000).toISOString(),
+          raw: sub as unknown as Record<string, unknown>,
+        },
+        { onConflict: "workspace_id" },
+      );
 
       // Mirror onto workspaces for fast reads.
       const updates: Record<string, unknown> = {
@@ -315,9 +309,11 @@ async function resolveWorkspaceByCustomer(customerId: string): Promise<string | 
 }
 
 function slugify(input: string): string {
-  return input
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 60) || `workspace-${Date.now()}`;
+  return (
+    input
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 60) || `workspace-${Date.now()}`
+  );
 }

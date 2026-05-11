@@ -24,16 +24,46 @@ const DAILY_SPEND_CAP_USD = 10;
 
 const PRIORITY_CITIES = new Set(
   [
-    "los angeles", "long beach", "anaheim", "santa monica", "burbank",
-    "phoenix", "scottsdale", "mesa", "tempe", "chandler", "gilbert", "glendale",
-    "dallas", "fort worth", "arlington", "plano", "frisco", "irving",
-    "tampa", "st petersburg", "saint petersburg", "clearwater",
-    "miami", "fort lauderdale", "hollywood", "hialeah",
-    "houston", "sugar land", "the woodlands",
-    "austin", "round rock", "cedar park",
-    "atlanta", "marietta", "alpharetta",
-    "san diego", "chula vista",
-    "las vegas", "henderson", "north las vegas",
+    "los angeles",
+    "long beach",
+    "anaheim",
+    "santa monica",
+    "burbank",
+    "phoenix",
+    "scottsdale",
+    "mesa",
+    "tempe",
+    "chandler",
+    "gilbert",
+    "glendale",
+    "dallas",
+    "fort worth",
+    "arlington",
+    "plano",
+    "frisco",
+    "irving",
+    "tampa",
+    "st petersburg",
+    "saint petersburg",
+    "clearwater",
+    "miami",
+    "fort lauderdale",
+    "hollywood",
+    "hialeah",
+    "houston",
+    "sugar land",
+    "the woodlands",
+    "austin",
+    "round rock",
+    "cedar park",
+    "atlanta",
+    "marietta",
+    "alpharetta",
+    "san diego",
+    "chula vista",
+    "las vegas",
+    "henderson",
+    "north las vegas",
   ].map((c) => c.toLowerCase()),
 );
 
@@ -62,7 +92,8 @@ const EMPTY: EnrichedShape = {
 function sanitizeShape(s: EnrichedShape, firstName: string | null): EnrichedShape {
   const emails: string[] = [];
   for (const e of s.emails) {
-    if (validateEmail(e, { firstName }).ok && !emails.includes(e.toLowerCase())) emails.push(e.toLowerCase());
+    if (validateEmail(e, { firstName }).ok && !emails.includes(e.toLowerCase()))
+      emails.push(e.toLowerCase());
   }
   const phones: string[] = [];
   for (const p of s.phones) {
@@ -96,7 +127,12 @@ async function getDailySpend(): Promise<number> {
   return (data || []).reduce((sum: number, r: any) => sum + Number(r.cost_usd || 0), 0);
 }
 
-async function logSpend(provider: string, match_id: string | null, cost_usd: number, outcome: "hit" | "miss" | "error") {
+async function logSpend(
+  provider: string,
+  match_id: string | null,
+  cost_usd: number,
+  outcome: "hit" | "miss" | "error",
+) {
   try {
     await sb().from("enrichment_spend_log").insert({
       provider,
@@ -129,27 +165,35 @@ async function readCache(cacheKey: string): Promise<EnrichedShape | null> {
   };
 }
 
-async function writeCache(cacheKey: string, tier: string, data: EnrichedShape, raw: any, cost: number) {
+async function writeCache(
+  cacheKey: string,
+  tier: string,
+  data: EnrichedShape,
+  raw: any,
+  cost: number,
+) {
   try {
-    await sb().from("enriched_contacts").upsert(
-      {
-        cache_key: cacheKey,
-        source_tier: tier,
-        full_name: data.full_name,
-        emails: data.emails,
-        phones: data.phones,
-        social_profiles: data.social_profiles,
-        property_address: data.property_address,
-        property_city: data.property_city,
-        property_state: data.property_state,
-        property_zip: data.property_zip,
-        raw_response: raw,
-        cost_usd: cost,
-        fetched_at: new Date().toISOString(),
-        expires_at: new Date(Date.now() + 90 * 86400 * 1000).toISOString(),
-      },
-      { onConflict: "cache_key" },
-    );
+    await sb()
+      .from("enriched_contacts")
+      .upsert(
+        {
+          cache_key: cacheKey,
+          source_tier: tier,
+          full_name: data.full_name,
+          emails: data.emails,
+          phones: data.phones,
+          social_profiles: data.social_profiles,
+          property_address: data.property_address,
+          property_city: data.property_city,
+          property_state: data.property_state,
+          property_zip: data.property_zip,
+          raw_response: raw,
+          cost_usd: cost,
+          fetched_at: new Date().toISOString(),
+          expires_at: new Date(Date.now() + 90 * 86400 * 1000).toISOString(),
+        },
+        { onConflict: "cache_key" },
+      );
   } catch (e) {
     console.error("[enricher] cache write failed", e);
   }
@@ -159,7 +203,10 @@ async function writeCache(cacheKey: string, tier: string, data: EnrichedShape, r
 // Tier 0 — free OSINT via Firecrawl search
 // ============================================================================
 
-async function firecrawlSearch(query: string, limit = 4): Promise<Array<{ url: string; title: string; description: string }>> {
+async function firecrawlSearch(
+  query: string,
+  limit = 4,
+): Promise<Array<{ url: string; title: string; description: string }>> {
   const fcKey = process.env.FIRECRAWL_API_KEY;
   if (!fcKey) return [];
   try {
@@ -171,11 +218,13 @@ async function firecrawlSearch(query: string, limit = 4): Promise<Array<{ url: s
     if (!resp.ok) return [];
     const json = await resp.json();
     const results = (json?.data?.web || json?.data || json?.web || []) as any[];
-    return results.map((r) => ({
-      url: r.url || "",
-      title: r.title || "",
-      description: r.description || r.snippet || "",
-    })).filter((r) => r.url);
+    return results
+      .map((r) => ({
+        url: r.url || "",
+        title: r.title || "",
+        description: r.description || r.snippet || "",
+      }))
+      .filter((r) => r.url);
   } catch {
     return [];
   }
@@ -183,7 +232,8 @@ async function firecrawlSearch(query: string, limit = 4): Promise<Array<{ url: s
 
 const EMAIL_RE = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
 const PHONE_RE = /(?:\+?1[\s.-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}/g;
-const ADDRESS_RE = /\b\d{1,6}\s+[A-Z][a-zA-Z0-9.\- ]{2,40}\s+(?:St|Street|Ave|Avenue|Rd|Road|Blvd|Boulevard|Dr|Drive|Ln|Lane|Ct|Court|Way|Pl|Place|Pkwy|Parkway|Ter|Terrace)\b/g;
+const ADDRESS_RE =
+  /\b\d{1,6}\s+[A-Z][a-zA-Z0-9.\- ]{2,40}\s+(?:St|Street|Ave|Avenue|Rd|Road|Blvd|Boulevard|Dr|Drive|Ln|Lane|Ct|Court|Way|Pl|Place|Pkwy|Parkway|Ter|Terrace)\b/g;
 
 async function tier0Osint(input: {
   match_id: string;
@@ -208,7 +258,11 @@ async function tier0Osint(input: {
   for (const q of queries.slice(0, 5)) {
     const results = await firecrawlSearch(q, 4);
     for (const r of results) {
-      if (/facebook\.com\/[^/]+\/?$/i.test(r.url) || /linkedin\.com\/in\//i.test(r.url) || /instagram\.com\/[^/]+\/?$/i.test(r.url)) {
+      if (
+        /facebook\.com\/[^/]+\/?$/i.test(r.url) ||
+        /linkedin\.com\/in\//i.test(r.url) ||
+        /instagram\.com\/[^/]+\/?$/i.test(r.url)
+      ) {
         if (!out.social_profiles.includes(r.url)) out.social_profiles.push(r.url);
       }
       allText.push(`${r.title} ${r.description}`);
@@ -216,9 +270,16 @@ async function tier0Osint(input: {
   }
 
   const blob = allText.join(" ");
-  const emails = Array.from(new Set((blob.match(EMAIL_RE) || []).filter((e) =>
-    !/swimply|peerspace|giggster|sentry|cloudflare|gstatic|googleusercontent|wixpress|squarespace/i.test(e),
-  ))).slice(0, 3);
+  const emails = Array.from(
+    new Set(
+      (blob.match(EMAIL_RE) || []).filter(
+        (e) =>
+          !/swimply|peerspace|giggster|sentry|cloudflare|gstatic|googleusercontent|wixpress|squarespace/i.test(
+            e,
+          ),
+      ),
+    ),
+  ).slice(0, 3);
   const phones = Array.from(new Set(blob.match(PHONE_RE) || [])).slice(0, 3);
   const addresses = Array.from(new Set(blob.match(ADDRESS_RE) || []));
 
@@ -228,7 +289,12 @@ async function tier0Osint(input: {
   out.property_city = input.city;
   out.property_state = input.state;
 
-  await logSpend("osint", input.match_id, 0, out.emails.length || out.phones.length || out.social_profiles.length ? "hit" : "miss");
+  await logSpend(
+    "osint",
+    input.match_id,
+    0,
+    out.emails.length || out.phones.length || out.social_profiles.length ? "hit" : "miss",
+  );
   return out;
 }
 
@@ -275,15 +341,26 @@ async function tier1BatchData(input: {
     }
     const data: EnrichedShape = {
       full_name: [person.name?.first, person.name?.last].filter(Boolean).join(" ") || null,
-      emails: (person.emails || []).map((e: any) => e?.email || e).filter(Boolean).slice(0, 5),
-      phones: (person.phoneNumbers || person.phones || []).map((p: any) => p?.number || p).filter(Boolean).slice(0, 5),
+      emails: (person.emails || [])
+        .map((e: any) => e?.email || e)
+        .filter(Boolean)
+        .slice(0, 5),
+      phones: (person.phoneNumbers || person.phones || [])
+        .map((p: any) => p?.number || p)
+        .filter(Boolean)
+        .slice(0, 5),
       social_profiles: [],
       property_address: input.property_address,
       property_city: input.city,
       property_state: input.state,
       property_zip: person.address?.zip || null,
     };
-    await logSpend("batchdata", input.match_id, cost, data.emails.length || data.phones.length ? "hit" : "miss");
+    await logSpend(
+      "batchdata",
+      input.match_id,
+      cost,
+      data.emails.length || data.phones.length ? "hit" : "miss",
+    );
     return { data, cost };
   } catch (e) {
     console.error("[enricher] batchdata failed", e);
@@ -335,15 +412,26 @@ async function tier2Pdl(input: {
     }
     const data: EnrichedShape = {
       full_name: p.full_name || null,
-      emails: (p.emails || []).map((e: any) => e?.address || e).filter(Boolean).slice(0, 5),
+      emails: (p.emails || [])
+        .map((e: any) => e?.address || e)
+        .filter(Boolean)
+        .slice(0, 5),
       phones: (p.phone_numbers || []).filter(Boolean).slice(0, 5),
-      social_profiles: (p.profiles || []).map((s: any) => s?.url).filter(Boolean).slice(0, 10),
+      social_profiles: (p.profiles || [])
+        .map((s: any) => s?.url)
+        .filter(Boolean)
+        .slice(0, 10),
       property_address: null,
       property_city: p.location_locality || input.city,
       property_state: p.location_region || input.state,
       property_zip: p.location_postal_code || null,
     };
-    await logSpend("pdl", input.match_id, cost, data.emails.length || data.phones.length ? "hit" : "miss");
+    await logSpend(
+      "pdl",
+      input.match_id,
+      cost,
+      data.emails.length || data.phones.length ? "hit" : "miss",
+    );
     return { data, cost };
   } catch (e) {
     console.error("[enricher] pdl failed", e);
@@ -356,7 +444,10 @@ async function tier2Pdl(input: {
 // Revenue signal scorer (uses listing markdown if available)
 // ============================================================================
 
-export function scoreRevenueSignal(markdown: string | null | undefined): { score: number; notes: string } {
+export function scoreRevenueSignal(markdown: string | null | undefined): {
+  score: number;
+  notes: string;
+} {
   if (!markdown) return { score: 0, notes: "no listing text" };
   const notes: string[] = [];
   let score = 0;
@@ -364,28 +455,46 @@ export function scoreRevenueSignal(markdown: string | null | undefined): { score
   const priceMatch = markdown.match(/\$\s?(\d{2,4})(?:\s*\/\s*hour|\s*per hour|\s*\/hr|\s*\/h\b)/i);
   if (priceMatch) {
     const price = Number(priceMatch[1]);
-    if (price >= 100) { score += 40; notes.push(`$${price}/hour premium pricing`); }
-    else if (price >= 60) { score += 20; notes.push(`$${price}/hour mid pricing`); }
+    if (price >= 100) {
+      score += 40;
+      notes.push(`$${price}/hour premium pricing`);
+    } else if (price >= 60) {
+      score += 20;
+      notes.push(`$${price}/hour mid pricing`);
+    }
   }
 
   const reviewMatch = markdown.match(/(\d{1,4})\s*review/i);
   if (reviewMatch) {
     const reviews = Number(reviewMatch[1]);
-    if (reviews >= 50) { score += 35; notes.push(`${reviews} reviews`); }
-    else if (reviews >= 20) { score += 20; notes.push(`${reviews} reviews`); }
-    else if (reviews >= 5) { score += 10; notes.push(`${reviews} reviews`); }
+    if (reviews >= 50) {
+      score += 35;
+      notes.push(`${reviews} reviews`);
+    } else if (reviews >= 20) {
+      score += 20;
+      notes.push(`${reviews} reviews`);
+    } else if (reviews >= 5) {
+      score += 10;
+      notes.push(`${reviews} reviews`);
+    }
   }
 
   if (/super\s*host|top\s*host|elite\s*host/i.test(markdown)) {
-    score += 15; notes.push("superhost badge");
+    score += 15;
+    notes.push("superhost badge");
   }
 
   const sinceMatch = markdown.match(/(?:host(?:ing)?\s+since|joined\s+in)\s+(20\d{2})/i);
   if (sinceMatch) {
     const year = Number(sinceMatch[1]);
     const monthsActive = (new Date().getFullYear() - year) * 12;
-    if (monthsActive >= 12) { score += 15; notes.push(`hosting ${monthsActive}mo`); }
-    else if (monthsActive >= 6) { score += 8; notes.push(`hosting ${monthsActive}mo`); }
+    if (monthsActive >= 12) {
+      score += 15;
+      notes.push(`hosting ${monthsActive}mo`);
+    } else if (monthsActive >= 6) {
+      score += 8;
+      notes.push(`hosting ${monthsActive}mo`);
+    }
   }
 
   return { score: Math.min(100, score), notes: notes.join(", ") };
@@ -405,13 +514,25 @@ export type EnrichResult = {
   reason?: string;
 };
 
-export async function enrichHostMatch(match_id: string, opts?: { force_tier?: "osint" | "batchdata" | "pdl" }): Promise<EnrichResult> {
+export async function enrichHostMatch(
+  match_id: string,
+  opts?: { force_tier?: "osint" | "batchdata" | "pdl" },
+): Promise<EnrichResult> {
   const { data: match } = await sb()
     .from("competitor_host_matches")
     .select("*")
     .eq("id", match_id)
     .maybeSingle();
-  if (!match) return { ok: false, match_id, tier_reached: "skipped", cost_usd: 0, emails_found: 0, phones_found: 0, reason: "match not found" };
+  if (!match)
+    return {
+      ok: false,
+      match_id,
+      tier_reached: "skipped",
+      cost_usd: 0,
+      emails_found: 0,
+      phones_found: 0,
+      reason: "match not found",
+    };
 
   // Cache check
   const cacheKey = normalizeKey([
@@ -424,15 +545,25 @@ export async function enrichHostMatch(match_id: string, opts?: { force_tier?: "o
   if (cacheKey) {
     const cached = await readCache(cacheKey);
     if (cached) {
-      await sb().from("competitor_host_matches").update({
-        enriched_at: new Date().toISOString(),
-        enriched_tier: "cached",
-        enriched_emails: cached.emails,
-        enriched_phones: cached.phones,
-        enriched_socials: cached.social_profiles,
-        property_address: cached.property_address,
-      }).eq("id", match_id);
-      return { ok: true, match_id, tier_reached: "cached", cost_usd: 0, emails_found: cached.emails.length, phones_found: cached.phones.length };
+      await sb()
+        .from("competitor_host_matches")
+        .update({
+          enriched_at: new Date().toISOString(),
+          enriched_tier: "cached",
+          enriched_emails: cached.emails,
+          enriched_phones: cached.phones,
+          enriched_socials: cached.social_profiles,
+          property_address: cached.property_address,
+        })
+        .eq("id", match_id);
+      return {
+        ok: true,
+        match_id,
+        tier_reached: "cached",
+        cost_usd: 0,
+        emails_found: cached.emails.length,
+        phones_found: cached.phones.length,
+      };
     }
   }
 
@@ -445,7 +576,9 @@ export async function enrichHostMatch(match_id: string, opts?: { force_tier?: "o
       .eq("url", match.competitor_url)
       .maybeSingle();
     listingMd = page?.markdown || null;
-  } catch { /* table may not have row */ }
+  } catch {
+    /* table may not have row */
+  }
 
   const revenue = scoreRevenueSignal(listingMd);
 
@@ -476,36 +609,52 @@ export async function enrichHostMatch(match_id: string, opts?: { force_tier?: "o
       .select("id, enrichment_cost_usd, enriched_at")
       .eq("competitor_url_id", match.competitor_url_id)
       .gt("enriched_at", since);
-    const paidCalls = (recent || []).filter((r: any) => Number(r.enrichment_cost_usd || 0) > 0 && r.id !== match_id).length;
+    const paidCalls = (recent || []).filter(
+      (r: any) => Number(r.enrichment_cost_usd || 0) > 0 && r.id !== match_id,
+    ).length;
     if (paidCalls >= 1) listingCapHit = true;
-  } catch { /* non-fatal */ }
-
+  } catch {
+    /* non-fatal */
+  }
 
   const priority = isPriorityCity(match.host_city);
   const confidence = Number(match.match_confidence || 0);
 
   // Hard refusal: if the match is junk (no validated contact AND no first name), don't burn money.
-  const hasAnyValidatedSignal = combined.emails.length > 0 || combined.phones.length > 0 || !!match.host_first_name;
+  const hasAnyValidatedSignal =
+    combined.emails.length > 0 || combined.phones.length > 0 || !!match.host_first_name;
   if (!hasAnyValidatedSignal && !opts?.force_tier) {
-    await sb().from("competitor_host_matches").update({
-      enriched_at: new Date().toISOString(),
-      enriched_tier: "osint",
-      enriched_emails: combined.emails,
-      enriched_phones: combined.phones,
-      enriched_socials: combined.social_profiles,
-      revenue_signal_score: revenue.score,
-      revenue_signal_notes: revenue.notes,
-      enrichment_cost_usd: 0,
-    }).eq("id", match_id);
-    return { ok: true, match_id, tier_reached: "osint", cost_usd: 0, emails_found: 0, phones_found: 0, reason: "no validated signal — paid tiers skipped" };
+    await sb()
+      .from("competitor_host_matches")
+      .update({
+        enriched_at: new Date().toISOString(),
+        enriched_tier: "osint",
+        enriched_emails: combined.emails,
+        enriched_phones: combined.phones,
+        enriched_socials: combined.social_profiles,
+        revenue_signal_score: revenue.score,
+        revenue_signal_notes: revenue.notes,
+        enrichment_cost_usd: 0,
+      })
+      .eq("id", match_id);
+    return {
+      ok: true,
+      match_id,
+      tier_reached: "osint",
+      cost_usd: 0,
+      emails_found: 0,
+      phones_found: 0,
+      reason: "no validated signal — paid tiers skipped",
+    };
   }
 
   // ---------- Tier 1: BatchData ----------
   // Now also requires confidence >= 85 (was 70) AND the match isn't all-garbage.
-  const tier1Eligible = !overCap && !listingCapHit && priority && confidence >= 85 && !!combined.property_address;
+  const tier1Eligible =
+    !overCap && !listingCapHit && priority && confidence >= 85 && !!combined.property_address;
   const forceT1 = opts?.force_tier === "batchdata" || opts?.force_tier === "pdl";
 
-  if ((tier1Eligible || forceT1) && (combined.property_address)) {
+  if ((tier1Eligible || forceT1) && combined.property_address) {
     const t1 = await tier1BatchData({
       match_id,
       property_address: combined.property_address,
@@ -524,7 +673,13 @@ export async function enrichHostMatch(match_id: string, opts?: { force_tier?: "o
 
   // ---------- Tier 2: PDL ----------
   const stillUnderCap = (await getDailySpend()) < DAILY_SPEND_CAP_USD;
-  const tier2Eligible = stillUnderCap && !listingCapHit && priority && confidence >= 85 && revenue.score >= 50 && !!(match.host_first_name && match.host_city);
+  const tier2Eligible =
+    stillUnderCap &&
+    !listingCapHit &&
+    priority &&
+    confidence >= 85 &&
+    revenue.score >= 50 &&
+    !!(match.host_first_name && match.host_city);
   const forceT2 = opts?.force_tier === "pdl";
 
   if ((tier2Eligible || forceT2) && match.host_first_name && match.host_city) {
@@ -540,7 +695,9 @@ export async function enrichHostMatch(match_id: string, opts?: { force_tier?: "o
       combined.full_name = combined.full_name || t2.data.full_name;
       combined.emails = Array.from(new Set([...combined.emails, ...t2.data.emails]));
       combined.phones = Array.from(new Set([...combined.phones, ...t2.data.phones]));
-      combined.social_profiles = Array.from(new Set([...combined.social_profiles, ...t2.data.social_profiles]));
+      combined.social_profiles = Array.from(
+        new Set([...combined.social_profiles, ...t2.data.social_profiles]),
+      );
       highestTier = "pdl";
     }
   }
@@ -548,20 +705,29 @@ export async function enrichHostMatch(match_id: string, opts?: { force_tier?: "o
   // Final sanitize before persisting/caching — never write garbage to the DB.
   combined = sanitizeShape(combined, match.host_first_name);
   if (cacheKey) {
-    await writeCache(cacheKey, highestTier, combined, { revenue, listingMd: !!listingMd }, totalCost);
+    await writeCache(
+      cacheKey,
+      highestTier,
+      combined,
+      { revenue, listingMd: !!listingMd },
+      totalCost,
+    );
   }
 
-  await sb().from("competitor_host_matches").update({
-    enriched_at: new Date().toISOString(),
-    enriched_tier: highestTier,
-    enriched_emails: combined.emails,
-    enriched_phones: combined.phones,
-    enriched_socials: combined.social_profiles,
-    property_address: combined.property_address,
-    revenue_signal_score: revenue.score,
-    revenue_signal_notes: revenue.notes,
-    enrichment_cost_usd: totalCost,
-  }).eq("id", match_id);
+  await sb()
+    .from("competitor_host_matches")
+    .update({
+      enriched_at: new Date().toISOString(),
+      enriched_tier: highestTier,
+      enriched_emails: combined.emails,
+      enriched_phones: combined.phones,
+      enriched_socials: combined.social_profiles,
+      property_address: combined.property_address,
+      revenue_signal_score: revenue.score,
+      revenue_signal_notes: revenue.notes,
+      enrichment_cost_usd: totalCost,
+    })
+    .eq("id", match_id);
 
   return {
     ok: true,
@@ -570,11 +736,17 @@ export async function enrichHostMatch(match_id: string, opts?: { force_tier?: "o
     cost_usd: totalCost,
     emails_found: combined.emails.length,
     phones_found: combined.phones.length,
-    reason: listingCapHit ? "30-day per-listing cap hit, paid tiers skipped" : (overCap ? "daily cap reached, paid tiers skipped" : undefined),
+    reason: listingCapHit
+      ? "30-day per-listing cap hit, paid tiers skipped"
+      : overCap
+        ? "daily cap reached, paid tiers skipped"
+        : undefined,
   };
 }
 
-export async function enrichManyHostMatches(match_ids: string[]): Promise<{ processed: number; total_cost: number; cap_hit: boolean }> {
+export async function enrichManyHostMatches(
+  match_ids: string[],
+): Promise<{ processed: number; total_cost: number; cap_hit: boolean }> {
   let total_cost = 0;
   let processed = 0;
   let cap_hit = false;

@@ -10,14 +10,23 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 async function fetchSitemapUrls(sitemapUrl: string, depth = 0): Promise<string[]> {
   if (depth > 2) return [];
-  const res = await fetch(sitemapUrl, { headers: { "User-Agent": "Mozilla/5.0 (compatible; PoolRentalNearMeBot/1.0; +https://www.poolrentalnearme.com)" } });
+  const res = await fetch(sitemapUrl, {
+    headers: {
+      "User-Agent":
+        "Mozilla/5.0 (compatible; PoolRentalNearMeBot/1.0; +https://www.poolrentalnearme.com)",
+    },
+  });
   if (!res.ok) throw new Error(`Sitemap fetch ${res.status}`);
   const xml = await res.text();
   const locs = Array.from(xml.matchAll(/<loc>\s*([^<\s]+)\s*<\/loc>/g)).map((m) => m[1]);
   if (/<sitemapindex/i.test(xml)) {
     const out: string[] = [];
     for (const child of locs.slice(0, 25)) {
-      try { out.push(...(await fetchSitemapUrls(child, depth + 1))); } catch { /* skip */ }
+      try {
+        out.push(...(await fetchSitemapUrls(child, depth + 1)));
+      } catch {
+        /* skip */
+      }
     }
     return out;
   }
@@ -34,19 +43,33 @@ async function runScan() {
       const urls = await fetchSitemapUrls(site.sitemap_url);
       const unique = Array.from(new Set(urls)).slice(0, 10000);
       const now = new Date().toISOString();
-      const { data: existing } = await sb.from("competitor_urls").select("url").eq("site_id", site.id);
+      const { data: existing } = await sb
+        .from("competitor_urls")
+        .select("url")
+        .eq("site_id", site.id);
       const existingSet = new Set((existing || []).map((r: any) => r.url));
       const newOnes = unique.filter((u) => !existingSet.has(u));
       if (newOnes.length) {
-        const { data: inserted } = await sb.from("competitor_urls").insert(
-          newOnes.map((url) => ({ site_id: site.id, url, first_seen_at: now, last_seen_at: now })),
-        ).select("id");
+        const { data: inserted } = await sb
+          .from("competitor_urls")
+          .insert(
+            newOnes.map((url) => ({
+              site_id: site.id,
+              url,
+              first_seen_at: now,
+              last_seen_at: now,
+            })),
+          )
+          .select("id");
         for (const r of inserted || []) newlyInsertedIds.push(r.id);
       }
-      await sb.from("competitor_sites").update({
-        last_checked_at: now,
-        last_url_count: unique.length,
-      }).eq("id", site.id);
+      await sb
+        .from("competitor_sites")
+        .update({
+          last_checked_at: now,
+          last_url_count: unique.length,
+        })
+        .eq("id", site.id);
       results.push({ domain: site.domain, new_count: newOnes.length, total: unique.length });
     } catch (e: any) {
       results.push({ domain: site.domain, error: e?.message || "scan failed" });
@@ -83,7 +106,13 @@ async function runScan() {
     console.error("[radar-scan] enrich failed", e);
   }
 
-  return { ok: true, results, matcher: matcherResult, enrich: enrichResult, ran_at: new Date().toISOString() };
+  return {
+    ok: true,
+    results,
+    matcher: matcherResult,
+    enrich: enrichResult,
+    ran_at: new Date().toISOString(),
+  };
 }
 
 export const Route = createFileRoute("/api/public/hooks/competitor-radar-scan")({

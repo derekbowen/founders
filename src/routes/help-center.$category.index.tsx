@@ -4,12 +4,7 @@ import { getHelpCategoryWithArticles } from "@/server/help-center.functions";
 import { SiteHeader, SiteFooter } from "@/components/site-layout";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { getCategoryIcon } from "@/lib/category-icons";
-import {
-  buildMeta,
-  breadcrumbJsonLd,
-  ldJsonScript,
-  SITE_NAME,
-} from "@/lib/seo";
+import { buildMeta, breadcrumbJsonLd, ldJsonScript, SITE_NAME } from "@/lib/seo";
 
 export const Route = createFileRoute("/help-center/$category/")({
   loader: async ({ params }) => {
@@ -24,9 +19,7 @@ export const Route = createFileRoute("/help-center/$category/")({
     const c = loaderData.category;
     const title = c.seo_title || `${c.name} — ${SITE_NAME} Help Center`;
     const description =
-      c.seo_description ||
-      c.description ||
-      `Help articles in the ${c.name} category.`;
+      c.seo_description || c.description || `Help articles in the ${c.name} category.`;
     const meta = buildMeta({
       title,
       description: description.slice(0, 160),
@@ -135,29 +128,27 @@ function HelpCategoryPage() {
             </div>
           ) : (
             <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
-              {articles.map(
-                (a: { slug: string; title: string; excerpt: string | null }) => (
-                  <li key={a.slug}>
-                    <Link
-                      to="/help-center/$category/$slug"
-                      params={{ category: params.category, slug: a.slug }}
-                      className="group flex items-start justify-between gap-4 px-6 py-5 hover:bg-muted/50"
-                    >
-                      <div className="min-w-0">
-                        <h3 className="text-base font-semibold text-foreground group-hover:text-primary">
-                          {a.title}
-                        </h3>
-                        {a.excerpt && (
-                          <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
-                            {a.excerpt}
-                          </p>
-                        )}
-                      </div>
-                      <ChevronRight className="mt-1 h-5 w-5 shrink-0 text-muted-foreground group-hover:text-primary" />
-                    </Link>
-                  </li>
-                ),
-              )}
+              {articles.map((a: { slug: string; title: string; excerpt: string | null }) => (
+                <li key={a.slug}>
+                  <Link
+                    to="/help-center/$category/$slug"
+                    params={{ category: params.category, slug: a.slug }}
+                    className="group flex items-start justify-between gap-4 px-6 py-5 hover:bg-muted/50"
+                  >
+                    <div className="min-w-0">
+                      <h3 className="text-base font-semibold text-foreground group-hover:text-primary">
+                        {a.title}
+                      </h3>
+                      {a.excerpt && (
+                        <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+                          {a.excerpt}
+                        </p>
+                      )}
+                    </div>
+                    <ChevronRight className="mt-1 h-5 w-5 shrink-0 text-muted-foreground group-hover:text-primary" />
+                  </Link>
+                </li>
+              ))}
             </ul>
           )}
         </section>

@@ -62,10 +62,19 @@ const HexColor = z.string().regex(/^#[0-9a-fA-F]{6}$/, "Must be a 6-digit hex co
 const UpdateSchema = z.object({
   site_name: z.string().min(1).max(120),
   sender_name: z.string().min(1).max(120),
-  logo_url: z.string().url().max(500).nullable().or(z.literal("").transform(() => null)),
+  logo_url: z
+    .string()
+    .url()
+    .max(500)
+    .nullable()
+    .or(z.literal("").transform(() => null)),
   primary_color: HexColor,
   primary_text_color: HexColor,
-  footer_text: z.string().max(500).nullable().or(z.literal("").transform(() => null)),
+  footer_text: z
+    .string()
+    .max(500)
+    .nullable()
+    .or(z.literal("").transform(() => null)),
 });
 
 export const updateEmailBranding = createServerFn({ method: "POST" })
@@ -74,9 +83,7 @@ export const updateEmailBranding = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     const { userId } = context as { userId: string };
     await assertAdmin(userId);
-    const { error } = await supabaseAdmin
-      .from("email_branding" as any)
-      .upsert({ id: 1, ...data });
+    const { error } = await supabaseAdmin.from("email_branding" as any).upsert({ id: 1, ...data });
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -103,7 +110,12 @@ function sampleProps(type: string) {
     case "recovery":
       return { confirmationUrl: SAMPLE_URL };
     case "email_change":
-      return { oldEmail: SAMPLE_EMAIL, email: SAMPLE_EMAIL, newEmail: "new@example.test", confirmationUrl: SAMPLE_URL };
+      return {
+        oldEmail: SAMPLE_EMAIL,
+        email: SAMPLE_EMAIL,
+        newEmail: "new@example.test",
+        confirmationUrl: SAMPLE_URL,
+      };
     case "reauthentication":
       return { token: "123456" };
     default:

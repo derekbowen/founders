@@ -8,13 +8,7 @@ import {
   searchHelpArticles,
 } from "@/server/help-center.functions";
 import { SiteHeader, SiteFooter } from "@/components/site-layout";
-import {
-  buildMeta,
-  breadcrumbJsonLd,
-  ldJsonScript,
-  SITE_URL,
-  SITE_NAME,
-} from "@/lib/seo";
+import { buildMeta, breadcrumbJsonLd, ldJsonScript, SITE_URL, SITE_NAME } from "@/lib/seo";
 
 export const Route = createFileRoute("/help-center/")({
   loader: async () => {
@@ -121,8 +115,8 @@ function HelpCenterIndex() {
               How can we help?
             </h1>
             <p className="mx-auto mt-4 max-w-2xl text-base opacity-90 sm:text-lg">
-              Search guides for hosts and guests — listing, bookings, payments,
-              safety, maintenance, and more.
+              Search guides for hosts and guests — listing, bookings, payments, safety, maintenance,
+              and more.
             </p>
             <div className="mx-auto mt-10 max-w-2xl">
               <div className="relative">
@@ -139,9 +133,7 @@ function HelpCenterIndex() {
               {query.trim().length >= 2 && (
                 <div className="mt-3 max-h-[60vh] overflow-y-auto rounded-2xl bg-background text-left text-foreground shadow-xl">
                   {searching && (
-                    <div className="px-5 py-4 text-sm text-muted-foreground">
-                      Searching…
-                    </div>
+                    <div className="px-5 py-4 text-sm text-muted-foreground">Searching…</div>
                   )}
                   {!searching && results.length === 0 && (
                     <div className="px-5 py-4 text-sm text-muted-foreground">
@@ -188,37 +180,40 @@ function HelpCenterIndex() {
 
         {/* Categories grid */}
         <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold tracking-tight text-foreground">
-            Browse by category
-          </h2>
+          <h2 className="text-2xl font-bold tracking-tight text-foreground">Browse by category</h2>
           <p className="mt-2 text-muted-foreground">
             {categories.length} categories of guides and resources.
           </p>
 
           <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {categories.map((c: { slug: string; name: string; description: string | null; icon: string | null }) => (
-              <Link
-                key={c.slug}
-                to="/help-center/$category"
-                params={{ category: c.slug }}
-                className="group flex flex-col rounded-2xl border border-border bg-card p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary hover:shadow-lg"
-              >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                  <CategoryIcon name={c.icon} />
-                </div>
-                <h3 className="mt-5 text-lg font-semibold text-foreground group-hover:text-primary">
-                  {c.name}
-                </h3>
-                {c.description && (
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    {c.description}
-                  </p>
-                )}
-                <span className="mt-4 inline-flex items-center text-sm font-semibold text-primary">
-                  Browse <ChevronRight className="ml-1 h-4 w-4" />
-                </span>
-              </Link>
-            ))}
+            {categories.map(
+              (c: {
+                slug: string;
+                name: string;
+                description: string | null;
+                icon: string | null;
+              }) => (
+                <Link
+                  key={c.slug}
+                  to="/help-center/$category"
+                  params={{ category: c.slug }}
+                  className="group flex flex-col rounded-2xl border border-border bg-card p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary hover:shadow-lg"
+                >
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <CategoryIcon name={c.icon} />
+                  </div>
+                  <h3 className="mt-5 text-lg font-semibold text-foreground group-hover:text-primary">
+                    {c.name}
+                  </h3>
+                  {c.description && (
+                    <p className="mt-2 text-sm text-muted-foreground">{c.description}</p>
+                  )}
+                  <span className="mt-4 inline-flex items-center text-sm font-semibold text-primary">
+                    Browse <ChevronRight className="ml-1 h-4 w-4" />
+                  </span>
+                </Link>
+              ),
+            )}
           </div>
         </section>
 
@@ -237,9 +232,7 @@ function HelpCenterIndex() {
                       params={{ category: a.category_slug, slug: a.slug }}
                       className="flex items-center justify-between rounded-xl border border-border bg-card px-5 py-4 shadow-sm hover:border-primary hover:shadow"
                     >
-                      <span className="text-sm font-semibold text-foreground">
-                        {a.title}
-                      </span>
+                      <span className="text-sm font-semibold text-foreground">{a.title}</span>
                       <ChevronRight className="h-4 w-4 text-muted-foreground" />
                     </Link>
                   </li>
@@ -252,13 +245,10 @@ function HelpCenterIndex() {
         {/* E-Learning callout */}
         <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
           <div className="rounded-3xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-8 sm:p-12">
-            <h2 className="text-2xl font-bold text-foreground sm:text-3xl">
-              E-Learning Academy
-            </h2>
+            <h2 className="text-2xl font-bold text-foreground sm:text-3xl">E-Learning Academy</h2>
             <p className="mt-3 max-w-2xl text-muted-foreground">
-              Take certified courses on water safety, CPR, host best practices,
-              and emergency procedures — all from the PoolRentalNearMe Learning
-              Center.
+              Take certified courses on water safety, CPR, host best practices, and emergency
+              procedures — all from the PoolRentalNearMe Learning Center.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link

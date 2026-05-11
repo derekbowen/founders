@@ -20,7 +20,6 @@ export function HydrationDebug() {
     const htmlLen = document.documentElement.outerHTML.length;
     const bodyChildren = document.body.children.length;
 
-    // eslint-disable-next-line no-console
     console.info("[hydration-debug] mounted", {
       url,
       path,
@@ -60,19 +59,15 @@ export function HydrationDebug() {
       if (isHydration) {
         const stack = new Error("hydration-debug capture").stack;
         try {
-          origError.call(
-            console,
-            "[hydration-debug] HYDRATION ERROR DETECTED",
-            {
-              url: window.location.href,
-              path: window.location.pathname,
-              originalArgs: args,
-              capturedStack: stack,
-              docTitle: document.title,
-              firstH1: document.querySelector("h1")?.textContent ?? null,
-              bodyPreview: document.body.innerText.slice(0, 200),
-            },
-          );
+          origError.call(console, "[hydration-debug] HYDRATION ERROR DETECTED", {
+            url: window.location.href,
+            path: window.location.pathname,
+            originalArgs: args,
+            capturedStack: stack,
+            docTitle: document.title,
+            firstH1: document.querySelector("h1")?.textContent ?? null,
+            bodyPreview: document.body.innerText.slice(0, 200),
+          });
         } catch {
           // ignore
         }
@@ -82,7 +77,6 @@ export function HydrationDebug() {
     };
 
     const onError = (event: ErrorEvent) => {
-      // eslint-disable-next-line no-console
       console.warn("[hydration-debug] window.error", {
         message: event.message,
         filename: event.filename,
@@ -92,7 +86,6 @@ export function HydrationDebug() {
       });
     };
     const onRejection = (event: PromiseRejectionEvent) => {
-      // eslint-disable-next-line no-console
       console.warn("[hydration-debug] unhandledrejection", {
         reason: event.reason?.message ?? String(event.reason),
         stack: event.reason?.stack,
@@ -117,24 +110,16 @@ export function HydrationDebug() {
  * Use sparingly to bisect which component is causing a hydration mismatch:
  *   <RenderTrace name="HomePageHero"><Hero /></RenderTrace>
  */
-export function RenderTrace({
-  name,
-  children,
-}: {
-  name: string;
-  children: React.ReactNode;
-}) {
+export function RenderTrace({ name, children }: { name: string; children: React.ReactNode }) {
   const isServer = typeof window === "undefined";
-  // eslint-disable-next-line no-console
+
   console.info(`[render-trace] ${name} render`, {
     env: isServer ? "server" : "client",
   });
 
   useEffect(() => {
-    // eslint-disable-next-line no-console
     console.info(`[render-trace] ${name} mounted`);
     return () => {
-      // eslint-disable-next-line no-console
       console.info(`[render-trace] ${name} unmounted`);
     };
   }, [name]);

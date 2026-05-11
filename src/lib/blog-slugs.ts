@@ -50,8 +50,8 @@ export const SLUG_ALIASES: Record<string, string> = {
   "high-stabilizer": "high-cyanuric-acid-stabilizer-fix",
   "calcium-hardness": "calcium-hardness-too-high-or-low",
   "high-tds": "total-dissolved-solids-tds-too-high-in-pool",
-  "phosphates": "phosphates-in-pool-water-removal-guide",
-  "chloramines": "pool-smells-like-chlorine-chloramines",
+  phosphates: "phosphates-in-pool-water-removal-guide",
+  chloramines: "pool-smells-like-chlorine-chloramines",
   "pool-smell": "pool-smells-like-chlorine-chloramines",
 
   // Equipment
@@ -92,12 +92,12 @@ export const SLUG_ALIASES: Record<string, string> = {
   // Maintenance / seasonal
   "after-storm": "after-storm-pool-recovery",
   "storm-cleanup": "after-storm-pool-recovery",
-  "winterizing": "pool-winterizing-mistakes-and-fixes",
+  winterizing: "pool-winterizing-mistakes-and-fixes",
   "pool-winterization": "pool-winterizing-mistakes-and-fixes",
   "spring-opening": "pool-opening-problems-spring-startup",
   "pool-opening": "pool-opening-problems-spring-startup",
   "pool-cover": "pool-cover-problems-sagging-and-tears",
-  "evaporation": "pool-water-loss-evaporation-vs-leak",
+  evaporation: "pool-water-loss-evaporation-vs-leak",
   "water-loss": "pool-water-loss-evaporation-vs-leak",
   "pool-stains": "pool-stains-metal-organic-and-mineral",
   "scale-on-tile": "scale-and-calcium-buildup-on-pool-tiles",

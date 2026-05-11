@@ -3,7 +3,13 @@ import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-const slugSchema = z.object({ slug: z.string().min(1).max(120).regex(/^[a-z0-9-]+$/) });
+const slugSchema = z.object({
+  slug: z
+    .string()
+    .min(1)
+    .max(120)
+    .regex(/^[a-z0-9-]+$/),
+});
 
 export const listHostTools = createServerFn({ method: "GET" }).handler(async () => {
   const { data, error } = await supabaseAdmin
@@ -33,7 +39,9 @@ export const getHostTool = createServerFn({ method: "GET" })
 export const listThreads = createServerFn({ method: "GET" }).handler(async () => {
   const { data, error } = await supabaseAdmin
     .from("mb_threads")
-    .select("id,title,body,author_name,reply_count,like_count,is_pinned,last_activity_at,created_at,user_id")
+    .select(
+      "id,title,body,author_name,reply_count,like_count,is_pinned,last_activity_at,created_at,user_id",
+    )
     .order("is_pinned", { ascending: false })
     .order("last_activity_at", { ascending: false })
     .limit(100);
@@ -165,7 +173,8 @@ export const runAiTool = createServerFn({ method: "POST" })
     });
 
     if (res.status === 429) throw new Error("Rate limit reached. Try again in a moment.");
-    if (res.status === 402) throw new Error("AI credits exhausted. Add funds in Workspace settings.");
+    if (res.status === 402)
+      throw new Error("AI credits exhausted. Add funds in Workspace settings.");
     if (!res.ok) {
       const txt = await res.text();
       throw new Error(`AI request failed: ${txt.slice(0, 200)}`);

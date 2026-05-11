@@ -5,10 +5,7 @@ import { CheckCircle2, ExternalLink, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteHeader, SiteFooter } from "@/components/site-layout";
 import { getCurrentWorkspace, type CurrentWorkspace } from "@/server/workspace.functions";
-import {
-  createCheckoutSession,
-  createPortalSession,
-} from "@/server/billing.functions";
+import { createCheckoutSession, createPortalSession } from "@/server/billing.functions";
 import {
   PLAN_FEATURES,
   type Plan,
@@ -134,8 +131,7 @@ function UpgradeBanner({ feature, currentPlan }: { feature: Feature; currentPlan
     <div className="mb-6 rounded-xl border border-primary/30 bg-primary/5 p-4">
       <p className="text-sm">
         <strong>{feature}</strong> is available on the{" "}
-        <strong>{PLAN_FEATURES[minPlan].name}</strong> plan and above. Upgrade below to unlock
-        it.
+        <strong>{PLAN_FEATURES[minPlan].name}</strong> plan and above. Upgrade below to unlock it.
       </p>
     </div>
   );
@@ -186,7 +182,11 @@ function CurrentPlanCard({ workspace }: { workspace: CurrentWorkspace }) {
             disabled={busy}
             className="inline-flex h-9 items-center gap-2 rounded-full border border-border px-4 text-sm font-medium hover:bg-muted disabled:opacity-50"
           >
-            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <ExternalLink className="h-4 w-4" />}
+            {busy ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <ExternalLink className="h-4 w-4" />
+            )}
             Manage payment & invoices
           </button>
         )}

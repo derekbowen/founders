@@ -19,8 +19,8 @@ export const MARKETPLACE_ORIGIN = "https://www.poolrentalnearme.com";
 // Path prefixes owned by the Sharetribe marketplace template.
 // Order matters only for readability; matching is by prefix.
 const SHARETRIBE_PREFIXES = [
-  "/s",            // search
-  "/l/",           // listing detail + draft
+  "/s", // search
+  "/l/", // listing detail + draft
   "/signup",
   "/login",
   "/logout",

@@ -15,7 +15,7 @@ function corsHeaders(origin: string | null) {
     "Access-Control-Allow-Origin": allow,
     "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Vary": "Origin",
+    Vary: "Origin",
   };
 }
 
@@ -25,7 +25,8 @@ const TOOL = {
   type: "function",
   function: {
     name: "emit_course_content",
-    description: "Emit structured long-form course content. Total prose across all sections MUST be at least 2,500 words.",
+    description:
+      "Emit structured long-form course content. Total prose across all sections MUST be at least 2,500 words.",
     parameters: {
       type: "object",
       properties: {
@@ -39,7 +40,10 @@ const TOOL = {
           type: "array",
           items: {
             type: "object",
-            properties: { title: { type: "string" }, content: { type: "string", description: "200-300 words" } },
+            properties: {
+              title: { type: "string" },
+              content: { type: "string", description: "200-300 words" },
+            },
             required: ["title", "content"],
           },
         },
@@ -58,7 +62,22 @@ const TOOL = {
         duration_minutes: { type: "integer" },
         level: { type: "string" },
       },
-      required: ["seo_title","seo_description","excerpt","overview","who_its_for","learning_outcomes","modules","host_playbook","pricing_tactics","common_mistakes","faq","related_topics","duration_minutes","level"],
+      required: [
+        "seo_title",
+        "seo_description",
+        "excerpt",
+        "overview",
+        "who_its_for",
+        "learning_outcomes",
+        "modules",
+        "host_playbook",
+        "pricing_tactics",
+        "common_mistakes",
+        "faq",
+        "related_topics",
+        "duration_minutes",
+        "level",
+      ],
       additionalProperties: false,
     },
   },
@@ -71,12 +90,32 @@ Deno.serve(async (req) => {
     // Require admin auth
     const authHeader = req.headers.get("Authorization");
     const token = authHeader?.replace("Bearer ", "");
-    if (!token) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...cors, "Content-Type": "application/json" } });
-    const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+    if (!token)
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...cors, "Content-Type": "application/json" },
+      });
+    const sb = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
     const { data: u, error: uErr } = await sb.auth.getUser(token);
-    if (uErr || !u.user) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...cors, "Content-Type": "application/json" } });
-    const { data: role } = await sb.from("user_roles").select("role").eq("user_id", u.user.id).eq("role", "admin").maybeSingle();
-    if (!role) return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: { ...cors, "Content-Type": "application/json" } });
+    if (uErr || !u.user)
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...cors, "Content-Type": "application/json" },
+      });
+    const { data: role } = await sb
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", u.user.id)
+      .eq("role", "admin")
+      .maybeSingle();
+    if (!role)
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403,
+        headers: { ...cors, "Content-Type": "application/json" },
+      });
 
     const { course } = await req.json();
     const KEY = Deno.env.get("OPENROUTER_API_KEY");
@@ -94,7 +133,10 @@ Write the full long-form course content for the PRNM Learning Academy. Total pro
       headers: { Authorization: `Bearer ${KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
-        messages: [{ role: "system", content: SYSTEM }, { role: "user", content: userPrompt }],
+        messages: [
+          { role: "system", content: SYSTEM },
+          { role: "user", content: userPrompt },
+        ],
         tools: [TOOL],
         tool_choice: { type: "function", function: { name: "emit_course_content" } },
       }),
@@ -102,14 +144,22 @@ Write the full long-form course content for the PRNM Learning Academy. Total pro
 
     if (!r.ok) {
       const text = await r.text();
-      return new Response(JSON.stringify({ error: `gateway ${r.status}: ${text}` }), { status: r.status, headers: { ...cors, "Content-Type": "application/json" } });
+      return new Response(JSON.stringify({ error: `gateway ${r.status}: ${text}` }), {
+        status: r.status,
+        headers: { ...cors, "Content-Type": "application/json" },
+      });
     }
     const data = await r.json();
     const args = data.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
     const content = typeof args === "string" ? JSON.parse(args) : args;
-    return new Response(JSON.stringify({ content }), { headers: { ...cors, "Content-Type": "application/json" } });
+    return new Response(JSON.stringify({ content }), {
+      headers: { ...cors, "Content-Type": "application/json" },
+    });
   } catch (e) {
     console.error(e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : String(e) }), { status: 500, headers: { ...cors, "Content-Type": "application/json" } });
+    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : String(e) }), {
+      status: 500,
+      headers: { ...cors, "Content-Type": "application/json" },
+    });
   }
 });

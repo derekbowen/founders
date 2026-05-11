@@ -55,13 +55,14 @@ export const getCityClickReport = createServerFn({ method: "POST" })
 
     if (error) throw new Error(error.message);
 
-    const agg = new Map<
-      string,
-      { total: number; visitors: Set<string>; last: string }
-    >();
+    const agg = new Map<string, { total: number; visitors: Set<string>; last: string }>();
     for (const r of rows ?? []) {
       const slug = r.to_city_slug as string;
-      const entry = agg.get(slug) ?? { total: 0, visitors: new Set<string>(), last: r.clicked_at as string };
+      const entry = agg.get(slug) ?? {
+        total: 0,
+        visitors: new Set<string>(),
+        last: r.clicked_at as string,
+      };
       entry.total += 1;
       if (r.visitor_hash) entry.visitors.add(r.visitor_hash as string);
       if ((r.clicked_at as string) > entry.last) entry.last = r.clicked_at as string;
@@ -75,10 +76,7 @@ export const getCityClickReport = createServerFn({ method: "POST" })
     // Look up display names for top slugs only.
     const slugs = sortedSlugs.map(([s]) => s);
     const { data: cities } = slugs.length
-      ? await supabaseAdmin
-          .from("cities")
-          .select("slug, name, state_code")
-          .in("slug", slugs)
+      ? await supabaseAdmin.from("cities").select("slug, name, state_code").in("slug", slugs)
       : { data: [] as Array<{ slug: string; name: string; state_code: string }> };
 
     const cityMap = new Map<string, { name: string; state_code: string }>();

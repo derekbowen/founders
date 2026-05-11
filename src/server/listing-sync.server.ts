@@ -4,12 +4,7 @@
  * Server-only.
  */
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import {
-  integrationGet,
-  type STImage,
-  type STListing,
-  type STResponse,
-} from "./sharetribe.server";
+import { integrationGet, type STImage, type STListing, type STResponse } from "./sharetribe.server";
 
 const PER_PAGE = 100;
 
@@ -31,9 +26,7 @@ function pickImages(
   if (!included || refs.length === 0) return { primary: null, all: [] };
   const urls: string[] = [];
   for (const ref of refs) {
-    const img = included.find(
-      (x) => x.type === "image" && x.id === ref.id,
-    ) as STImage | undefined;
+    const img = included.find((x) => x.type === "image" && x.id === ref.id) as STImage | undefined;
     if (!img) continue;
     const v = img.attributes.variants;
     const url =
@@ -52,24 +45,20 @@ function toRow(listing: STListing, included: STResponse<unknown>["included"]) {
   const md = (a.metadata ?? {}) as Record<string, any>;
   const { primary, all } = pickImages(listing, included);
 
-  const city: string | null =
-    pd.city ?? pd.location?.city ?? pd.address?.city ?? null;
+  const city: string | null = pd.city ?? pd.location?.city ?? pd.address?.city ?? null;
   const stateCode: string | null =
     pd.state ?? pd.stateCode ?? pd.location?.state ?? pd.address?.state ?? null;
   const address: string | null =
     pd.address?.formatted ?? pd.location?.address ?? pd.fullAddress ?? null;
 
-  const amenities: string[] = Array.isArray(pd.amenities)
-    ? pd.amenities.map(String)
-    : [];
+  const amenities: string[] = Array.isArray(pd.amenities) ? pd.amenities.map(String) : [];
   const capacity: number | null =
     typeof pd.capacity === "number"
       ? pd.capacity
       : typeof pd.maxGuests === "number"
         ? pd.maxGuests
         : null;
-  const category: string | null =
-    pd.category ?? pd.listingType ?? pd.type ?? null;
+  const category: string | null = pd.category ?? pd.listingType ?? pd.type ?? null;
 
   return {
     sharetribe_id: listing.id,
@@ -129,18 +118,14 @@ export async function runListingSync(): Promise<SyncResult> {
 
   try {
     // Loop pages
-    // eslint-disable-next-line no-constant-condition
+
     while (true) {
-      const resp = await integrationGet<STResponse<STListing[]>>(
-        "/listings/query",
-        {
-          include: "images,author",
-          "fields.image":
-            "variants.default,variants.landscape-crop,variants.landscape-crop2x",
-          perPage: PER_PAGE,
-          page,
-        },
-      );
+      const resp = await integrationGet<STResponse<STListing[]>>("/listings/query", {
+        include: "images,author",
+        "fields.image": "variants.default,variants.landscape-crop,variants.landscape-crop2x",
+        perPage: PER_PAGE,
+        page,
+      });
 
       const listings = resp.data ?? [];
       if (listings.length === 0) break;
@@ -153,9 +138,7 @@ export async function runListingSync(): Promise<SyncResult> {
         .from("synced_listings")
         .select("sharetribe_id")
         .in("sharetribe_id", ids);
-      const existingIds = new Set(
-        (existing ?? []).map((r: any) => r.sharetribe_id as string),
-      );
+      const existingIds = new Set((existing ?? []).map((r: any) => r.sharetribe_id as string));
 
       const { error: upsertError } = await supabaseAdmin
         .from("synced_listings")

@@ -81,7 +81,9 @@ function MyLearningPage() {
                   key={r.course_slug}
                   className="rounded-2xl border border-border bg-card p-4 shadow-sm"
                 >
-                  <div className="font-semibold text-foreground">{r.course_title ?? r.course_slug}</div>
+                  <div className="font-semibold text-foreground">
+                    {r.course_title ?? r.course_slug}
+                  </div>
                   <div className="mt-1 text-xs text-muted-foreground">
                     Completed {r.completed_at ? new Date(r.completed_at).toLocaleDateString() : ""}
                   </div>

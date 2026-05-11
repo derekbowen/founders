@@ -10,11 +10,14 @@ export const Route = createFileRoute("/admin/page-auditor")({
   beforeLoad: async () => {
     if (typeof window === "undefined") return;
     const { data, error } = await supabase.auth.getUser();
-    if (error || !data.user) throw redirect({ to: "/auth", search: { redirect: "/admin/page-auditor", mode: "signin" } });
+    if (error || !data.user)
+      throw redirect({ to: "/auth", search: { redirect: "/admin/page-auditor", mode: "signin" } });
     const { isAdmin } = await checkAdminRole();
     if (!isAdmin) throw redirect({ to: "/admin/no-access" });
   },
-  head: () => ({ meta: [{ title: "AI Page Auditor — Admin" }, { name: "robots", content: "noindex,nofollow" }] }),
+  head: () => ({
+    meta: [{ title: "AI Page Auditor — Admin" }, { name: "robots", content: "noindex,nofollow" }],
+  }),
   component: PageAuditor,
 });
 
@@ -36,17 +39,29 @@ function PageAuditor() {
     const r = await listRecentAudits({ data: { limit: 30 } });
     setHistory(r.rows);
   }, []);
-  React.useEffect(() => { load(); }, [load]);
+  React.useEffect(() => {
+    load();
+  }, [load]);
 
   async function run() {
-    if (!path.trim().startsWith("/")) { setErr("Path must start with /"); return; }
-    setBusy(true); setErr(null); setCurrent(null);
+    if (!path.trim().startsWith("/")) {
+      setErr("Path must start with /");
+      return;
+    }
+    setBusy(true);
+    setErr(null);
+    setCurrent(null);
     try {
       const r: any = await auditPage({ data: { url_path: path.trim() } });
-      if (r.ok) { setCurrent(r.audit); await load(); }
-      else setErr(r.error || "audit failed");
-    } catch (e: any) { setErr(e?.message || "failed"); }
-    finally { setBusy(false); }
+      if (r.ok) {
+        setCurrent(r.audit);
+        await load();
+      } else setErr(r.error || "audit failed");
+    } catch (e: any) {
+      setErr(e?.message || "failed");
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
@@ -56,17 +71,25 @@ function PageAuditor() {
           <Sparkles className="h-6 w-6 text-primary" /> AI Page Auditor
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Score any /p/ page 0-100 against top-ranking competitors. Get strengths, weaknesses, and exact recommendations.
+          Score any /p/ page 0-100 against top-ranking competitors. Get strengths, weaknesses, and
+          exact recommendations.
         </p>
       </div>
 
       <div className="rounded-2xl border border-border bg-card p-4">
         <label className="block text-xs font-medium text-muted-foreground">Page URL path</label>
         <div className="mt-2 flex flex-col gap-2 sm:flex-row">
-          <input value={path} onChange={(e) => setPath(e.target.value)} placeholder="/p/austin-tx"
-            className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm font-mono" />
-          <button onClick={run} disabled={busy}
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50">
+          <input
+            value={path}
+            onChange={(e) => setPath(e.target.value)}
+            placeholder="/p/austin-tx"
+            className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm font-mono"
+          />
+          <button
+            onClick={run}
+            disabled={busy}
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+          >
             {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
             {busy ? "Auditing…" : "Audit page"}
           </button>
@@ -88,9 +111,21 @@ function PageAuditor() {
           </div>
 
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
-            <Section title="Strengths" icon={<CheckCircle2 className="h-4 w-4 text-emerald-600" />} items={current.strengths} />
-            <Section title="Weaknesses" icon={<AlertTriangle className="h-4 w-4 text-amber-600" />} items={current.weaknesses} />
-            <Section title="Recommendations" icon={<Lightbulb className="h-4 w-4 text-primary" />} items={current.recommendations} />
+            <Section
+              title="Strengths"
+              icon={<CheckCircle2 className="h-4 w-4 text-emerald-600" />}
+              items={current.strengths}
+            />
+            <Section
+              title="Weaknesses"
+              icon={<AlertTriangle className="h-4 w-4 text-amber-600" />}
+              items={current.weaknesses}
+            />
+            <Section
+              title="Recommendations"
+              icon={<Lightbulb className="h-4 w-4 text-primary" />}
+              items={current.recommendations}
+            />
           </div>
         </div>
       )}
@@ -104,14 +139,19 @@ function PageAuditor() {
             </p>
           )}
           {history.map((h) => (
-            <button key={h.id} onClick={() => setCurrent(h)}
-              className="flex w-full items-center justify-between gap-3 rounded-xl border border-border bg-card p-3 text-left hover:bg-muted/40">
+            <button
+              key={h.id}
+              onClick={() => setCurrent(h)}
+              className="flex w-full items-center justify-between gap-3 rounded-xl border border-border bg-card p-3 text-left hover:bg-muted/40"
+            >
               <div className="min-w-0">
                 <p className="truncate font-mono text-xs">{h.url_path}</p>
                 <p className="truncate text-xs text-muted-foreground">{h.summary}</p>
               </div>
               <div className="flex shrink-0 items-center gap-3">
-                <span className="text-xs text-muted-foreground">{new Date(h.audited_at).toLocaleDateString()}</span>
+                <span className="text-xs text-muted-foreground">
+                  {new Date(h.audited_at).toLocaleDateString()}
+                </span>
                 <span className={`text-xl font-bold ${scoreColor(h.score)}`}>{h.score ?? "—"}</span>
               </div>
             </button>
@@ -122,14 +162,30 @@ function PageAuditor() {
   );
 }
 
-function Section({ title, icon, items }: { title: string; icon: React.ReactNode; items: string[] }) {
+function Section({
+  title,
+  icon,
+  items,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  items: string[];
+}) {
   return (
     <div className="rounded-xl border border-border p-3">
       <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-muted-foreground">
         {icon} {title}
       </div>
       <ul className="mt-2 space-y-1.5 text-sm">
-        {items?.length ? items.map((it, i) => <li key={i} className="leading-snug">• {it}</li>) : <li className="text-xs text-muted-foreground">None</li>}
+        {items?.length ? (
+          items.map((it, i) => (
+            <li key={i} className="leading-snug">
+              • {it}
+            </li>
+          ))
+        ) : (
+          <li className="text-xs text-muted-foreground">None</li>
+        )}
       </ul>
     </div>
   );

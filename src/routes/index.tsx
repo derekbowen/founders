@@ -1,8 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { FoundersHome } from "@/components/founders-home";
-
-const SITE_NAME = "founders.click";
-const SITE_URL = "https://founders.click";
+import { SITE_NAME, SITE_URL } from "@/lib/seo";
 
 export const Route = createFileRoute("/")({
   head: () => ({

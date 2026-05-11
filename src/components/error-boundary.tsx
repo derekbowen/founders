@@ -24,12 +24,8 @@ export class ErrorBoundary extends Component<Props, State> {
   componentDidCatch(error: Error, info: ErrorInfo) {
     // Surface for diagnostics; never crash the page.
     const label = this.props.name ? `[${this.props.name}]` : "";
-    // eslint-disable-next-line no-console
-    console.error(
-      `ErrorBoundary${label} caught:`,
-      error,
-      info?.componentStack,
-    );
+
+    console.error(`ErrorBoundary${label} caught:`, error, info?.componentStack);
   }
 
   reset = () => {
@@ -46,11 +42,12 @@ export class ErrorBoundary extends Component<Props, State> {
             Something went wrong loading this section.
           </h2>
           <p className="mt-3 text-muted-foreground">
-            Please refresh the page. If this keeps happening, try again in a
-            moment.
+            Please refresh the page. If this keeps happening, try again in a moment.
           </p>
           <a
-            href="https://www.poolrentalnearme.com/s" target="_blank" rel="noopener noreferrer"
+            href="https://www.poolrentalnearme.com/s"
+            target="_blank"
+            rel="noopener noreferrer"
             className="mt-6 inline-flex items-center justify-center rounded-full bg-primary px-6 py-3 text-base font-semibold text-primary-foreground"
           >
             Browse pools →

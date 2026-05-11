@@ -70,9 +70,7 @@ async function getPublicReadToken(): Promise<string> {
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(
-      `Sharetribe public-read auth failed [${res.status}]: ${text.slice(0, 200)}`,
-    );
+    throw new Error(`Sharetribe public-read auth failed [${res.status}]: ${text.slice(0, 200)}`);
   }
 
   const json = (await res.json()) as { access_token: string; expires_in: number };
@@ -107,9 +105,7 @@ async function getIntegrationToken(): Promise<string> {
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(
-      `Sharetribe integ auth failed [${res.status}]: ${text.slice(0, 200)}`,
-    );
+    throw new Error(`Sharetribe integ auth failed [${res.status}]: ${text.slice(0, 200)}`);
   }
 
   const json = (await res.json()) as { access_token: string; expires_in: number };
@@ -144,9 +140,7 @@ async function integGet<T = unknown>(
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(
-      `Sharetribe ${path} failed [${res.status}]: ${text.slice(0, 200)}`,
-    );
+    throw new Error(`Sharetribe ${path} failed [${res.status}]: ${text.slice(0, 200)}`);
   }
   return (await res.json()) as T;
 }
@@ -172,9 +166,7 @@ export async function integrationGet<T = unknown>(
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(
-      `Sharetribe integ ${path} failed [${res.status}]: ${text.slice(0, 200)}`,
-    );
+    throw new Error(`Sharetribe integ ${path} failed [${res.status}]: ${text.slice(0, 200)}`);
   }
   return (await res.json()) as T;
 }
@@ -198,9 +190,7 @@ export async function integrationPost<T = unknown>(
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(
-      `Sharetribe integ POST ${path} failed [${res.status}]: ${text.slice(0, 200)}`,
-    );
+    throw new Error(`Sharetribe integ POST ${path} failed [${res.status}]: ${text.slice(0, 200)}`);
   }
   return (await res.json()) as T;
 }
@@ -273,15 +263,10 @@ function slugify(s: string): string {
   );
 }
 
-function pickImage(
-  listing: STListing,
-  included: STResponse<unknown>["included"],
-): string | null {
+function pickImage(listing: STListing, included: STResponse<unknown>["included"]): string | null {
   const imgRef = listing.relationships?.images?.data?.[0];
   if (!imgRef || !included) return null;
-  const img = included.find(
-    (x) => x.type === "image" && x.id === imgRef.id,
-  ) as STImage | undefined;
+  const img = included.find((x) => x.type === "image" && x.id === imgRef.id) as STImage | undefined;
   if (!img) return null;
   const variants = img.attributes.variants;
   return (
@@ -293,10 +278,7 @@ function pickImage(
   );
 }
 
-function summarize(
-  listing: STListing,
-  included: STResponse<unknown>["included"],
-): ListingSummary {
+function summarize(listing: STListing, included: STResponse<unknown>["included"]): ListingSummary {
   const pd = (listing.attributes.publicData ?? {}) as Record<string, unknown>;
   const location = (pd.location as Record<string, unknown> | undefined) ?? {};
   const addressStr =
@@ -311,10 +293,7 @@ function summarize(
     (addressStr ? addressStr.split(",")[0]?.trim() : "") ||
     null;
   const state =
-    (location.state as string) ||
-    (pd.state as string) ||
-    (pd.state_code as string) ||
-    null;
+    (location.state as string) || (pd.state as string) || (pd.state_code as string) || null;
   const slug = slugify(listing.attributes.title || "pool");
   return {
     id: listing.id,
@@ -331,8 +310,7 @@ function summarize(
 }
 
 const IMAGE_VARIANT_PARAMS = {
-  "fields.image":
-    "variants.landscape-crop,variants.landscape-crop2x,variants.default",
+  "fields.image": "variants.landscape-crop,variants.landscape-crop2x,variants.default",
   include: "images",
 };
 
@@ -341,10 +319,10 @@ export async function fetchListing(id: string): Promise<{
   raw: STListing;
 } | null> {
   try {
-    const res = await integGet<STResponse<STListing | STListing[]>>(
-      `/listings/show`,
-      { id, ...IMAGE_VARIANT_PARAMS },
-    );
+    const res = await integGet<STResponse<STListing | STListing[]>>(`/listings/show`, {
+      id,
+      ...IMAGE_VARIANT_PARAMS,
+    });
     const data = Array.isArray(res.data) ? res.data[0] : res.data;
     if (!data) return null;
     // Don't expose draft / closed listings publicly.
@@ -415,7 +393,10 @@ async function searchSyncedListings(opts: SearchOptions): Promise<{
     const to = from + perPage - 1;
     let query = supabaseAdmin
       .from("synced_listings")
-      .select("sharetribe_id, slug, title, description, price_amount, price_currency, city, state_code, primary_image_url, latitude, longitude", { count: "exact" })
+      .select(
+        "sharetribe_id, slug, title, description, price_amount, price_currency, city, state_code, primary_image_url, latitude, longitude",
+        { count: "exact" },
+      )
       .eq("state", "published")
       .eq("is_deleted", false);
     if (opts.citySlug) query = query.eq("city_slug", opts.citySlug);
@@ -433,16 +414,18 @@ async function searchSyncedListings(opts: SearchOptions): Promise<{
         slug: row.slug,
         title: row.title,
         description: row.description ?? "",
-        price: row.price_amount && row.price_currency
-          ? { amount: row.price_amount, currency: row.price_currency }
-          : null,
+        price:
+          row.price_amount && row.price_currency
+            ? { amount: row.price_amount, currency: row.price_currency }
+            : null,
         city: row.city ?? null,
         state: row.state_code ?? null,
         imageUrl: row.primary_image_url ?? null,
         url: `/l/${row.slug}/${row.sharetribe_id}`,
-        geolocation: row.latitude && row.longitude
-          ? { lat: Number(row.latitude), lng: Number(row.longitude) }
-          : null,
+        geolocation:
+          row.latitude && row.longitude
+            ? { lat: Number(row.latitude), lng: Number(row.longitude) }
+            : null,
       })),
       total: count ?? rows.length,
       page,

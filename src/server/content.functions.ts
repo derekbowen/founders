@@ -4,7 +4,15 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 export const getCity = createServerFn({ method: "GET" })
   .inputValidator((d: unknown) =>
-    z.object({ slug: z.string().min(1).max(120).regex(/^[a-z0-9-]+$/) }).parse(d),
+    z
+      .object({
+        slug: z
+          .string()
+          .min(1)
+          .max(120)
+          .regex(/^[a-z0-9-]+$/),
+      })
+      .parse(d),
   )
   .handler(async ({ data }) => {
     const { data: city, error } = await supabaseAdmin
@@ -35,7 +43,15 @@ export const getCity = createServerFn({ method: "GET" })
 
 export const getCategory = createServerFn({ method: "GET" })
   .inputValidator((d: unknown) =>
-    z.object({ slug: z.string().min(1).max(120).regex(/^[a-z0-9-]+$/) }).parse(d),
+    z
+      .object({
+        slug: z
+          .string()
+          .min(1)
+          .max(120)
+          .regex(/^[a-z0-9-]+$/),
+      })
+      .parse(d),
   )
   .handler(async ({ data }) => {
     const { data: category, error } = await supabaseAdmin
@@ -50,7 +66,15 @@ export const getCategory = createServerFn({ method: "GET" })
 
 export const getProvider = createServerFn({ method: "GET" })
   .inputValidator((d: unknown) =>
-    z.object({ slug: z.string().min(1).max(120).regex(/^[a-z0-9-]+$/) }).parse(d),
+    z
+      .object({
+        slug: z
+          .string()
+          .min(1)
+          .max(120)
+          .regex(/^[a-z0-9-]+$/),
+      })
+      .parse(d),
   )
   .handler(async ({ data }) => {
     const { data: provider, error } = await supabaseAdmin
@@ -65,7 +89,15 @@ export const getProvider = createServerFn({ method: "GET" })
 
 export const getBlogPost = createServerFn({ method: "GET" })
   .inputValidator((d: unknown) =>
-    z.object({ slug: z.string().min(1).max(120).regex(/^[a-z0-9-]+$/) }).parse(d),
+    z
+      .object({
+        slug: z
+          .string()
+          .min(1)
+          .max(120)
+          .regex(/^[a-z0-9-]+$/),
+      })
+      .parse(d),
   )
   .handler(async ({ data }) => {
     const { data: post, error } = await supabaseAdmin
@@ -78,71 +110,53 @@ export const getBlogPost = createServerFn({ method: "GET" })
     return { post: post ?? null };
   });
 
-export const getBlogLinkTargets = createServerFn({ method: "GET" }).handler(
-  async () => {
-    const [cities, helpArticles, tools] = await Promise.all([
-      supabaseAdmin
-        .from("cities")
-        .select("slug, name, state, state_code")
-        .eq("is_published", true),
-      supabaseAdmin
-        .from("help_articles")
-        .select("slug, title, category_slug")
-        .eq("is_published", true)
-        .in("category_slug", [
-          "legal-and-compliance",
-          "safety-first",
-          "pool-management",
-          "for-hosts",
-          "getting-started-hub",
-        ]),
-      supabaseAdmin
-        .from("host_tools")
-        .select("slug, title")
-        .eq("is_published", true),
-    ]);
-    return {
-      cities: cities.data ?? [],
-      helpArticles: helpArticles.data ?? [],
-      tools: tools.data ?? [],
-    };
-  },
-);
+export const getBlogLinkTargets = createServerFn({ method: "GET" }).handler(async () => {
+  const [cities, helpArticles, tools] = await Promise.all([
+    supabaseAdmin.from("cities").select("slug, name, state, state_code").eq("is_published", true),
+    supabaseAdmin
+      .from("help_articles")
+      .select("slug, title, category_slug")
+      .eq("is_published", true)
+      .in("category_slug", [
+        "legal-and-compliance",
+        "safety-first",
+        "pool-management",
+        "for-hosts",
+        "getting-started-hub",
+      ]),
+    supabaseAdmin.from("host_tools").select("slug, title").eq("is_published", true),
+  ]);
+  return {
+    cities: cities.data ?? [],
+    helpArticles: helpArticles.data ?? [],
+    tools: tools.data ?? [],
+  };
+});
 
-export const listAllSitemapEntries = createServerFn({ method: "GET" }).handler(
-  async () => {
-    const [cities, categories, providers, posts] = await Promise.all([
-      supabaseAdmin
-        .from("cities")
-        .select("slug, updated_at")
-        .eq("is_published", true),
-      supabaseAdmin
-        .from("categories")
-        .select("slug, updated_at")
-        .eq("is_published", true),
-      supabaseAdmin
-        .from("providers")
-        .select("slug, updated_at")
-        .eq("is_published", true),
-      supabaseAdmin
-        .from("blog_posts")
-        .select("slug, updated_at")
-        .eq("is_published", true),
-    ]);
-    return {
-      cities: cities.data ?? [],
-      categories: categories.data ?? [],
-      providers: providers.data ?? [],
-      posts: posts.data ?? [],
-    };
-  },
-);
+export const listAllSitemapEntries = createServerFn({ method: "GET" }).handler(async () => {
+  const [cities, categories, providers, posts] = await Promise.all([
+    supabaseAdmin.from("cities").select("slug, updated_at").eq("is_published", true),
+    supabaseAdmin.from("categories").select("slug, updated_at").eq("is_published", true),
+    supabaseAdmin.from("providers").select("slug, updated_at").eq("is_published", true),
+    supabaseAdmin.from("blog_posts").select("slug, updated_at").eq("is_published", true),
+  ]);
+  return {
+    cities: cities.data ?? [],
+    categories: categories.data ?? [],
+    providers: providers.data ?? [],
+    posts: posts.data ?? [],
+  };
+});
 
 export const getNearbyCities = createServerFn({ method: "GET" })
   .inputValidator((d: unknown) =>
     z
       .object({
-        slug: z.string().min(1).max(120).regex(/^[a-z0-9-]+$/),
+        slug: z
+          .string()
+          .min(1)
+          .max(120)
+          .regex(/^[a-z0-9-]+$/),
         state_code: z.string().length(2).optional(),
         limit: z.number().int().min(1).max(24).optional(),
       })
@@ -150,10 +164,10 @@ export const getNearbyCities = createServerFn({ method: "GET" })
   )
   .handler(async ({ data }) => {
     const limit = data.limit ?? 12;
-    const { data: rows, error } = await supabaseAdmin.rpc(
-      "nearby_cities_by_distance",
-      { _slug: data.slug, _limit: limit },
-    );
+    const { data: rows, error } = await supabaseAdmin.rpc("nearby_cities_by_distance", {
+      _slug: data.slug,
+      _limit: limit,
+    });
     if (error) {
       console.error("getNearbyCities rpc:", error);
       let q = supabaseAdmin
@@ -183,17 +197,15 @@ export const getNearbyCities = createServerFn({ method: "GET" })
     return { cities };
   });
 
-export const listCategories = createServerFn({ method: "GET" }).handler(
-  async () => {
-    const { data, error } = await supabaseAdmin
-      .from("categories")
-      .select("slug, name, icon")
-      .eq("is_published", true)
-      .order("name");
-    if (error) console.error("listCategories:", error);
-    return { categories: data ?? [] };
-  },
-);
+export const listCategories = createServerFn({ method: "GET" }).handler(async () => {
+  const { data, error } = await supabaseAdmin
+    .from("categories")
+    .select("slug, name, icon")
+    .eq("is_published", true)
+    .order("name");
+  if (error) console.error("listCategories:", error);
+  return { categories: data ?? [] };
+});
 
 export const listBlogPostsPaged = createServerFn({ method: "GET" })
   .inputValidator((d: unknown) =>
@@ -201,7 +213,12 @@ export const listBlogPostsPaged = createServerFn({ method: "GET" })
       .object({
         page: z.number().int().min(1).max(500).default(1),
         pageSize: z.number().int().min(1).max(48).default(12),
-        topic: z.string().min(1).max(48).regex(/^[a-z0-9-]+$/).optional(),
+        topic: z
+          .string()
+          .min(1)
+          .max(48)
+          .regex(/^[a-z0-9-]+$/)
+          .optional(),
         q: z.string().trim().min(1).max(120).optional(),
       })
       .parse(d ?? {}),
@@ -221,9 +238,11 @@ export const listBlogPostsPaged = createServerFn({ method: "GET" })
         q = q.or(`title.ilike.${pattern},excerpt.ilike.${pattern}`);
       }
     }
-    const { data: rows, count, error } = await q
-      .order("published_at", { ascending: false, nullsFirst: false })
-      .range(from, to);
+    const {
+      data: rows,
+      count,
+      error,
+    } = await q.order("published_at", { ascending: false, nullsFirst: false }).range(from, to);
     if (error) console.error("listBlogPostsPaged:", error);
     return {
       posts: rows ?? [],
@@ -235,26 +254,24 @@ export const listBlogPostsPaged = createServerFn({ method: "GET" })
     };
   });
 
-export const listBlogTopics = createServerFn({ method: "GET" }).handler(
-  async () => {
-    const { data, error } = await supabaseAdmin
-      .from("blog_posts")
-      .select("topic")
-      .eq("is_published", true)
-      .not("topic", "is", null);
-    if (error) console.error("listBlogTopics:", error);
-    const counts = new Map<string, number>();
-    for (const row of data ?? []) {
-      const t = (row as { topic: string | null }).topic;
-      if (!t) continue;
-      counts.set(t, (counts.get(t) ?? 0) + 1);
-    }
-    const topics = Array.from(counts.entries())
-      .map(([slug, count]) => ({ slug, count }))
-      .sort((a, b) => b.count - a.count);
-    return { topics };
-  },
-);
+export const listBlogTopics = createServerFn({ method: "GET" }).handler(async () => {
+  const { data, error } = await supabaseAdmin
+    .from("blog_posts")
+    .select("topic")
+    .eq("is_published", true)
+    .not("topic", "is", null);
+  if (error) console.error("listBlogTopics:", error);
+  const counts = new Map<string, number>();
+  for (const row of data ?? []) {
+    const t = (row as { topic: string | null }).topic;
+    if (!t) continue;
+    counts.set(t, (counts.get(t) ?? 0) + 1);
+  }
+  const topics = Array.from(counts.entries())
+    .map(([slug, count]) => ({ slug, count }))
+    .sort((a, b) => b.count - a.count);
+  return { topics };
+});
 
 export type StatePoolRegulation = {
   state_code: string;
@@ -276,7 +293,14 @@ export type StatePoolRegulation = {
 
 export const getStateRegulation = createServerFn({ method: "GET" })
   .inputValidator((d: unknown) =>
-    z.object({ state_code: z.string().length(2).regex(/^[A-Z]{2}$/) }).parse(d),
+    z
+      .object({
+        state_code: z
+          .string()
+          .length(2)
+          .regex(/^[A-Z]{2}$/),
+      })
+      .parse(d),
   )
   .handler(async ({ data }): Promise<{ regulation: StatePoolRegulation | null }> => {
     const { data: row, error } = await supabaseAdmin
@@ -305,9 +329,7 @@ export const getStateRegulation = createServerFn({ method: "GET" })
         compliance_steps: Array.isArray(row.compliance_steps)
           ? (row.compliance_steps as string[])
           : [],
-        faqs: Array.isArray(row.faqs)
-          ? (row.faqs as Array<{ q: string; a: string }>)
-          : [],
+        faqs: Array.isArray(row.faqs) ? (row.faqs as Array<{ q: string; a: string }>) : [],
         source_urls: (row.source_urls as string[] | null) ?? [],
         last_verified_at: (row.last_verified_at as string | null) ?? null,
       },

@@ -69,8 +69,7 @@ const DUPLICATE_PAIRS: Record<string, string> = {
   "become-a-swimming-pool-host-albuquerque-new-mexico":
     "become-a-swimming-pool-host-albuquerque-nm",
   "become-a-swimming-pool-host-hilo-hawaii": "become-a-swimming-pool-host-hilo-hi",
-  "become-a-swimming-pool-host-idaho-falls-idaho":
-    "become-a-swimming-pool-host-idaho-falls-id",
+  "become-a-swimming-pool-host-idaho-falls-idaho": "become-a-swimming-pool-host-idaho-falls-id",
   "become-a-swimming-pool-host-meridian-idaho": "become-a-swimming-pool-host-meridian-id",
 };
 
@@ -92,18 +91,31 @@ function normalizeSlug(rawSlug: string): { canonical: string; legacy: string[] }
 // ---------- Template type classification (mirror gen_url_mapping.py) ----------
 
 const MONEY_PAGES = new Set([
-  "all-locations", "why-hosts-are-leaving-swimply",
+  "all-locations",
+  "why-hosts-are-leaving-swimply",
   "swimply-alternative-vs-pool-rental-near-me",
-  "about", "investors", "howitworksforguests", "hosting", "make-money",
-  "los-angeles", "new-york", "las-vegas-search-page", "katy-texas",
-  "sacramento-best-private-pools", "private-pool-rentals-san-diego", "riverside",
+  "about",
+  "investors",
+  "howitworksforguests",
+  "hosting",
+  "make-money",
+  "los-angeles",
+  "new-york",
+  "las-vegas-search-page",
+  "katy-texas",
+  "sacramento-best-private-pools",
+  "private-pool-rentals-san-diego",
+  "riverside",
 ]);
 
 function classifyTemplateType(canonicalSlug: string): {
   template_type: string;
   language: "en" | "es";
 } {
-  if (canonicalSlug.startsWith("become-a-pool-host-") || canonicalSlug.startsWith("become-a-swimming-pool-host-")) {
+  if (
+    canonicalSlug.startsWith("become-a-pool-host-") ||
+    canonicalSlug.startsWith("become-a-swimming-pool-host-")
+  ) {
     return { template_type: "host_acquisition_city", language: "en" };
   }
   if (canonicalSlug.startsWith("guide-to-") && canonicalSlug.includes("pool-rental")) {
@@ -133,15 +145,28 @@ function classifyTemplateType(canonicalSlug: string): {
 // ---------- Tier priority for --priority=tier1 flag ----------
 
 const TIER1_SLUGS = new Set([
-  "all-locations", "newyork", "privatepoolrentalssandiego", "riverside",
-  "las-vegas-search-page", "american-cities-with-pools",
+  "all-locations",
+  "newyork",
+  "privatepoolrentalssandiego",
+  "riverside",
+  "las-vegas-search-page",
+  "american-cities-with-pools",
   "rent-a-swimming-pool-fort-greene-ny",
   "top-20-romantic-us-retreats-with-pools",
-  "pool-rental-tax-write-offs-your-missing-out-on", "host-advocacy-texas",
-  "best-poolside-beers", "hosting", "sacramentobestprivatepools",
-  "howtoturnyourbackyardpoolintoabusinessasset", "privatepoolpartyriversideca",
-  "losangeles", "katytexas", "swimply-alternative-vs-pool-rental-near-me",
-  "why-hosts-are-leaving-swimply", "make-money", "about", "investors",
+  "pool-rental-tax-write-offs-your-missing-out-on",
+  "host-advocacy-texas",
+  "best-poolside-beers",
+  "hosting",
+  "sacramentobestprivatepools",
+  "howtoturnyourbackyardpoolintoabusinessasset",
+  "privatepoolpartyriversideca",
+  "losangeles",
+  "katytexas",
+  "swimply-alternative-vs-pool-rental-near-me",
+  "why-hosts-are-leaving-swimply",
+  "make-money",
+  "about",
+  "investors",
   "howitworksforguests",
 ]);
 
@@ -169,22 +194,14 @@ async function extractPage(url: string): Promise<ExtractedPage> {
 
   // Title — prefer og:title, else <title>, else first H1
   const title =
-    (meta.ogTitle as string) ??
-    (meta.title as string) ??
-    extractFirstH1(md) ??
-    "(untitled)";
+    (meta.ogTitle as string) ?? (meta.title as string) ?? extractFirstH1(md) ?? "(untitled)";
 
   // Description — prefer meta description, else first paragraph
   const description =
-    (meta.description as string) ??
-    (meta.ogDescription as string) ??
-    extractFirstParagraph(md);
+    (meta.description as string) ?? (meta.ogDescription as string) ?? extractFirstParagraph(md);
 
   // Cover image — prefer og:image, then first <img> in markdown
-  const cover_image_url =
-    (meta.ogImage as string) ??
-    extractFirstImage(md) ??
-    null;
+  const cover_image_url = (meta.ogImage as string) ?? extractFirstImage(md) ?? null;
 
   // Strip Sharetribe nav/header/footer chrome from markdown if onlyMainContent missed it
   const cleaned = stripSharetribeChrome(md);
@@ -194,9 +211,7 @@ async function extractPage(url: string): Promise<ExtractedPage> {
 
   // published_at — try article:published_time, else null
   const published_at =
-    (meta.publishedTime as string) ??
-    (meta["article:published_time"] as string) ??
-    null;
+    (meta.publishedTime as string) ?? (meta["article:published_time"] as string) ?? null;
 
   return {
     title: title.trim(),
@@ -285,7 +300,7 @@ function entryFromUrl(url: string): UrlEntry | null {
 
 async function processOne(
   entry: UrlEntry,
-  opts: { dryRun: boolean; force: boolean }
+  opts: { dryRun: boolean; force: boolean },
 ): Promise<{ status: "ok" | "skipped" | "miss" | "error"; error?: string; word_count?: number }> {
   // Skip if already in content_pages and not --force
   if (!opts.force) {
@@ -326,9 +341,7 @@ async function processOne(
     legacy_slugs: entry.legacy_slugs,
     is_published: true,
   };
-  const { error } = await sb
-    .from("content_pages")
-    .upsert(row, { onConflict: "slug" });
+  const { error } = await sb.from("content_pages").upsert(row, { onConflict: "slug" });
   if (error) return { status: "error", error: error.message };
 
   return { status: "ok", word_count: extracted.word_count };
@@ -375,7 +388,9 @@ async function main() {
   });
 
   if (priority === "tier1") {
-    entries = entries.filter((e) => TIER1_SLUGS.has(e.canonical_slug) || TIER1_SLUGS.has(e.raw_slug));
+    entries = entries.filter(
+      (e) => TIER1_SLUGS.has(e.canonical_slug) || TIER1_SLUGS.has(e.raw_slug),
+    );
   }
   if (slugs?.length) {
     const set = new Set(slugs);
@@ -404,7 +419,7 @@ async function main() {
         // Polite delay; Firecrawl is ~1 RPS per worker on most plans
         await new Promise((res) => setTimeout(res, 200));
       }
-    })
+    }),
   );
 
   // Summary
@@ -420,10 +435,7 @@ async function main() {
     const csv =
       "canonical_slug,old_url,status,error\n" +
       failures
-        .map(
-          (r) =>
-            `${r.canonical_slug},${r.old_url},${r.status},${JSON.stringify(r.error ?? "")}`
-        )
+        .map((r) => `${r.canonical_slug},${r.old_url},${r.status},${JSON.stringify(r.error ?? "")}`)
         .join("\n");
     writeFileSync("/tmp/content-backfill-failures.csv", csv);
     console.log(`\nWrote /tmp/content-backfill-failures.csv (${failures.length} rows)`);

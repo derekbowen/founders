@@ -83,12 +83,10 @@ function OnboardingPage() {
           Connect your marketplace
         </h1>
         <p className="mt-3 text-muted-foreground">
-          Tell us about your Sharetribe marketplace. After Checkout, you'll get a
-          one-line reverse-proxy snippet that points{" "}
-          <code className="rounded bg-muted px-1 font-mono text-xs">
-            yourdomain.com/p/*
-          </code>{" "}
-          at founders.click — your generated SEO pages render native to your domain.
+          Tell us about your Sharetribe marketplace. After Checkout, you'll get a one-line
+          reverse-proxy snippet that points{" "}
+          <code className="rounded bg-muted px-1 font-mono text-xs">yourdomain.com/p/*</code> at
+          founders.click — your generated SEO pages render native to your domain.
         </p>
 
         <form onSubmit={onSubmit} className="mt-10 space-y-6">
@@ -117,8 +115,8 @@ function OnboardingPage() {
               maxLength={253}
             />
             <p className="mt-1 text-xs text-muted-foreground">
-              The apex domain of your Sharetribe marketplace. We'll use this to route
-              your /p/* traffic. You'll verify ownership after checkout.
+              The apex domain of your Sharetribe marketplace. We'll use this to route your /p/*
+              traffic. You'll verify ownership after checkout.
             </p>
           </div>
 
@@ -144,9 +142,7 @@ function OnboardingPage() {
                     </div>
                     <div className="mt-1 text-2xl font-bold">
                       {formatPlanPrice(p)}
-                      <span className="ml-1 text-xs font-normal text-muted-foreground">
-                        /mo
-                      </span>
+                      <span className="ml-1 text-xs font-normal text-muted-foreground">/mo</span>
                     </div>
                     <p className="mt-2 text-xs text-muted-foreground">{d.blurb}</p>
                   </button>
@@ -158,11 +154,7 @@ function OnboardingPage() {
             </p>
           </div>
 
-          {error && (
-            <div className="rounded-lg bg-rose-50 p-3 text-sm text-rose-900">
-              {error}
-            </div>
-          )}
+          {error && <div className="rounded-lg bg-rose-50 p-3 text-sm text-rose-900">{error}</div>}
 
           <div className="flex items-center gap-3">
             <button

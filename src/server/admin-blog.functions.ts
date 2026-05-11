@@ -101,7 +101,8 @@ Return ONLY valid JSON with this exact shape:
     });
 
     if (resp.status === 429) throw new Error("Rate limited by AI gateway. Try again in a minute.");
-    if (resp.status === 402) throw new Error("AI credits exhausted. Add funds in Workspace > Usage.");
+    if (resp.status === 402)
+      throw new Error("AI credits exhausted. Add funds in Workspace > Usage.");
     if (!resp.ok) {
       const t = await resp.text().catch(() => "");
       throw new Error(`AI gateway error ${resp.status}: ${t.slice(0, 200)}`);
@@ -126,7 +127,8 @@ Return ONLY valid JSON with this exact shape:
     if (parsed.content_markdown) update.content = String(parsed.content_markdown);
     if (parsed.excerpt) update.excerpt = String(parsed.excerpt).slice(0, 280);
     if (parsed.seo_title) update.seo_title = String(parsed.seo_title).slice(0, 60);
-    if (parsed.seo_description) update.seo_description = String(parsed.seo_description).slice(0, 160);
+    if (parsed.seo_description)
+      update.seo_description = String(parsed.seo_description).slice(0, 160);
 
     const { error: upErr } = await supabaseAdmin
       .from("blog_posts")
@@ -134,6 +136,8 @@ Return ONLY valid JSON with this exact shape:
       .eq("slug", data.slug);
     if (upErr) throw new Error(upErr.message);
 
-    const wc = String(update.content ?? "").split(/\s+/).filter(Boolean).length;
+    const wc = String(update.content ?? "")
+      .split(/\s+/)
+      .filter(Boolean).length;
     return { ok: true, word_count: wc };
   });

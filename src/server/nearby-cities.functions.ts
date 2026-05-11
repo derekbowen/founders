@@ -34,10 +34,10 @@ export const getNearbyCitiesForPage = createServerFn({ method: "GET" })
     const citySlug = cityForContentPage(data.templateType, data.slug);
     if (!citySlug) return [];
 
-    const { data: rows, error } = await (supabaseAdmin as any).rpc(
-      "nearby_cities_by_distance",
-      { _slug: citySlug, _limit: data.limit ?? 6 },
-    );
+    const { data: rows, error } = await (supabaseAdmin as any).rpc("nearby_cities_by_distance", {
+      _slug: citySlug,
+      _limit: data.limit ?? 6,
+    });
     if (error || !rows) return [];
 
     return (rows as Array<Record<string, unknown>>).map((r) => ({
@@ -45,7 +45,6 @@ export const getNearbyCitiesForPage = createServerFn({ method: "GET" })
       name: String(r.out_name),
       state: (r.out_state as string | null) ?? null,
       state_code: (r.out_state_code as string | null) ?? null,
-      distance_km:
-        r.out_distance_km == null ? null : Number(r.out_distance_km),
+      distance_km: r.out_distance_km == null ? null : Number(r.out_distance_km),
     }));
   });

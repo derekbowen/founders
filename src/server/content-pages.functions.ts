@@ -95,8 +95,7 @@ export const lookupContentPage = createServerFn({ method: "GET" })
       .limit(5);
 
     const list = (rows ?? []) as ContentPage[];
-    const page =
-      list.find((r) => r.url_path === canonicalPath) ?? list[0] ?? null;
+    const page = list.find((r) => r.url_path === canonicalPath) ?? list[0] ?? null;
 
     if (page) {
       return { kind: "found", page };

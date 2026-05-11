@@ -25,14 +25,29 @@ interface TemplateGroup {
 
 const TEMPLATE_GROUPS: TemplateGroup[] = [
   { basePath: "/sitemap-pages-money.xml", templateTypes: ["money_page"] },
-  { basePath: "/sitemap-pages-cities.xml", templateTypes: ["city_main", "public_pool_city", "public_pool_state"] },
-  { basePath: "/sitemap-pages-host-acquisition.xml", templateTypes: ["host_acq_city", "host_acq_hub"] },
+  {
+    basePath: "/sitemap-pages-cities.xml",
+    templateTypes: ["city_main", "public_pool_city", "public_pool_state"],
+  },
+  {
+    basePath: "/sitemap-pages-host-acquisition.xml",
+    templateTypes: ["host_acq_city", "host_acq_hub"],
+  },
   { basePath: "/sitemap-pages-event-guides.xml", templateTypes: ["event_guide"] },
   { basePath: "/sitemap-pages-articles.xml", templateTypes: ["resource", "other"] },
   { basePath: "/sitemap-pages-academy.xml", templateTypes: ["elearning"] },
-  { basePath: "/sitemap-pages-advocacy.xml", templateTypes: ["host_advocacy_hub", "host_advocacy_state"] },
-  { basePath: "/sitemap-pages-spanish.xml", templateTypes: ["spanish_host_acq", "spanish_resource"] },
-  { basePath: "/sitemap-pages-swim-instructor.xml", templateTypes: ["swim_instructor_city", "swim_instructor_hub"] },
+  {
+    basePath: "/sitemap-pages-advocacy.xml",
+    templateTypes: ["host_advocacy_hub", "host_advocacy_state"],
+  },
+  {
+    basePath: "/sitemap-pages-spanish.xml",
+    templateTypes: ["spanish_host_acq", "spanish_resource"],
+  },
+  {
+    basePath: "/sitemap-pages-swim-instructor.xml",
+    templateTypes: ["swim_instructor_city", "swim_instructor_hub"],
+  },
 ];
 
 export const Route = createFileRoute("/sitemap.xml")({

@@ -11,7 +11,12 @@ export type DashboardStats = {
     last24h: number;
   };
   byTemplate: Array<{ template_type: string | null; total: number; published: number }>;
-  recentlyPublished: Array<{ url_path: string; title: string | null; updated_at: string; words: number }>;
+  recentlyPublished: Array<{
+    url_path: string;
+    title: string | null;
+    updated_at: string;
+    words: number;
+  }>;
   blog: { total: number; published: number };
   courses: { total: number; published: number };
   helpArticles: { total: number; published: number };
@@ -96,31 +101,91 @@ export const getDashboardStats = createServerFn({ method: "GET" })
       missingTotal,
       missingUnresolved,
     ] = await Promise.all([
-      cnt(sb.from("content_pages").select("*", { count: "exact", head: true }).like("url_path", "/p/%")),
-      cnt(sb.from("content_pages").select("*", { count: "exact", head: true }).like("url_path", "/p/%").eq("status", "published")),
-      cnt(sb.from("content_pages").select("*", { count: "exact", head: true }).like("url_path", "/p/%").neq("status", "published")),
+      cnt(
+        sb
+          .from("content_pages")
+          .select("*", { count: "exact", head: true })
+          .like("url_path", "/p/%"),
+      ),
+      cnt(
+        sb
+          .from("content_pages")
+          .select("*", { count: "exact", head: true })
+          .like("url_path", "/p/%")
+          .eq("status", "published"),
+      ),
+      cnt(
+        sb
+          .from("content_pages")
+          .select("*", { count: "exact", head: true })
+          .like("url_path", "/p/%")
+          .neq("status", "published"),
+      ),
       // needs content: not published yet (proxy)
-      cnt(sb.from("content_pages").select("*", { count: "exact", head: true }).like("url_path", "/p/%").neq("status", "published")),
-      cnt(sb.from("content_pages").select("*", { count: "exact", head: true }).like("url_path", "/p/%").eq("status", "published").gte("updated_at", day)),
+      cnt(
+        sb
+          .from("content_pages")
+          .select("*", { count: "exact", head: true })
+          .like("url_path", "/p/%")
+          .neq("status", "published"),
+      ),
+      cnt(
+        sb
+          .from("content_pages")
+          .select("*", { count: "exact", head: true })
+          .like("url_path", "/p/%")
+          .eq("status", "published")
+          .gte("updated_at", day),
+      ),
       cnt(sb.from("blog_posts").select("*", { count: "exact", head: true })),
-      cnt(sb.from("blog_posts").select("*", { count: "exact", head: true }).eq("is_published", true)),
+      cnt(
+        sb.from("blog_posts").select("*", { count: "exact", head: true }).eq("is_published", true),
+      ),
       cnt(sb.from("courses").select("*", { count: "exact", head: true })),
       cnt(sb.from("courses").select("*", { count: "exact", head: true }).eq("is_published", true)),
       cnt(sb.from("help_articles").select("*", { count: "exact", head: true })),
-      cnt(sb.from("help_articles").select("*", { count: "exact", head: true }).eq("is_published", true)),
+      cnt(
+        sb
+          .from("help_articles")
+          .select("*", { count: "exact", head: true })
+          .eq("is_published", true),
+      ),
       cnt(sb.from("cities").select("*", { count: "exact", head: true })),
       cnt(sb.from("cities").select("*", { count: "exact", head: true }).eq("is_published", true)),
       cnt(sb.from("providers").select("*", { count: "exact", head: true })),
-      cnt(sb.from("providers").select("*", { count: "exact", head: true }).eq("is_published", true)),
-      cnt(sb.from("synced_listings").select("*", { count: "exact", head: true }).eq("is_deleted", false)),
+      cnt(
+        sb.from("providers").select("*", { count: "exact", head: true }).eq("is_published", true),
+      ),
+      cnt(
+        sb
+          .from("synced_listings")
+          .select("*", { count: "exact", head: true })
+          .eq("is_deleted", false),
+      ),
       cnt(sb.from("profiles").select("*", { count: "exact", head: true })),
-      sb.from("user_roles").select("user_id", { count: "exact", head: true }).eq("role", "admin").then((r: any) => r.count ?? 0),
+      sb
+        .from("user_roles")
+        .select("user_id", { count: "exact", head: true })
+        .eq("role", "admin")
+        .then((r: any) => r.count ?? 0),
       cnt(sb.from("pool_waitlist").select("*", { count: "exact", head: true })),
-      cnt(sb.from("pool_waitlist").select("*", { count: "exact", head: true }).gte("created_at", week)),
+      cnt(
+        sb
+          .from("pool_waitlist")
+          .select("*", { count: "exact", head: true })
+          .gte("created_at", week),
+      ),
       cnt(sb.from("provider_leads").select("*", { count: "exact", head: true })),
-      cnt(sb.from("provider_leads").select("*", { count: "exact", head: true }).eq("status", "new")),
+      cnt(
+        sb.from("provider_leads").select("*", { count: "exact", head: true }).eq("status", "new"),
+      ),
       cnt(sb.from("content_404_log").select("*", { count: "exact", head: true })),
-      cnt(sb.from("content_404_log").select("*", { count: "exact", head: true }).is("resolved_at", null)),
+      cnt(
+        sb
+          .from("content_404_log")
+          .select("*", { count: "exact", head: true })
+          .is("resolved_at", null),
+      ),
     ]);
 
     const { data: byTemplateRaw } = await sb
@@ -205,7 +270,10 @@ export const getDashboardStats = createServerFn({ method: "GET" })
       helpArticles: { total: helpTotal, published: helpPub },
       cities: { total: citiesTotal, published: citiesPub },
       providers: { total: providersTotal, published: providersPub },
-      listings: { total: listingsTotal, lastSync: lastSync?.finished_at || lastSync?.started_at || null },
+      listings: {
+        total: listingsTotal,
+        lastSync: lastSync?.finished_at || lastSync?.started_at || null,
+      },
       users: { profiles: profilesTotal, admins: adminsRows as number },
       waitlist: { total: waitlistTotal, last7d: waitlist7d },
       leads: { total: leadsTotal, new: leadsNew },

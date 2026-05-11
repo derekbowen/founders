@@ -1,11 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader, SiteFooter } from "@/components/site-layout";
-import {
-  buildMeta,
-  breadcrumbJsonLd,
-  ldJsonScript,
-  SITE_URL,
-} from "@/lib/seo";
+import { buildMeta, breadcrumbJsonLd, ldJsonScript, SITE_URL } from "@/lib/seo";
 
 const PATH = "/referral";
 const TITLE = "Host Referral Program — Refer 5 Hosts, Pay $0 Fees for a Year";
@@ -16,14 +11,12 @@ const TIERS = [
   {
     badge: "Tier 1",
     title: "Refer 5 hosts → 0% fees for 12 months",
-    body:
-      "Get 5 friends approved as Pool Rental Near Me hosts and we'll waive your 10% platform fee for a full year. That's pure profit on every booking you take — typically $1,500–$5,000 in saved fees per host per season.",
+    body: "Get 5 friends approved as Pool Rental Near Me hosts and we'll waive your 10% platform fee for a full year. That's pure profit on every booking you take — typically $1,500–$5,000 in saved fees per host per season.",
   },
   {
     badge: "Tier 2",
     title: "Recruit pools → 5% of bookings for 2 years",
-    body:
-      "Want to go pro? If you actively recruit new pool hosts (not just casual referrals — outreach, signups, training), we pay you 5% of every booking they take for 2 full years. Build a recruiting territory and earn passive income on every swim.",
+    body: "Want to go pro? If you actively recruit new pool hosts (not just casual referrals — outreach, signups, training), we pay you 5% of every booking they take for 2 full years. Build a recruiting territory and earn passive income on every swim.",
   },
 ];
 
@@ -120,10 +113,9 @@ function ReferralPage() {
               <span className="text-primary">Pay $0 in fees for a year.</span>
             </h1>
             <p className="mt-6 max-w-2xl text-lg text-muted-foreground">
-              The most generous referral program in pool sharing. Bring 5 approved
-              hosts onto Pool Rental Near Me and we'll waive your 10% platform fee
-              for 12 full months. Want to go bigger? Recruit pools and earn 5% of
-              their bookings for 2 years.
+              The most generous referral program in pool sharing. Bring 5 approved hosts onto Pool
+              Rental Near Me and we'll waive your 10% platform fee for 12 full months. Want to go
+              bigger? Recruit pools and earn 5% of their bookings for 2 years.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <a
@@ -160,9 +152,7 @@ function ReferralPage() {
                 <div className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
                   {t.badge}
                 </div>
-                <h3 className="mt-4 text-2xl font-semibold text-foreground">
-                  {t.title}
-                </h3>
+                <h3 className="mt-4 text-2xl font-semibold text-foreground">{t.title}</h3>
                 <p className="mt-3 text-muted-foreground">{t.body}</p>
               </div>
             ))}
@@ -181,9 +171,7 @@ function ReferralPage() {
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-lg font-bold text-primary-foreground">
                     {s.n}
                   </div>
-                  <h3 className="mt-4 text-lg font-semibold text-foreground">
-                    {s.title}
-                  </h3>
+                  <h3 className="mt-4 text-lg font-semibold text-foreground">{s.title}</h3>
                   <p className="mt-2 text-sm text-muted-foreground">{s.body}</p>
                 </div>
               ))}
@@ -194,9 +182,7 @@ function ReferralPage() {
         {/* Math */}
         <section className="mx-auto max-w-5xl px-4 py-16">
           <div className="rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/5 to-accent/5 p-8 sm:p-12">
-            <h2 className="text-2xl font-bold text-foreground sm:text-3xl">
-              The math
-            </h2>
+            <h2 className="text-2xl font-bold text-foreground sm:text-3xl">The math</h2>
             <div className="mt-6 grid gap-6 sm:grid-cols-3">
               <div>
                 <div className="text-4xl font-bold text-primary">$3,200</div>
@@ -234,9 +220,7 @@ function ReferralPage() {
                 >
                   <summary className="flex cursor-pointer items-center justify-between text-base font-semibold text-foreground">
                     {f.q}
-                    <span className="ml-4 text-primary transition group-open:rotate-45">
-                      +
-                    </span>
+                    <span className="ml-4 text-primary transition group-open:rotate-45">+</span>
                   </summary>
                   <p className="mt-3 text-sm text-muted-foreground">{f.a}</p>
                 </details>
@@ -251,8 +235,7 @@ function ReferralPage() {
             Ready to start referring?
           </h2>
           <p className="mt-3 text-muted-foreground">
-            Sign in to grab your unique referral link, or apply to the recruiter
-            program at{" "}
+            Sign in to grab your unique referral link, or apply to the recruiter program at{" "}
             <a
               href="mailto:referrals@poolrentalnearme.com"
               className="font-semibold text-primary underline-offset-4 hover:underline"

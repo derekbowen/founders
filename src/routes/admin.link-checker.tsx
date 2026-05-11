@@ -3,17 +3,25 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { checkAdminRole } from "@/server/admin-auth.functions";
 import { AdminLayout } from "@/components/admin-layout";
-import { scanBrokenLinks, fixBrokenLink, bulkFixBrokenLinks, type BrokenLink } from "@/server/link-checker.functions";
+import {
+  scanBrokenLinks,
+  fixBrokenLink,
+  bulkFixBrokenLinks,
+  type BrokenLink,
+} from "@/server/link-checker.functions";
 
 export const Route = createFileRoute("/admin/link-checker")({
   beforeLoad: async () => {
     if (typeof window === "undefined") return;
     const { data, error } = await supabase.auth.getUser();
-    if (error || !data.user) throw redirect({ to: "/auth", search: { redirect: "/admin/link-checker", mode: "signin" } });
+    if (error || !data.user)
+      throw redirect({ to: "/auth", search: { redirect: "/admin/link-checker", mode: "signin" } });
     const { isAdmin } = await checkAdminRole();
     if (!isAdmin) throw redirect({ to: "/admin/no-access" });
   },
-  head: () => ({ meta: [{ title: "Link checker — Admin" }, { name: "robots", content: "noindex,nofollow" }] }),
+  head: () => ({
+    meta: [{ title: "Link checker — Admin" }, { name: "robots", content: "noindex,nofollow" }],
+  }),
   component: LinkChecker,
 });
 
@@ -43,7 +51,9 @@ function LinkChecker() {
   const [fPageIdsRaw, setFPageIdsRaw] = React.useState("");
   const [fOnlyMissing, setFOnlyMissing] = React.useState(false);
 
-  function key(b: BrokenLink) { return `${b.page_id}::${b.href}`; }
+  function key(b: BrokenLink) {
+    return `${b.page_id}::${b.href}`;
+  }
 
   function buildScanFilters() {
     const pageIds = fPageIdsRaw
@@ -61,8 +71,12 @@ function LinkChecker() {
   }
 
   function resetFilters() {
-    setFUrlPrefix("/p/"); setFUrlContains(""); setFRangeStart(""); setFRangeEnd("");
-    setFPageIdsRaw(""); setFOnlyMissing(false);
+    setFUrlPrefix("/p/");
+    setFUrlContains("");
+    setFRangeStart("");
+    setFRangeEnd("");
+    setFPageIdsRaw("");
+    setFOnlyMissing(false);
   }
 
   const activeFilterCount =
@@ -77,8 +91,13 @@ function LinkChecker() {
   const [scanDurationMs, setScanDurationMs] = React.useState<number | null>(null);
 
   async function startScan() {
-    setRows([]); setState({}); setEditHref({}); setScanning(true); abortRef.current = false;
-    setScanCompletedAt(null); setScanDurationMs(null);
+    setRows([]);
+    setState({});
+    setEditHref({});
+    setScanning(true);
+    abortRef.current = false;
+    setScanCompletedAt(null);
+    setScanDurationMs(null);
     let offset = 0;
     const batchSize = 200;
     const filters = buildScanFilters();
@@ -99,13 +118,24 @@ function LinkChecker() {
     }
   }
 
-  async function applyFix(b: BrokenLink, action: "replace" | "unlink" | "remove", newHref?: string) {
+  async function applyFix(
+    b: BrokenLink,
+    action: "replace" | "unlink" | "remove",
+    newHref?: string,
+  ) {
     const k = key(b);
     setState((s) => ({ ...s, [k]: { status: "fixing" } }));
     try {
-      const res = await fixBrokenLink({ data: { pageId: b.page_id, href: b.href, action, newHref } });
-      if (res.ok) setState((s) => ({ ...s, [k]: { status: "fixed", msg: action === "replace" ? `→ ${newHref}` : action } }));
-      else setState((s) => ({ ...s, [k]: { status: "error", msg: (res as any).error || "Failed" } }));
+      const res = await fixBrokenLink({
+        data: { pageId: b.page_id, href: b.href, action, newHref },
+      });
+      if (res.ok)
+        setState((s) => ({
+          ...s,
+          [k]: { status: "fixed", msg: action === "replace" ? `→ ${newHref}` : action },
+        }));
+      else
+        setState((s) => ({ ...s, [k]: { status: "error", msg: (res as any).error || "Failed" } }));
     } catch (e: any) {
       setState((s) => ({ ...s, [k]: { status: "error", msg: e?.message || "Failed" } }));
     }
@@ -119,14 +149,23 @@ function LinkChecker() {
     const targets = filtered;
     if (!targets.length) return;
     if (action === "replace") {
-      const missingSuggestion = targets.filter((b) => !((editHref[key(b)] ?? b.suggestion?.href) || "").trim());
+      const missingSuggestion = targets.filter(
+        (b) => !((editHref[key(b)] ?? b.suggestion?.href) || "").trim(),
+      );
       if (missingSuggestion.length === targets.length) {
-        setBulkResult("No suggestions/edits available to replace with. Use Unlink or Remove instead.");
+        setBulkResult(
+          "No suggestions/edits available to replace with. Use Unlink or Remove instead.",
+        );
         return;
       }
     }
     const verb = action === "replace" ? "replace" : action;
-    if (!confirm(`Apply "${verb}" to ${targets.length} link${targets.length === 1 ? "" : "s"}?${action === "replace" ? " Only links with a suggested or edited URL will be changed." : ""}`)) return;
+    if (
+      !confirm(
+        `Apply "${verb}" to ${targets.length} link${targets.length === 1 ? "" : "s"}?${action === "replace" ? " Only links with a suggested or edited URL will be changed." : ""}`,
+      )
+    )
+      return;
 
     setBulkRunning(true);
     try {
@@ -134,7 +173,11 @@ function LinkChecker() {
         .map((b) => {
           const newHref = (editHref[key(b)] ?? b.suggestion?.href ?? "").trim();
           if (action === "replace" && !newHref) return null;
-          return { pageId: b.page_id, href: b.href, newHref: action === "replace" ? newHref : undefined };
+          return {
+            pageId: b.page_id,
+            href: b.href,
+            newHref: action === "replace" ? newHref : undefined,
+          };
         })
         .filter(Boolean) as Array<{ pageId: string; href: string; newHref?: string }>;
 
@@ -148,14 +191,15 @@ function LinkChecker() {
         }
         return next;
       });
-      setBulkResult(`Updated ${res.pagesUpdated} page${res.pagesUpdated === 1 ? "" : "s"} · fixed ${res.linksFixed} link${res.linksFixed === 1 ? "" : "s"}${res.linksSkipped ? ` · skipped ${res.linksSkipped}` : ""}${res.errors.length ? ` · ${res.errors.length} errors` : ""}.`);
+      setBulkResult(
+        `Updated ${res.pagesUpdated} page${res.pagesUpdated === 1 ? "" : "s"} · fixed ${res.linksFixed} link${res.linksFixed === 1 ? "" : "s"}${res.linksSkipped ? ` · skipped ${res.linksSkipped}` : ""}${res.errors.length ? ` · ${res.errors.length} errors` : ""}.`,
+      );
     } catch (e: any) {
       setBulkResult(`Bulk fix failed: ${e?.message || "unknown error"}`);
     } finally {
       setBulkRunning(false);
     }
   }
-
 
   const filtered = rows.filter((r) => filter === "all" || r.reason === filter);
   const counts = {
@@ -170,10 +214,26 @@ function LinkChecker() {
   const report = React.useMemo(() => {
     if (!rows.length) return null;
     // Top broken targets (group by href)
-    const byTarget = new Map<string, { href: string; count: number; pages: Set<string>; reason: BrokenLink["reason"]; suggestion: string | null }>();
+    const byTarget = new Map<
+      string,
+      {
+        href: string;
+        count: number;
+        pages: Set<string>;
+        reason: BrokenLink["reason"];
+        suggestion: string | null;
+      }
+    >();
     for (const r of rows) {
-      const e = byTarget.get(r.href) || { href: r.href, count: 0, pages: new Set<string>(), reason: r.reason, suggestion: r.suggestion?.href || null };
-      e.count++; e.pages.add(r.page_url);
+      const e = byTarget.get(r.href) || {
+        href: r.href,
+        count: 0,
+        pages: new Set<string>(),
+        reason: r.reason,
+        suggestion: r.suggestion?.href || null,
+      };
+      e.count++;
+      e.pages.add(r.page_url);
       if (!e.suggestion && r.suggestion?.href) e.suggestion = r.suggestion.href;
       byTarget.set(r.href, e);
     }
@@ -186,22 +246,37 @@ function LinkChecker() {
       .slice(0, 8);
     // Affected pages count
     const affectedPages = new Set(rows.map((r) => r.page_url)).size;
-    return { topTargets, fastestFixes, affectedPages, withSuggestions: rows.filter((r) => r.suggestion?.href).length };
+    return {
+      topTargets,
+      fastestFixes,
+      affectedPages,
+      withSuggestions: rows.filter((r) => r.suggestion?.href).length,
+    };
   }, [rows]);
 
   async function fixAllOf(href: string, newHref: string) {
-    const items = rows.filter((r) => r.href === href).map((r) => ({ pageId: r.page_id, href: r.href, newHref }));
+    const items = rows
+      .filter((r) => r.href === href)
+      .map((r) => ({ pageId: r.page_id, href: r.href, newHref }));
     if (!items.length) return;
-    if (!confirm(`Replace ${items.length} occurrence${items.length === 1 ? "" : "s"} of ${href} → ${newHref}?`)) return;
+    if (
+      !confirm(
+        `Replace ${items.length} occurrence${items.length === 1 ? "" : "s"} of ${href} → ${newHref}?`,
+      )
+    )
+      return;
     setBulkRunning(true);
     try {
       const res = await bulkFixBrokenLinks({ data: { action: "replace", items } });
       setState((prev) => {
         const next = { ...prev };
-        for (const it of items) next[`${it.pageId}::${it.href}`] = { status: "fixed", msg: `→ ${newHref}` };
+        for (const it of items)
+          next[`${it.pageId}::${it.href}`] = { status: "fixed", msg: `→ ${newHref}` };
         return next;
       });
-      setBulkResult(`Updated ${res.pagesUpdated} page${res.pagesUpdated === 1 ? "" : "s"} · fixed ${res.linksFixed} link${res.linksFixed === 1 ? "" : "s"}.`);
+      setBulkResult(
+        `Updated ${res.pagesUpdated} page${res.pagesUpdated === 1 ? "" : "s"} · fixed ${res.linksFixed} link${res.linksFixed === 1 ? "" : "s"}.`,
+      );
     } catch (e: any) {
       setBulkResult(`Failed: ${e?.message || "unknown"}`);
     } finally {
@@ -209,14 +284,14 @@ function LinkChecker() {
     }
   }
 
-
   return (
     <AdminLayout title="Link checker">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-3xl font-bold">Internal link checker</h1>
           <p className="text-sm text-muted-foreground">
-            Scans every published <code>/p/*</code> page for broken internal links and offers one-click fixes.
+            Scans every published <code>/p/*</code> page for broken internal links and offers
+            one-click fixes.
           </p>
         </div>
         <div className="flex gap-2">
@@ -227,9 +302,19 @@ function LinkChecker() {
             Filters{activeFilterCount ? ` (${activeFilterCount})` : ""}
           </button>
           {scanning ? (
-            <button onClick={() => { abortRef.current = true; }} className="rounded-full border border-border px-4 py-2 text-sm font-semibold">Stop</button>
+            <button
+              onClick={() => {
+                abortRef.current = true;
+              }}
+              className="rounded-full border border-border px-4 py-2 text-sm font-semibold"
+            >
+              Stop
+            </button>
           ) : (
-            <button onClick={startScan} className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground">
+            <button
+              onClick={startScan}
+              className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
+            >
               {rows.length ? "Re-scan" : "Start scan"}
             </button>
           )}
@@ -247,7 +332,9 @@ function LinkChecker() {
                 placeholder="/p/ or /p/austin-tx-"
                 className="w-full rounded border border-border bg-background px-2 py-1.5 text-sm"
               />
-              <span className="mt-1 block text-[11px] text-muted-foreground">Must start with <code>/p/</code>. Limits scan to URLs starting with this.</span>
+              <span className="mt-1 block text-[11px] text-muted-foreground">
+                Must start with <code>/p/</code>. Limits scan to URLs starting with this.
+              </span>
             </label>
             <label className="block text-xs">
               <span className="mb-1 block font-medium text-muted-foreground">URL contains</span>
@@ -257,7 +344,9 @@ function LinkChecker() {
                 placeholder="austin"
                 className="w-full rounded border border-border bg-background px-2 py-1.5 text-sm"
               />
-              <span className="mt-1 block text-[11px] text-muted-foreground">Substring match on the URL path (case-insensitive).</span>
+              <span className="mt-1 block text-[11px] text-muted-foreground">
+                Substring match on the URL path (case-insensitive).
+              </span>
             </label>
             <label className="block text-xs">
               <span className="mb-1 block font-medium text-muted-foreground">Range start</span>
@@ -278,7 +367,9 @@ function LinkChecker() {
               />
             </label>
             <label className="block text-xs sm:col-span-2">
-              <span className="mb-1 block font-medium text-muted-foreground">Page IDs (overrides URL filters)</span>
+              <span className="mb-1 block font-medium text-muted-foreground">
+                Page IDs (overrides URL filters)
+              </span>
               <textarea
                 value={fPageIdsRaw}
                 onChange={(e) => setFPageIdsRaw(e.target.value)}
@@ -294,11 +385,16 @@ function LinkChecker() {
                 onChange={(e) => setFOnlyMissing(e.target.checked)}
                 className="h-4 w-4"
               />
-              <span className="text-sm">Only report <code>/p/</code> missing-target issues</span>
+              <span className="text-sm">
+                Only report <code>/p/</code> missing-target issues
+              </span>
             </label>
           </div>
           <div className="mt-3 flex justify-end gap-2">
-            <button onClick={resetFilters} className="rounded-md border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted">
+            <button
+              onClick={resetFilters}
+              className="rounded-md border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted"
+            >
               Reset
             </button>
           </div>
@@ -309,7 +405,9 @@ function LinkChecker() {
         <div className="mt-4">
           <div className="flex justify-between text-xs text-muted-foreground">
             <span>{scanning ? "Scanning…" : "Scan complete"}</span>
-            <span>{progress.done} / {progress.total} pages · {rows.length} broken links</span>
+            <span>
+              {progress.done} / {progress.total} pages · {rows.length} broken links
+            </span>
           </div>
           <div className="mt-1 h-2 overflow-hidden rounded-full bg-muted">
             <div className="h-full bg-primary transition-all" style={{ width: `${pct}%` }} />
@@ -336,7 +434,9 @@ function LinkChecker() {
               ["Missing /p/", counts.missing_p_page.toLocaleString()],
             ].map(([label, val]) => (
               <div key={label} className="rounded-md border border-border bg-background p-3">
-                <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</div>
+                <div className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                  {label}
+                </div>
                 <div className="mt-1 text-xl font-semibold">{val}</div>
               </div>
             ))}
@@ -347,10 +447,17 @@ function LinkChecker() {
               <h3 className="text-sm font-semibold">Top broken targets</h3>
               <p className="text-xs text-muted-foreground">Links broken in the most places.</p>
               <ol className="mt-2 space-y-1.5">
-                {report.topTargets.length === 0 && <li className="text-xs text-muted-foreground">None.</li>}
+                {report.topTargets.length === 0 && (
+                  <li className="text-xs text-muted-foreground">None.</li>
+                )}
                 {report.topTargets.map((t) => (
-                  <li key={t.href} className="flex items-center justify-between gap-2 rounded border border-border bg-background px-2 py-1.5">
-                    <code className="truncate text-xs" title={t.href}>{t.href}</code>
+                  <li
+                    key={t.href}
+                    className="flex items-center justify-between gap-2 rounded border border-border bg-background px-2 py-1.5"
+                  >
+                    <code className="truncate text-xs" title={t.href}>
+                      {t.href}
+                    </code>
                     <span className="shrink-0 text-xs text-muted-foreground">
                       {t.count}× · {t.pageCount} page{t.pageCount === 1 ? "" : "s"}
                     </span>
@@ -360,22 +467,37 @@ function LinkChecker() {
             </div>
             <div>
               <h3 className="text-sm font-semibold">Fastest fixes by impact</h3>
-              <p className="text-xs text-muted-foreground">Targets with a suggested replacement, ordered by occurrences fixed.</p>
+              <p className="text-xs text-muted-foreground">
+                Targets with a suggested replacement, ordered by occurrences fixed.
+              </p>
               <ol className="mt-2 space-y-1.5">
-                {report.fastestFixes.length === 0 && <li className="text-xs text-muted-foreground">No suggestions available yet.</li>}
+                {report.fastestFixes.length === 0 && (
+                  <li className="text-xs text-muted-foreground">No suggestions available yet.</li>
+                )}
                 {report.fastestFixes.map((t) => (
-                  <li key={t.href} className="rounded border border-border bg-background px-2 py-1.5">
+                  <li
+                    key={t.href}
+                    className="rounded border border-border bg-background px-2 py-1.5"
+                  >
                     <div className="flex items-center justify-between gap-2">
-                      <code className="truncate text-xs" title={t.href}>{t.href}</code>
-                      <span className="shrink-0 text-xs text-muted-foreground">{t.count}× · {t.pageCount} pg</span>
+                      <code className="truncate text-xs" title={t.href}>
+                        {t.href}
+                      </code>
+                      <span className="shrink-0 text-xs text-muted-foreground">
+                        {t.count}× · {t.pageCount} pg
+                      </span>
                     </div>
                     <div className="mt-1 flex items-center justify-between gap-2">
-                      <div className="truncate text-[11px] text-muted-foreground">→ <code>{t.suggestion}</code></div>
+                      <div className="truncate text-[11px] text-muted-foreground">
+                        → <code>{t.suggestion}</code>
+                      </div>
                       <button
                         disabled={bulkRunning}
                         onClick={() => fixAllOf(t.href, t.suggestion!)}
                         className="shrink-0 rounded bg-primary px-2 py-0.5 text-[11px] font-semibold text-primary-foreground disabled:opacity-50"
-                      >Fix all</button>
+                      >
+                        Fix all
+                      </button>
                     </div>
                   </li>
                 ))}
@@ -387,12 +509,14 @@ function LinkChecker() {
 
       {rows.length > 0 && (
         <div className="mt-6 flex flex-wrap gap-2">
-          {([
-            ["all", "All"],
-            ["missing_p_page", "Missing /p/"],
-            ["unknown_internal_path", "Unknown internal"],
-            ["malformed", "Malformed"],
-          ] as const).map(([id, label]) => (
+          {(
+            [
+              ["all", "All"],
+              ["missing_p_page", "Missing /p/"],
+              ["unknown_internal_path", "Unknown internal"],
+              ["malformed", "Malformed"],
+            ] as const
+          ).map(([id, label]) => (
             <button
               key={id}
               onClick={() => setFilter(id as any)}
@@ -406,7 +530,9 @@ function LinkChecker() {
 
       {filtered.length > 0 && (
         <div className="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-border bg-card p-3">
-          <span className="text-sm font-medium">Bulk action on {filtered.length} filtered link{filtered.length === 1 ? "" : "s"}:</span>
+          <span className="text-sm font-medium">
+            Bulk action on {filtered.length} filtered link{filtered.length === 1 ? "" : "s"}:
+          </span>
           <button
             onClick={() => applyBulk("replace")}
             disabled={bulkRunning}
@@ -430,7 +556,9 @@ function LinkChecker() {
             Remove all
           </button>
           {bulkRunning && <span className="text-xs text-muted-foreground">Working…</span>}
-          {bulkResult && <span className="ml-auto text-xs text-muted-foreground">{bulkResult}</span>}
+          {bulkResult && (
+            <span className="ml-auto text-xs text-muted-foreground">{bulkResult}</span>
+          )}
         </div>
       )}
 
@@ -446,9 +574,15 @@ function LinkChecker() {
           </thead>
           <tbody>
             {filtered.length === 0 && (
-              <tr><td colSpan={4} className="px-3 py-8 text-center text-muted-foreground">
-                {scanning ? "Scanning…" : rows.length ? "No links match this filter." : "Run a scan to find broken links."}
-              </td></tr>
+              <tr>
+                <td colSpan={4} className="px-3 py-8 text-center text-muted-foreground">
+                  {scanning
+                    ? "Scanning…"
+                    : rows.length
+                      ? "No links match this filter."
+                      : "Run a scan to find broken links."}
+                </td>
+              </tr>
             )}
             {filtered.map((b) => {
               const k = key(b);
@@ -458,8 +592,17 @@ function LinkChecker() {
               return (
                 <tr key={k + Math.random()} className="border-t border-border align-top">
                   <td className="px-3 py-2">
-                    <a href={b.page_url} target="_blank" rel="noreferrer" className="font-medium text-primary hover:underline">{b.page_url}</a>
-                    <div className="text-xs text-muted-foreground line-clamp-1">{b.page_title || ""}</div>
+                    <a
+                      href={b.page_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="font-medium text-primary hover:underline"
+                    >
+                      {b.page_url}
+                    </a>
+                    <div className="text-xs text-muted-foreground line-clamp-1">
+                      {b.page_title || ""}
+                    </div>
                   </td>
                   <td className="px-3 py-2">
                     <code className="rounded bg-muted px-1.5 py-0.5 text-xs">{b.href}</code>
@@ -471,15 +614,21 @@ function LinkChecker() {
                     </span>
                     {b.suggestion && (
                       <div className="mt-1 text-xs text-muted-foreground">
-                        Suggested: <code className="rounded bg-muted px-1 py-0.5">{b.suggestion.href}</code> ({b.suggestion.reason})
+                        Suggested:{" "}
+                        <code className="rounded bg-muted px-1 py-0.5">{b.suggestion.href}</code> (
+                        {b.suggestion.reason})
                       </div>
                     )}
                   </td>
                   <td className="px-3 py-2">
                     {st?.status === "fixed" ? (
-                      <span className="text-xs font-medium text-green-600 dark:text-green-400">✓ Fixed {st.msg}</span>
+                      <span className="text-xs font-medium text-green-600 dark:text-green-400">
+                        ✓ Fixed {st.msg}
+                      </span>
                     ) : st?.status === "error" ? (
-                      <span className="text-xs font-medium text-red-600 dark:text-red-400">✗ {st.msg}</span>
+                      <span className="text-xs font-medium text-red-600 dark:text-red-400">
+                        ✗ {st.msg}
+                      </span>
                     ) : (
                       <div className="flex flex-wrap items-center gap-1.5">
                         <input
@@ -492,17 +641,23 @@ function LinkChecker() {
                           disabled={st?.status === "fixing" || !editVal.trim()}
                           onClick={() => applyFix(b, "replace", editVal.trim())}
                           className="rounded bg-primary px-2 py-1 text-xs font-semibold text-primary-foreground disabled:opacity-50"
-                        >Replace</button>
+                        >
+                          Replace
+                        </button>
                         <button
                           disabled={st?.status === "fixing"}
                           onClick={() => applyFix(b, "unlink")}
                           className="rounded border border-border px-2 py-1 text-xs font-medium hover:bg-muted disabled:opacity-50"
-                        >Unlink</button>
+                        >
+                          Unlink
+                        </button>
                         <button
                           disabled={st?.status === "fixing"}
                           onClick={() => applyFix(b, "remove")}
                           className="rounded border border-border px-2 py-1 text-xs font-medium hover:bg-muted disabled:opacity-50"
-                        >Remove</button>
+                        >
+                          Remove
+                        </button>
                       </div>
                     )}
                   </td>

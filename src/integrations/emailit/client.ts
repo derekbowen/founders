@@ -105,7 +105,10 @@ export async function sendEmailitEmail(
     const retryAfterHeader = res.headers.get("retry-after");
     const retryAfterSeconds = retryAfterHeader ? parseInt(retryAfterHeader, 10) || null : null;
     const message =
-      (parsed && typeof parsed === "object" && "error" in parsed && typeof (parsed as any).error === "string"
+      (parsed &&
+      typeof parsed === "object" &&
+      "error" in parsed &&
+      typeof (parsed as any).error === "string"
         ? (parsed as any).error
         : `Emailit ${res.status}`) || `Emailit ${res.status}`;
     throw new EmailitAPIError(res.status, message, parsed, retryAfterSeconds);

@@ -243,7 +243,10 @@ function estimateOutputTokens(row: PlanRow): number {
   return Math.ceil((base + faqOverhead) * 1.15);
 }
 
-function pickModelForBudget(row: PlanRow, requestedModel: string): {
+function pickModelForBudget(
+  row: PlanRow,
+  requestedModel: string,
+): {
   model: string;
   estTokens: number;
   maxTokens: number;
@@ -263,7 +266,12 @@ function pickModelForBudget(row: PlanRow, requestedModel: string): {
     reason = `est ${estTokens} tok > ${requestedBudget} tok budget of ${requestedModel}; switched to ${model}`;
   }
   // Hard rule: event_guides always need Pro regardless (15-20 FAQs + 4k words).
-  if (isEventSource(row) && !model.includes("pro") && !model.includes("gpt-5") && !model.includes("gpt-5.2")) {
+  if (
+    isEventSource(row) &&
+    !model.includes("pro") &&
+    !model.includes("gpt-5") &&
+    !model.includes("gpt-5.2")
+  ) {
     model = "google/gemini-2.5-pro";
     switched = true;
     reason = `event_guide forced to ${model} (FAQ + word-count requirement)`;
@@ -454,7 +462,9 @@ async function processGeneration(
         if (pick.switched) {
           console.log(`[generate-content-batch:${row.slug}] model auto-switch — ${pick.reason}`);
         } else {
-          console.log(`[generate-content-batch:${row.slug}] using ${pick.model} (~${pick.estTokens} tok)`);
+          console.log(
+            `[generate-content-batch:${row.slug}] using ${pick.model} (~${pick.estTokens} tok)`,
+          );
         }
         return generateOne(row, pick.model, apiKey, pick.maxTokens);
       }),
