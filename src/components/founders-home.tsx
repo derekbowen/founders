@@ -57,14 +57,14 @@ function Header() {
         <div className="flex items-center gap-2">
           <Link
             to="/auth"
-            search={{ redirect: "/admin/dashboard", mode: "signin" } as never}
+            search={{ redirect: "/account/billing", mode: "signin" } as never}
             className="hidden h-9 items-center justify-center rounded-full border border-border px-4 text-sm font-medium hover:bg-muted sm:inline-flex"
           >
             Log in
           </Link>
           <Link
             to="/auth"
-            search={{ redirect: "/admin/dashboard", mode: "signup" } as never}
+            search={{ redirect: "/onboarding", mode: "signup" } as never}
             className="inline-flex h-9 items-center justify-center rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm transition-all hover:opacity-90"
           >
             Start free trial
@@ -113,7 +113,7 @@ function Hero() {
         <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Link
             to="/auth"
-            search={{ redirect: "/admin/dashboard", mode: "signup" } as never}
+            search={{ redirect: "/onboarding", mode: "signup" } as never}
             className="inline-flex h-12 w-full items-center justify-center rounded-full bg-primary px-8 text-base font-semibold text-primary-foreground shadow-sm transition-all hover:opacity-90 sm:w-auto"
           >
             Start free trial — no developers required
@@ -792,7 +792,7 @@ function ClosingCta() {
         </p>
         <Link
           to="/auth"
-          search={{ redirect: "/admin/dashboard", mode: "signup" } as never}
+          search={{ redirect: "/onboarding", mode: "signup" } as never}
           className="mt-10 inline-flex h-12 items-center justify-center rounded-full bg-primary px-8 text-base font-semibold text-primary-foreground shadow-sm transition-all hover:opacity-90"
         >
           Start your free trial
