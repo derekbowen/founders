@@ -11,7 +11,7 @@ export const Route = createFileRoute("/unsubscribe")({
   component: UnsubscribePage,
   head: () => ({
     meta: [
-      { title: "Unsubscribe — Pool Rental Near Me" },
+      { title: "Unsubscribe — founders.click" },
       { name: "robots", content: "noindex,nofollow" },
     ],
   }),
@@ -81,7 +81,7 @@ function UnsubscribePage() {
         {status === "ready" && (
           <>
             <p className="mt-4 text-muted-foreground">
-              Click below to stop receiving emails from Pool Rental Near Me.
+              Click below to stop receiving emails from founders.click.
             </p>
             <button
               onClick={confirm}

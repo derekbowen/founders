@@ -10,7 +10,7 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/auth/reset-password")({
   component: ResetPasswordPage,
   head: () => ({
-    meta: [{ title: "Reset password — Pool Rental Near Me" }],
+    meta: [{ title: "Reset password — founders.click" }],
   }),
 });
 

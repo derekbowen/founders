@@ -24,7 +24,7 @@ export const Route = createFileRoute("/admin/learning")({
     if (!isAdmin) throw redirect({ to: "/admin/no-access" });
   },
   component: AdminLearningPage,
-  head: () => ({ meta: [{ title: "Learning admin — Pool Rental Near Me" }] }),
+  head: () => ({ meta: [{ title: "Learning admin — founders.click" }] }),
 });
 
 function AdminLearningPage() {

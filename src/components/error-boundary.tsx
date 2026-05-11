@@ -45,12 +45,10 @@ export class ErrorBoundary extends Component<Props, State> {
             Please refresh the page. If this keeps happening, try again in a moment.
           </p>
           <a
-            href="https://www.poolrentalnearme.com/s"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="/"
             className="mt-6 inline-flex items-center justify-center rounded-full bg-primary px-6 py-3 text-base font-semibold text-primary-foreground"
           >
-            Browse pools →
+            Back to home →
           </a>
         </div>
       );

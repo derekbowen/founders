@@ -226,7 +226,7 @@ function EmailBrandingPage() {
             <Textarea
               id="footer_text"
               rows={3}
-              placeholder="© Pool Rental Near Me · 123 Main St · Reply to this email if you need help."
+              placeholder="© founders.click · Reply to this email if you need help."
               value={form.footer_text}
               onChange={(e) => set("footer_text", e.target.value)}
             />

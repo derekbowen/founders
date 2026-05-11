@@ -20,7 +20,7 @@ export const Route = createFileRoute("/verify/$uid")({
     </div>
   ),
   head: ({ params }) => ({
-    meta: [{ title: `Verify certificate ${params.uid} — Pool Rental Near Me` }],
+    meta: [{ title: `Verify certificate ${params.uid} — founders.click` }],
   }),
 });
 

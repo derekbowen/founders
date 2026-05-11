@@ -22,7 +22,7 @@ export const Route = createFileRoute("/account/learning")({
     }
   },
   component: MyLearningPage,
-  head: () => ({ meta: [{ title: "My learning — Pool Rental Near Me Academy" }] }),
+  head: () => ({ meta: [{ title: "My learning — founders.click" }] }),
 });
 
 function MyLearningPage() {
