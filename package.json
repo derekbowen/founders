@@ -1,0 +1,14 @@
+{
+  "name": "founders-monorepo",
+  "private": true,
+  "description": "Workspace root for the founders.click-lineage applications.",
+  "scripts": {
+    "dev:prnm": "npm --prefix apps/poolrentalnearme run dev",
+    "build:prnm": "npm --prefix apps/poolrentalnearme run build",
+    "lint:prnm": "npm --prefix apps/poolrentalnearme run lint",
+    "dev:fc": "cd apps/founders-click && bun run dev",
+    "build:fc": "cd apps/founders-click && bun run build",
+    "lint:fc": "cd apps/founders-click && bun run lint",
+    "check:worker-names": "node scripts/check-worker-names.mjs"
+  }
+}

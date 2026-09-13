@@ -1,14 +1,23 @@
-name: Deploy to Cloudflare Workers
+name: Deploy poolrentalnearme
 
+# Scoped to apps/poolrentalnearme. This repository now holds two deployable
+# apps, so this workflow is path-filtered: a change to apps/founders-click
+# must not redeploy this app. apps/founders-click has no auto-deploy workflow
+# (it never had one -- it is released through its own pipeline), so nothing
+# here publishes it.
 on:
   push:
     branches: [main]
+    paths:
+      - "apps/poolrentalnearme/**"
+      - ".github/workflows/deploy.yml"
+      - "scripts/check-worker-names.mjs"
   # Allow manual triggering from the GitHub UI.
   workflow_dispatch:
 
 # Cancel any in-flight deploy if a newer commit lands.
 concurrency:
-  group: deploy-${{ github.ref }}
+  group: deploy-prnm-${{ github.ref }}
   cancel-in-progress: true
 
 # Future-proof: GitHub is deprecating Node 20 on runners (Sep 2026).
@@ -23,6 +32,9 @@ jobs:
     permissions:
       contents: read
       deployments: write
+    defaults:
+      run:
+        working-directory: apps/poolrentalnearme
     steps:
       - uses: actions/checkout@v5
 
@@ -31,6 +43,13 @@ jobs:
         with:
           node-version: "22"
           cache: "npm"
+          cache-dependency-path: apps/poolrentalnearme/package-lock.json
+
+      # Refuse to deploy while two apps claim one Cloudflare Worker name --
+      # the last deploy would silently take over the other app's domain.
+      - name: Check for Worker name collisions
+        working-directory: .
+        run: node scripts/check-worker-names.mjs
 
       - name: Install dependencies
         run: npm ci --no-audit --no-fund
@@ -55,3 +74,4 @@ jobs:
           # "Edit Cloudflare Workers" template at
           # https://dash.cloudflare.com/profile/api-tokens
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          workingDirectory: apps/poolrentalnearme
