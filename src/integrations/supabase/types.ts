@@ -521,6 +521,7 @@ export type Database = {
           title: string | null;
           updated_at: string;
           url_path: string | null;
+          workspace_id: string;
         };
         Insert: {
           body_markdown?: string | null;
@@ -553,6 +554,7 @@ export type Database = {
           title?: string | null;
           updated_at?: string;
           url_path?: string | null;
+          workspace_id: string;
         };
         Update: {
           body_markdown?: string | null;
@@ -585,8 +587,17 @@ export type Database = {
           title?: string | null;
           updated_at?: string;
           url_path?: string | null;
+          workspace_id?: string;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "content_pages_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspaces";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       content_plan: {
         Row: {
@@ -875,6 +886,74 @@ export type Database = {
           updated_at?: string;
         };
         Relationships: [];
+      };
+      customer_subscriptions: {
+        Row: {
+          cancel_at_period_end: boolean;
+          canceled_at: string | null;
+          created_at: string;
+          current_period_end: string | null;
+          current_period_start: string | null;
+          id: string;
+          last_event_at: string | null;
+          last_event_id: string | null;
+          plan: Database["public"]["Enums"]["app_plan"];
+          raw: Json | null;
+          status: Database["public"]["Enums"]["subscription_status"];
+          stripe_customer_id: string;
+          stripe_price_id: string | null;
+          stripe_subscription_id: string | null;
+          trial_ends_at: string | null;
+          updated_at: string;
+          workspace_id: string;
+        };
+        Insert: {
+          cancel_at_period_end?: boolean;
+          canceled_at?: string | null;
+          created_at?: string;
+          current_period_end?: string | null;
+          current_period_start?: string | null;
+          id?: string;
+          last_event_at?: string | null;
+          last_event_id?: string | null;
+          plan: Database["public"]["Enums"]["app_plan"];
+          raw?: Json | null;
+          status: Database["public"]["Enums"]["subscription_status"];
+          stripe_customer_id: string;
+          stripe_price_id?: string | null;
+          stripe_subscription_id?: string | null;
+          trial_ends_at?: string | null;
+          updated_at?: string;
+          workspace_id: string;
+        };
+        Update: {
+          cancel_at_period_end?: boolean;
+          canceled_at?: string | null;
+          created_at?: string;
+          current_period_end?: string | null;
+          current_period_start?: string | null;
+          id?: string;
+          last_event_at?: string | null;
+          last_event_id?: string | null;
+          plan?: Database["public"]["Enums"]["app_plan"];
+          raw?: Json | null;
+          status?: Database["public"]["Enums"]["subscription_status"];
+          stripe_customer_id?: string;
+          stripe_price_id?: string | null;
+          stripe_subscription_id?: string | null;
+          trial_ends_at?: string | null;
+          updated_at?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "customer_subscriptions_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: true;
+            referencedRelation: "workspaces";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       email_branding: {
         Row: {
@@ -2526,6 +2605,95 @@ export type Database = {
         };
         Relationships: [];
       };
+      workspace_members: {
+        Row: {
+          created_at: string;
+          id: string;
+          invited_by: string | null;
+          role: Database["public"]["Enums"]["workspace_role"];
+          user_id: string;
+          workspace_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          invited_by?: string | null;
+          role?: Database["public"]["Enums"]["workspace_role"];
+          user_id: string;
+          workspace_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          invited_by?: string | null;
+          role?: Database["public"]["Enums"]["workspace_role"];
+          user_id?: string;
+          workspace_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "workspace_members_workspace_id_fkey";
+            columns: ["workspace_id"];
+            isOneToOne: false;
+            referencedRelation: "workspaces";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      workspaces: {
+        Row: {
+          created_at: string;
+          current_period_end: string | null;
+          domain_verified_at: string | null;
+          id: string;
+          is_internal: boolean;
+          marketplace_domain: string | null;
+          name: string;
+          owner_user_id: string | null;
+          plan: Database["public"]["Enums"]["app_plan"];
+          slug: string;
+          stripe_customer_id: string | null;
+          stripe_subscription_id: string | null;
+          subscription_status: Database["public"]["Enums"]["subscription_status"];
+          trial_ends_at: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          current_period_end?: string | null;
+          domain_verified_at?: string | null;
+          id?: string;
+          is_internal?: boolean;
+          marketplace_domain?: string | null;
+          name: string;
+          owner_user_id?: string | null;
+          plan?: Database["public"]["Enums"]["app_plan"];
+          slug: string;
+          stripe_customer_id?: string | null;
+          stripe_subscription_id?: string | null;
+          subscription_status?: Database["public"]["Enums"]["subscription_status"];
+          trial_ends_at?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          current_period_end?: string | null;
+          domain_verified_at?: string | null;
+          id?: string;
+          is_internal?: boolean;
+          marketplace_domain?: string | null;
+          name?: string;
+          owner_user_id?: string | null;
+          plan?: Database["public"]["Enums"]["app_plan"];
+          slug?: string;
+          stripe_customer_id?: string | null;
+          stripe_subscription_id?: string | null;
+          subscription_status?: Database["public"]["Enums"]["subscription_status"];
+          trial_ends_at?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       page_quality: {
@@ -2681,7 +2849,18 @@ export type Database = {
       };
     };
     Enums: {
+      app_plan: "starter" | "growth" | "scale" | "enterprise";
       app_role: "admin" | "editor" | "user";
+      subscription_status:
+        | "trialing"
+        | "active"
+        | "past_due"
+        | "canceled"
+        | "incomplete"
+        | "incomplete_expired"
+        | "unpaid"
+        | "paused";
+      workspace_role: "owner" | "editor";
     };
     CompositeTypes: {
       [_ in never]: never;
