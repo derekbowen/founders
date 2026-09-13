@@ -3,6 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import {
   creditsForTier,
   pagesForTier,
+  tierByMonthlyPrice,
   PAGE_ADDON,
   ADDON_CATALOG,
   isAddonKey,
@@ -247,8 +248,50 @@ Deno.serve(async (req) => {
 
         // ---- base page plan -------------------------------------------------
         const priceId = sub.items.data[0]?.price.id ?? null;
-        const tier = sub.metadata?.plan_tier ?? (await resolveTierFromPrice(stripe, priceId));
-        const includedPages = pagesForTier(tier);
+        let tier = sub.metadata?.plan_tier ?? (await resolveTierFromPrice(stripe, priceId));
+        let includedPages = pagesForTier(tier);
+
+        // A price with no plan_tier metadata used to resolve to "unknown", give
+        // 0 pages, and silently skip the entitlement update below — so a
+        // customer Stripe had genuinely charged stayed on trial capacity and
+        // nothing anywhere said so. What they are being charged identifies the
+        // plan unambiguously, so recover from the amount before giving up.
+        if (includedPages === 0) {
+          const amount = sub.items.data[0]?.price.unit_amount ?? null;
+          const recovered = tierByMonthlyPrice(amount);
+          if (recovered) {
+            console.warn(
+              `[stripe-webhook] price ${priceId} has no plan_tier metadata; recovered "${recovered}" from unit_amount ${amount}`,
+            );
+            tier = recovered;
+            includedPages = pagesForTier(recovered);
+            await logBilling(admin, workspace_id, "plan_tier_recovered_from_price", event.id, {
+              subscription: sub.id,
+              price: priceId,
+              unit_amount: amount,
+              recovered_tier: recovered,
+            });
+          }
+        }
+
+        // Still unresolved: the customer is paying for something this catalog
+        // does not describe. Never silent — that is a paying customer capped at
+        // trial capacity, and it is invisible until they complain.
+        if (includedPages === 0) {
+          console.error(
+            `[stripe-webhook] UNRESOLVED PLAN: workspace ${workspace_id}, subscription ${sub.id}, ` +
+              `price ${priceId}, tier "${tier}", amount ${sub.items.data[0]?.price.unit_amount}. ` +
+              `Entitlement NOT granted — this customer may be paying for capacity they do not have.`,
+          );
+          await logBilling(admin, workspace_id, "plan_tier_unresolved", event.id, {
+            subscription: sub.id,
+            price: priceId,
+            tier,
+            unit_amount: sub.items.data[0]?.price.unit_amount ?? null,
+            status: sub.status,
+            severity: "needs_human",
+          });
+        }
         // current_period_end can be absent on some subscription states; guard
         // against new Date(NaN) which would throw and force endless retries.
         const periodEnd =
