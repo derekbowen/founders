@@ -20,9 +20,29 @@ name: Production Monitor
 # NOTE: GitHub suspends cron schedules after ~60 days without repo activity.
 # If the repo goes quiet, re-enable from the Actions tab.
 
+
+# ---------------------------------------------------------------------------
+# CUTOVER STATE: manual dispatch only.
+#
+# founders.click is still deployed and monitored from derekbowen/kindred-ease-space.
+# This copy is re-anchored to apps/founders-click and ready, but its automatic
+# triggers are deliberately removed: while both repositories are live, an
+# automatic run here would race that one for the same Cloudflare Worker, and
+# two monitors would double every alert.
+#
+# To complete the cutover:
+#   1. Disable (or delete) the matching workflow in kindred-ease-space.
+#   2. Run this one via "Run workflow" and confirm it behaves.
+#   3. Restore the automatic trigger recorded below.
+# ---------------------------------------------------------------------------
+#
+# Original trigger:
+#   on:
+#     schedule:
+#       - cron: "*/30 * * * *"
+#     workflow_dispatch:
+
 on:
-  schedule:
-    - cron: "*/30 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -30,6 +50,9 @@ permissions:
 
 jobs:
   probe:
+    defaults:
+      run:
+        working-directory: apps/founders-click
     name: Verify production identity
     runs-on: ubuntu-latest
     timeout-minutes: 5

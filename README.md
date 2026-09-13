@@ -81,11 +81,21 @@ TXT  _dmarc   v=DMARC1; p=none; rua=mailto:dmarc@founders.click   (adds reportin
 
 Each changes runtime behaviour and needs a decision:
 
-1. **Cut founders.click's deploy over to this repo** — re-anchor the four
-   nested workflows to `apps/founders-click`, disable them in
-   `kindred-ease-space`, verify, then retire that repo. Until this happens,
-   `kindred-ease-space` remains the source of truth for founders.click and work
-   done here will not reach production.
+1. **Cut founders.click's deploy over to this repo.** The four workflows are
+   already re-anchored to `apps/founders-click` and sitting in
+   `.github/workflows/`, but with their automatic triggers removed — while
+   `kindred-ease-space` is still live, an automatic run here would race it for
+   the same Cloudflare Worker and double every monitor alert. Each file records
+   its original trigger in a comment. To finish:
+
+   1. Disable the matching workflow in `kindred-ease-space`.
+   2. Run `Deploy founders.click` here via **Run workflow** and confirm it
+      behaves — it verifies itself, comparing `/api/public/edge-health` against
+      the SHA it just shipped.
+   3. Restore the automatic triggers from the comments, and retire the old repo.
+
+   Until this is done, `kindred-ease-space` remains the source of truth for
+   founders.click and **work done here will not reach production.**
 2. **Confirm the Cloudflare domain mapping.** `apps/poolrentalnearme`'s Worker
    was renamed `founders-click` → `poolrentalnearme`. Verify poolrentalnearme.com
    is attached to the Worker this app now publishes.

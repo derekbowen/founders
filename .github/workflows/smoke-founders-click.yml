@@ -6,22 +6,29 @@ name: E2E Smoke
 #   SUPABASE_TEST_PASSWORD  — password for that account
 
 
+
+# ---------------------------------------------------------------------------
+# CUTOVER STATE: manual dispatch only.
+#
+# founders.click is still deployed and monitored from derekbowen/kindred-ease-space.
+# This copy is re-anchored to apps/founders-click and ready, but its automatic
+# triggers are deliberately removed: while both repositories are live, an
+# automatic run here would race that one for the same Cloudflare Worker, and
+# two monitors would double every alert.
+#
+# To complete the cutover:
+#   1. Disable (or delete) the matching workflow in kindred-ease-space.
+#   2. Run this one via "Run workflow" and confirm it behaves.
+#   3. Restore the automatic trigger recorded below.
+# ---------------------------------------------------------------------------
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "17 */6 * * *" # every 6 hours
-  push:
-    branches: [main]
-    paths:
-      - "src/routes/_authenticated/**"
-      - "src/lib/workspace.functions.ts"
-      - "src/routes/signup.tsx"
-      - "src/routes/login.tsx"
-      - "tests/e2e/**"
-      - ".github/workflows/smoke.yml"
 
 jobs:
   smoke:
+    defaults:
+      run:
+        working-directory: apps/founders-click
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:

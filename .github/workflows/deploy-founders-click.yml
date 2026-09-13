@@ -22,9 +22,29 @@ name: Deploy App
 #   CLOUDFLARE_API_TOKEN provisioning secret, which has no Workers permission.
 #   Neither may be substituted for the other.
 
+
+# ---------------------------------------------------------------------------
+# CUTOVER STATE: manual dispatch only.
+#
+# founders.click is still deployed and monitored from derekbowen/kindred-ease-space.
+# This copy is re-anchored to apps/founders-click and ready, but its automatic
+# triggers are deliberately removed: while both repositories are live, an
+# automatic run here would race that one for the same Cloudflare Worker, and
+# two monitors would double every alert.
+#
+# To complete the cutover:
+#   1. Disable (or delete) the matching workflow in kindred-ease-space.
+#   2. Run this one via "Run workflow" and confirm it behaves.
+#   3. Restore the automatic trigger recorded below.
+# ---------------------------------------------------------------------------
+#
+# Original trigger:
+#   on:
+#     push:
+#       branches: [main]
+#     workflow_dispatch:
+
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 # SERIALIZE, never interleave. Two pushes in quick succession must not race:
@@ -41,6 +61,9 @@ permissions:
 
 jobs:
   deploy:
+    defaults:
+      run:
+        working-directory: apps/founders-click
     name: Build and deploy founders-click
     runs-on: ubuntu-latest
     timeout-minutes: 25
@@ -120,7 +143,7 @@ jobs:
       # they exist. Shipping a build whose dependencies are unconfigured would
       # 500 the first time a customer touched the missing one.
       - name: Preflight — required Worker secrets are configured
-        working-directory: .output/server
+        working-directory: apps/founders-click/.output/server
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_WORKER_DEPLOY_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

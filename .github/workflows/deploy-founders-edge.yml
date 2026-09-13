@@ -18,6 +18,21 @@ name: Deploy Edge Worker
 # Flip the `push` trigger on once the fail-open path has real production
 # history.
 
+
+# ---------------------------------------------------------------------------
+# CUTOVER STATE: manual dispatch only.
+#
+# founders.click is still deployed and monitored from derekbowen/kindred-ease-space.
+# This copy is re-anchored to apps/founders-click and ready, but its automatic
+# triggers are deliberately removed: while both repositories are live, an
+# automatic run here would race that one for the same Cloudflare Worker, and
+# two monitors would double every alert.
+#
+# To complete the cutover:
+#   1. Disable (or delete) the matching workflow in kindred-ease-space.
+#   2. Run this one via "Run workflow" and confirm it behaves.
+#   3. Restore the automatic trigger recorded below.
+# ---------------------------------------------------------------------------
 on:
   workflow_dispatch:
     inputs:
@@ -25,16 +40,15 @@ on:
         description: 'Type "deploy" to confirm you intend to update the live edge Worker'
         required: true
         default: ""
-  # push:
-  #   branches: [main]
-  #   paths:
-  #     - "edge/founders-edge/**"
 
 permissions:
   contents: read
 
 jobs:
   deploy:
+    defaults:
+      run:
+        working-directory: apps/founders-click
     name: Deploy founders-edge
     runs-on: ubuntu-latest
     steps:
@@ -118,7 +132,7 @@ jobs:
           echo "count=$n" >> "$GITHUB_OUTPUT"
 
       - name: Deploy
-        working-directory: edge/founders-edge
+        working-directory: apps/founders-click/edge/founders-edge
         env:
           # Wrangler reads the credential from CLOUDFLARE_API_TOKEN. That name
           # is wrangler's, not ours: the value here is the Worker DEPLOYMENT
