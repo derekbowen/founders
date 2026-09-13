@@ -29,7 +29,6 @@ function BillingPage() {
   const [workspaceId, setWorkspaceId] = useState<string | null>(null);
   const [ent, setEnt] = useState<PageEntitlement | null>(null);
   const [addonQty, setAddonQty] = useState(1);
-  const [packQty, setPackQty] = useState(1);
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -163,14 +162,35 @@ function BillingPage() {
             <CardTitle>Current plan</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{ent?.planName ?? "—"}</div>
+            <div className="text-2xl font-bold">{ent?.isTrial ? "Free trial" : (ent?.planName ?? "—")}</div>
             <div className="text-xs text-muted-foreground capitalize">
-              {ent?.monthlyPrice ? `$${ent.monthlyPrice}/month · ` : ""}
+              {/* A trial has no price. `plan` is written as 'starter' at
+                  provisioning, so showing its price here told every trial
+                  user they were already paying $29/month. */}
+              {!ent?.isTrial && ent?.monthlyPrice ? `$${ent.monthlyPrice}/month · ` : ""}
               {ent?.subscriptionStatus ?? ""}
             </div>
-            {ent?.currentPeriodEnd && (
+            {ent?.isTrial && ent?.trialEndsAt && (
+              <div className="text-xs mt-1">
+                Trial ends {new Date(ent.trialEndsAt).toLocaleDateString()}
+              </div>
+            )}
+            {!ent?.isTrial && ent?.currentPeriodEnd && (
               <div className="text-xs mt-1">
                 Renews {new Date(ent.currentPeriodEnd).toLocaleDateString()}
+              </div>
+            )}
+            {/* When pages have stopped serving, the billing page is where the
+                customer comes to find out why. Say it plainly rather than
+                leaving them to infer it from a dead site. */}
+            {ent && !ent.pagesServe && (
+              <div className="text-xs mt-2 rounded border border-destructive/40 bg-destructive/5 p-2 text-destructive">
+                Your published pages are not being served. {ent.billingReason}
+              </div>
+            )}
+            {ent && ent.pagesServe && !ent.canPublish && (
+              <div className="text-xs mt-2 rounded border border-amber-500/40 bg-amber-500/5 p-2">
+                {ent.billingReason}
               </div>
             )}
             {ent?.isTrial && ent?.trialEndsAt && (
@@ -231,23 +251,17 @@ function BillingPage() {
             <div className="text-2xl font-bold tabular-nums">
               {ent?.aiBalance.toLocaleString() ?? "—"}
             </div>
-            <div className="text-xs text-muted-foreground">generation credits available</div>
-            <div className="flex items-center gap-2 pt-1">
-              <Input
-                type="number"
-                min={1}
-                value={packQty}
-                onChange={(e) => setPackQty(Math.max(1, +e.target.value))}
-                className="w-16 h-8"
-              />
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => checkout("credits", packQty)}
-                disabled={loading}
-              >
-                Add {(packQty * 1000).toLocaleString()} (${packQty * 10})
-              </Button>
+            <div className="text-xs text-muted-foreground">
+              generation credits remaining this month
+            </div>
+            {/* Credits are INTERNAL metering, not a SKU. Selling them here
+                contradicted the product decision that capacity is what the
+                customer buys (docs/SOURCE_OF_TRUTH.md), and gave the billing
+                page two competing units. The allowance is still worth showing
+                — it is what the plan includes — but it is not for sale.
+                More capacity is bought as pages, below. */}
+            <div className="text-xs text-muted-foreground pt-1">
+              Included with your plan. Need more pages? Upgrade below.
             </div>
           </CardContent>
         </Card>
