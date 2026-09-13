@@ -39,6 +39,44 @@ Cloudflare Worker and run the half-hourly production monitor twice.
 Before any deploy, CI runs `scripts/check-worker-names.mjs`, which fails if two
 apps declare the same Worker name. Both previously declared `founders-click`.
 
+## Auth email is not being delivered
+
+founders.click sends auth mail as `noreply@founders.click`, and that domain
+publishes **no SPF record**. DKIM is present (selector `emailit`) and DMARC is
+present at `p=none` with no `rua=` reporting address. EmailIt accepts every
+send and returns 200; receivers discard the mail without bouncing, so every
+signup dead-ends at "check your email" and nothing reports a failure.
+
+Two tools exist to close this, neither of which needs a login — which matters,
+because the thing being diagnosed is why nobody can log in.
+
+```bash
+# 1. What does the DNS say? Exits non-zero when mail cannot authenticate.
+cd apps/founders-click && bun run check:email-dns
+
+# 2. What does EmailIt actually say? Reads config + DNS, no side effects:
+curl -X POST https://www.founders.click/api/public/ops/email-probe \
+  -H "x-founders-probe-secret: $SEND_EMAIL_HOOK_SECRET"
+
+#    ...and with an actual send, to see the provider's real response:
+curl -X POST "https://www.founders.click/api/public/ops/email-probe?send=1" \
+  -H "x-founders-probe-secret: $SEND_EMAIL_HOOK_SECRET" \
+  -H "content-type: application/json" -d '{"to":"you@example.com"}'
+```
+
+The probe distinguishes the two failures that look identical from outside:
+EmailIt refusing the message (its error is returned verbatim) versus EmailIt
+accepting it and the receiver dropping it (check spam, then SPF/DKIM). The
+smoke suite runs the DNS half every 30 minutes, so this cannot rot unnoticed
+again.
+
+The fix itself is one record, and it belongs to whoever holds the DNS:
+
+```
+TXT  @        v=spf1 include:_spf.emailit.com ~all
+TXT  _dmarc   v=DMARC1; p=none; rua=mailto:dmarc@founders.click   (adds reporting)
+```
+
 ## Open items
 
 Each changes runtime behaviour and needs a decision:
