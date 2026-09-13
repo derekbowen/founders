@@ -16,6 +16,57 @@ import {
 
 type Admin = ReturnType<typeof createClient>;
 
+/**
+ * Which workspace a charge belongs to.
+ *
+ * Preferred route is charge -> invoice -> subscription, because the
+ * subscriptions table is keyed by stripe_subscription_id and is the same link
+ * every other handler uses. A one-off charge has no invoice, so fall back to
+ * the customer mapping.
+ *
+ * Returns null rather than throwing: a refund or dispute must still be
+ * recorded even when we cannot attribute it, and an unattributed one is
+ * exactly the case a human needs to see.
+ */
+async function workspaceForCharge(
+  admin: Admin,
+  stripe: Stripe,
+  charge: Stripe.Charge,
+): Promise<string | null> {
+  const invoiceId = typeof charge.invoice === "string" ? charge.invoice : (charge.invoice?.id ?? null);
+  if (invoiceId) {
+    try {
+      const invoice = await stripe.invoices.retrieve(invoiceId);
+      const subId =
+        typeof invoice.subscription === "string"
+          ? invoice.subscription
+          : (invoice.subscription?.id ?? null);
+      if (subId) {
+        const { data } = await admin
+          .from("subscriptions")
+          .select("workspace_id")
+          .eq("stripe_subscription_id", subId)
+          .maybeSingle();
+        if (data?.workspace_id) return data.workspace_id as string;
+      }
+    } catch (e) {
+      console.error(`[stripe-webhook] invoice lookup failed for charge ${charge.id}`, e);
+    }
+  }
+
+  const customerId =
+    typeof charge.customer === "string" ? charge.customer : (charge.customer?.id ?? null);
+  if (customerId) {
+    const { data } = await admin
+      .from("stripe_customers")
+      .select("workspace_id")
+      .eq("stripe_customer_id", customerId)
+      .maybeSingle();
+    if (data?.workspace_id) return data.workspace_id as string;
+  }
+  return null;
+}
+
 async function logBilling(
   admin: Admin,
   workspace_id: string | null,
@@ -431,6 +482,66 @@ Deno.serve(async (req) => {
         await logBilling(admin, sub.workspace_id, "payment_failed", event.id, {
           attempt: inv.attempt_count,
           next_attempt: inv.next_payment_attempt,
+        });
+        break;
+      }
+      // ---- money going back out -------------------------------------------
+      // Neither of these was handled. A refunded or disputed charge left every
+      // granted allowance in place, so a customer who got their money back kept
+      // the capacity it bought. Both are recorded rather than acted on
+      // automatically: a dispute can still be resolved in the merchant's
+      // favour, and a partial refund is not a cancellation. Stripe will move
+      // the subscription's own status when it is decided, and entitlement is
+      // derived from that status on every read (src/lib/billing-capacity.ts),
+      // so the safe move here is to make the event impossible to miss.
+      case "charge.refunded": {
+        const charge = event.data.object as Stripe.Charge;
+        const workspace_id = await workspaceForCharge(admin, stripe, charge);
+        const fullyRefunded = charge.amount_refunded >= charge.amount;
+        console.warn(
+          `[stripe-webhook] charge ${charge.id} refunded ${charge.amount_refunded}/${charge.amount}` +
+            ` for workspace ${workspace_id ?? "unknown"}`,
+        );
+        await logBilling(admin, workspace_id, "charge_refunded", event.id, {
+          charge: charge.id,
+          amount: charge.amount,
+          amount_refunded: charge.amount_refunded,
+          currency: charge.currency,
+          fully_refunded: fullyRefunded,
+          // A full refund means the period was not paid for after all. Flag it
+          // for review rather than revoking automatically — a goodwill refund
+          // on an otherwise-active subscription is a normal thing to do.
+          severity: fullyRefunded ? "needs_human" : "info",
+        });
+        break;
+      }
+      case "charge.dispute.created": {
+        const dispute = event.data.object as Stripe.Dispute;
+        const chargeId =
+          typeof dispute.charge === "string" ? dispute.charge : (dispute.charge?.id ?? null);
+        let workspace_id: string | null = null;
+        if (chargeId) {
+          try {
+            const charge = await stripe.charges.retrieve(chargeId);
+            workspace_id = await workspaceForCharge(admin, stripe, charge);
+          } catch (e) {
+            console.error(`[stripe-webhook] dispute ${dispute.id}: charge lookup failed`, e);
+          }
+        }
+        console.error(
+          `[stripe-webhook] DISPUTE opened on charge ${chargeId ?? "?"} ` +
+            `(${dispute.amount} ${dispute.currency}, reason "${dispute.reason}") ` +
+            `for workspace ${workspace_id ?? "unknown"} — needs a human before the evidence deadline.`,
+        );
+        await logBilling(admin, workspace_id, "charge_disputed", event.id, {
+          dispute: dispute.id,
+          charge: chargeId,
+          amount: dispute.amount,
+          currency: dispute.currency,
+          reason: dispute.reason,
+          status: dispute.status,
+          evidence_due_by: dispute.evidence_details?.due_by ?? null,
+          severity: "needs_human",
         });
         break;
       }
