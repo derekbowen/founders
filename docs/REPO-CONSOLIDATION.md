@@ -103,3 +103,18 @@ Fixed by renaming this app's Worker to `poolrentalnearme`, and by
 
 Renaming changes only which Worker future deploys publish to. It does not move a
 custom domain — see the [README](../README.md) open items.
+
+## Consequence: the Supabase GitHub integration goes blind
+
+The Supabase integration on this repository watches a root `supabase/`
+directory. Moving both apps under `apps/` empties that path, so the integration
+stops seeing migrations. It is not a theoretical risk: on the consolidation PR
+the bot commented "no changes detected in `supabase` directory" on a diff that
+relocates every migration file.
+
+Re-point it per app in the project's Integrations settings before merging, or
+accept that migrations are applied by hand until you do.
+
+It is also worth noting which project it is connected to: `xbxhzinnfhosoztqaaao`,
+the founders.click project — on a repository whose app declares
+`ptfjspcphskifoseidut`. Same contradiction as the Supabase mismatch above.

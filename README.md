@@ -56,3 +56,14 @@ Each changes runtime behaviour and needs a decision:
    against `xbxhzinnfhosoztqaaao`. One is wrong.
 4. **Stale rebrand values.** That app still sets `SITE_ROOT_DOMAIN` and
    `EMAILIT_SENDER_DOMAIN` to `founders.click` while serving poolrentalnearme.com.
+5. **Re-point the Supabase GitHub integration.** It watches the repo-root
+   `supabase/` directory, which no longer exists — migrations now live at
+   `apps/*/supabase/`. On PR #3 the bot reported "no changes detected in
+   `supabase` directory" even though the PR moves every migration, so the
+   integration is already blind. Set the directory per app in
+   [Project Integrations Settings](https://supabase.com/dashboard/project/xbxhzinnfhosoztqaaao/settings/integrations),
+   or migrations will silently stop being picked up.
+
+   Note the integration is connected to `xbxhzinnfhosoztqaaao` — the
+   founders.click project — on a repository whose app declares
+   `ptfjspcphskifoseidut`. That is the same contradiction as open item 3.
