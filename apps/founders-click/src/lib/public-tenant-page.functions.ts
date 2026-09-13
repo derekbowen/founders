@@ -3,6 +3,7 @@ import { getRequestHeader } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { recordPage404 } from "@/lib/page-data.helpers.server";
+import { decideCapacity } from "@/lib/billing-capacity";
 
 const sb = () => supabaseAdmin as any;
 
@@ -137,6 +138,8 @@ export const getPublicTenantPage = createServerFn({ method: "GET" })
       host: string | null;
       redirect?: string;
       preview: boolean;
+      /** Set when the page exists but the workspace is no longer entitled to serve it. */
+      billingBlocked?: boolean;
     }> => {
       const host = resolveRequestHost() ?? null;
       let workspaceId: string | null = null;
@@ -156,6 +159,42 @@ export const getPublicTenantPage = createServerFn({ method: "GET" })
       }
 
       if (!workspaceId) return { page: null, host, preview };
+
+      // BILLING GATE. The subscription promise is that pages stop when paying
+      // stops; until now nothing on this path consulted billing at all, so a
+      // cancelled customer kept serving on their own domain indefinitely.
+      //
+      // Preview is deliberately exempt: an owner whose subscription lapsed
+      // should still be able to see what they get back by paying.
+      //
+      // Fails OPEN. If this read errors we serve the page. A transient
+      // database blip must never take down a paying customer's live site —
+      // the cost of carrying a lapsed one for a few minutes is far lower.
+      if (!preview) {
+        const { data: billing, error: billingError } = await sb()
+          .from("workspaces")
+          .select("subscription_status, trial_ends_at, current_period_end")
+          .eq("id", workspaceId)
+          .maybeSingle();
+        if (billingError) {
+          console.error(
+            "[getPublicTenantPage] billing read failed, serving anyway:",
+            billingError.message,
+          );
+        } else if (billing) {
+          const decision = decideCapacity({
+            subscriptionStatus: billing.subscription_status,
+            trialEndsAt: billing.trial_ends_at,
+            currentPeriodEnd: billing.current_period_end,
+          });
+          if (!decision.serve) {
+            console.warn(
+              `[getPublicTenantPage] withholding ${host ?? "?"}/${data.slug}: ${decision.state} — ${decision.reason}`,
+            );
+            return { page: null, host, preview, billingBlocked: true };
+          }
+        }
+      }
 
       // Internal links: without them every pSEO page is a sitemap-only orphan
       // (the listing cards link off-site with nofollow), which Google's doorway

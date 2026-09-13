@@ -3,6 +3,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { planByKey, TRIAL_PAGE_LIMIT } from "@/lib/plan-catalog";
+import { decideCapacity, effectivePageLimit, type BillingState } from "@/lib/billing-capacity";
 
 const sb = () => supabaseAdmin as any;
 
@@ -23,6 +24,16 @@ export type PageEntitlement = {
   trialEndsAt: string | null;
   isTrial: boolean;
   aiBalance: number;
+  /**
+   * What the billing facts say right now, independent of whether a webhook
+   * ever landed. `billingState`/`canPublish`/`pagesServe` are derived on every
+   * read, so an entitlement can no longer outlive the subscription that paid
+   * for it — see src/lib/billing-capacity.ts.
+   */
+  billingState: BillingState;
+  canPublish: boolean;
+  pagesServe: boolean;
+  billingReason: string;
 };
 
 /**
@@ -92,7 +103,18 @@ export async function readEntitlement(workspaceId: string): Promise<PageEntitlem
   const base = ws.page_limit_base ?? TRIAL_PAGE_LIMIT;
   const addon = ws.page_limit_addon ?? 0;
   const bonus = bonusActive ? (ws.page_limit_bonus ?? 0) : 0;
-  const limit = base + addon + bonus;
+
+  // The stored columns are what Stripe last told us. What they MEAN depends on
+  // the subscription's current state, and that has to be recomputed rather
+  // than trusted: a webhook that never arrived would otherwise read as a
+  // permanent grant. An expired trial or a lapsed subscription has no
+  // capacity, whatever page_limit_base still says.
+  const decision = decideCapacity({
+    subscriptionStatus: ws.subscription_status,
+    trialEndsAt: ws.trial_ends_at,
+    currentPeriodEnd: ws.current_period_end,
+  });
+  const limit = effectivePageLimit({ base, addon, bonus }, decision);
 
   const status: string = ws.subscription_status ?? "trialing";
   const isTrial = status === "trialing";
@@ -115,6 +137,10 @@ export async function readEntitlement(workspaceId: string): Promise<PageEntitlem
     trialEndsAt: ws.trial_ends_at ?? null,
     isTrial,
     aiBalance: bal?.balance ?? 0,
+    billingState: decision.state,
+    canPublish: decision.publish,
+    pagesServe: decision.serve,
+    billingReason: decision.reason,
   };
 }
 
