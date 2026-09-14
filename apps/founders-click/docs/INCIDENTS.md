@@ -5,6 +5,78 @@ fixed them. Newest first.
 
 ---
 
+## 2026-09-14 — Three preflight checks passed without checking anything
+
+**Impact.** No customer-facing outage. The cost was direction: 22 scheduled
+re-checks spent waiting for a DNS record that was never required, while the
+actual cause of non-delivery went unexamined. Two other gates were silently
+inert — one of them the gate that is supposed to prove the Worker has an
+EmailIt API key before a deploy ships.
+
+**The false blocker.** `checkSendingDomain()` read SPF at the sending domain
+only. founders.click publishes no apex SPF and does not need to: SPF
+authenticates the **envelope** sender (MAIL FROM / Return-Path), not the From
+header, and EmailIt delegates the envelope to `emailit.founders.click`, which
+carries both the bounce MX (`feedback-smtp.ffdc-1.emailit.com`) and
+`v=spf1 include:_spf.emailit.com ~all`. DKIM signs with `d=founders.click` and
+DMARC (`p=none`, relaxed by default) aligns on that leg — and on the SPF leg
+too, since the return path is inside the organisational domain. Mail from this
+domain authenticated the whole time the check called it a hard failure.
+
+**Two more of the same shape, both caused by the monorepo move.** Both read a
+path that was correct while the app sat at the repo root and wrong afterwards,
+and both reported success rather than failing:
+
+| Check | Read | Should read | Result |
+| --- | --- | --- | --- |
+| `scripts/audit-canonical-urls.ts` | `$PWD/src`, `$PWD/scripts` | its own tree | walked 0 files, printed "0 violations", exit 0 |
+| `deploy-founders-click.yml` secrets preflight | `$GITHUB_WORKSPACE/scripts/required-secrets.txt` | `.../apps/founders-click/scripts/...` | awk could not open it, name loops ran 0 times, printed "all required secrets present" |
+
+The second one matters most: it is the check that would fail a deploy whose
+Worker has no `EMAILIT_API_KEY`. It has been passing vacuously, so there is no
+CI evidence that the running Worker can reach EmailIt at all.
+
+**Resolution.**
+1. SPF is now read at the return path when the apex has none — named by
+   `EMAILIT_RETURN_PATH_DOMAIN`, or discovered. A guessed candidate must
+   prove itself with **both** an MX and an SPF record. Alignment is reported
+   separately, because SPF passing is not SPF aligning.
+2. The canonical audit resolves from its own location, refuses to report clean
+   after scanning zero files, and prints the file count alongside the verdict.
+3. The secrets preflight reads the right manifest, fails if it is unreadable
+   or parses to zero required names, and no longer exits 0 when
+   `wrangler secret list` fails for any reason other than "script not found".
+4. The production monitor now asserts deliverability on every run, using the
+   app's own checker rather than a second inline copy.
+
+**Lesson.** A check that cannot read its input must fail, never pass. Every
+one of these three reported success from a state that carried no information:
+an unopenable file, an empty directory walk, a lookup at a name nothing sends
+from. "0 violations" is only meaningful next to the number of things examined,
+which is why the audit now prints it.
+
+**Where the email diagnosis actually stands** (verified 2026-09-14, live):
+
+| Link in the chain | State | How it was established |
+| --- | --- | --- |
+| SPF / DKIM / DMARC | correct and complete | authoritative query against the Cloudflare nameservers |
+| Hook route deployed | yes | unsigned POST returns 401 `invalid signature`, not 404 |
+| `SEND_EMAIL_HOOK_SECRET` on the Worker | present | that 401 is `invalid signature`, not `hook not configured` |
+| Signup requires the email | yes | GoTrue `/auth/v1/settings`: `mailer_autoconfirm: false` |
+| Signup is open | yes | `disable_signup: false` |
+| Google OAuth | live and configured | `/auth/v1/authorize?provider=google` 302s to Google with a real client id |
+| Supabase hook URI points here | **unverified** | needs the dashboard, or a real signup |
+| `EMAILIT_API_KEY` on the Worker | **unverified** | the CI gate that proves this was inert (above) |
+| What EmailIt answers | **unverified** | the hook returns 200 and logs it; nothing else records it |
+
+The last three are what `POST /api/public/ops/email-probe` (with `?send=1`)
+answers in one call. It is written and tested but not deployed — the live
+Worker is still build `baf9985` (2026-09-02) from the pre-consolidation trunk.
+
+Note that a customer can sign up **today** with Google and never touch the
+email path.
+
+---
 ## 2026-09-01 — Signup down platform-wide (~65 minutes)
 
 **Impact.** Every signup failed with a 500 from Supabase Auth between roughly
