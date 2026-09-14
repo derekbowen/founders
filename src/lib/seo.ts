@@ -7,6 +7,12 @@ export const SITE_NAME = "founders.click";
 export const DEFAULT_OG_IMAGE = `${SITE_URL}/og-default.jpg`;
 export const SITE_LOGO = `${SITE_URL}/og-default.jpg`;
 
+// Canonical founders.click support inbox. Matches DEFAULT_FOOTER.contact_email
+// in site-footer-defaults.ts and the address the help centre and privacy policy
+// already point users at. Internal notifications route here so customer PII
+// never lands in another product's inbox.
+export const SUPPORT_EMAIL = "support@founders.click";
+
 // Social profiles will be added once the founders.click handles are claimed.
 export const SOCIAL_PROFILES: string[] = [];
 

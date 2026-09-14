@@ -9,6 +9,7 @@ import {
   Section,
   Text,
 } from "@react-email/components";
+import { SUPPORT_EMAIL } from "@/lib/seo";
 import type { TemplateEntry } from "./registry";
 
 interface InternalLeadNotificationProps {
@@ -89,7 +90,7 @@ export const template = {
   component: InternalLeadNotificationEmail,
   subject: (data: Record<string, any>) =>
     `🚀 New ${data.formType || "lead"} — ${data.submitterEmail || "unknown"}`,
-  to: "hello@poolrentalnearme.com",
+  to: SUPPORT_EMAIL,
   displayName: "Internal lead notification",
   previewData: {
     formType: "Pool waitlist signup",

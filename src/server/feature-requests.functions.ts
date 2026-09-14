@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { getRequest, getRequestHeader } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { SUPPORT_EMAIL } from "@/lib/seo";
 import { sendTransactionalEmailServer } from "./transactional-email.server";
 
 const schema = z.object({
@@ -55,7 +56,7 @@ export const submitFeatureRequest = createServerFn({ method: "POST" })
     try {
       await sendTransactionalEmailServer({
         templateName: "internal-lead-notification",
-        recipientEmail: "hello@poolrentalnearme.com",
+        recipientEmail: SUPPORT_EMAIL,
         idempotencyKey: `feature-req-notify-${data.email.toLowerCase()}-${Date.now()}`,
         templateData: {
           formType: "Feature request",
