@@ -12,8 +12,18 @@
  *
  * Set EMAILIT_DKIM_SELECTOR when the provider's selector is known — a probe
  * across common selectors can miss a real key published under another name.
+ *
+ * Set EMAILIT_RETURN_PATH_DOMAIN when the envelope (bounce) domain is known.
+ * SPF authorises the envelope sender, not the From header, so a domain whose
+ * ESP delegates the return path to a subdomain needs no SPF of its own — this
+ * check looks there before reporting SPF missing. Naming it explicitly skips
+ * the probe and removes the guess.
  */
-import { checkSendingDomain, sendingDomainFromEnv } from "../src/lib/email-deliverability";
+import {
+  checkSendingDomain,
+  returnPathFromEnv,
+  sendingDomainFromEnv,
+} from "../src/lib/email-deliverability";
 
 const explicit = process.argv[2];
 const domain =
@@ -31,23 +41,42 @@ if (!domain) {
 }
 
 const selector = process.env.EMAILIT_DKIM_SELECTOR;
-const report = await checkSendingDomain(domain, { dkimSelector: selector });
+const report = await checkSendingDomain(domain, {
+  dkimSelector: selector,
+  returnPathDomain: returnPathFromEnv({
+    EMAILIT_RETURN_PATH_DOMAIN: process.env.EMAILIT_RETURN_PATH_DOMAIN,
+  }),
+});
 
 const mark = { pass: "OK  ", warn: "WARN", fail: "FAIL" }[report.verdict];
 console.log(`\n${mark}  email deliverability for ${report.domain}\n`);
 
 const row = (
   label: string,
-  check: { status: "present" | "absent" | "unknown"; value?: string; problem?: string },
+  check: {
+    status: "present" | "absent" | "unknown";
+    value?: string;
+    problem?: string;
+    foundOn?: string;
+  },
 ) => {
   const state = { present: "present", absent: "MISSING", unknown: "UNKNOWN" }[check.status];
   console.log(`  ${label.padEnd(6)} ${state.padEnd(8)} ${check.value ?? ""}`);
+  // Where a record lives is the whole point for SPF: on the apex it is absent
+  // and correct at the same time, provided the return path carries it.
+  if (check.foundOn) console.log(`         on ${check.foundOn}`);
   if (check.problem) console.log(`         ${check.problem}`);
 };
 
 row("SPF", report.spf);
 row("DKIM", report.dkim.selector ? { ...report.dkim, value: `selector "${report.dkim.selector}"` } : report.dkim);
 row("DMARC", report.dmarc);
+if (report.returnPath) {
+  console.log(
+    `  PATH   ${report.returnPath.via === "configured" ? "declared" : "found   "} ` +
+      `${report.returnPath.domain}${report.returnPath.mx ? `  (MX ${report.returnPath.mx})` : ""}`,
+  );
+}
 
 console.log("");
 for (const finding of report.findings) console.log(`  - ${finding}`);
@@ -64,10 +93,16 @@ if (report.indeterminate) {
 // gets mistaken for a big one and deferred.
 const fixes: string[] = [];
 if (!report.spf.present) {
+  // Reached only when neither the apex nor any return path authorises a
+  // sender. Publishing at the apex is the one-record answer; delegating the
+  // envelope to the ESP is the other, and is what most providers prefer.
   fixes.push(
     `    SPF     TXT  @        v=spf1 include:_spf.emailit.com ~all\n` +
       `            Without it, Microsoft in particular drops mail from a domain\n` +
-      `            with no sending reputation even when DKIM signs correctly.`,
+      `            with no sending reputation even when DKIM signs correctly.\n` +
+      `            Alternatively, if EmailIt gave you a return-path subdomain,\n` +
+      `            publish its records and set EMAILIT_RETURN_PATH_DOMAIN — SPF\n` +
+      `            belongs on the envelope domain, not necessarily on this one.`,
   );
 }
 if (!report.dkim.present) {

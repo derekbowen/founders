@@ -150,16 +150,33 @@ jobs:
         run: |
           set -o pipefail
           if ! bunx --bun wrangler@4 secret list --format json > /tmp/secrets.json 2>/tmp/secret-err; then
-            # A brand-new Worker has no secrets yet and no script to list them
-            # against; that is expected on a first deploy, not a failure.
-            echo "::warning::Could not list Worker secrets (first deploy?): $(tail -1 /tmp/secret-err)"
-            exit 0
+            # A brand-new Worker has no script to list secrets against; that is
+            # expected on a first deploy. ANY OTHER failure — an unscoped
+            # token, a rate limit, an API outage — is this check not running,
+            # and must not read as "all required secrets present".
+            if grep -qiE "script_not_found|10007|could not find|not found" /tmp/secret-err; then
+              echo "::warning::Worker does not exist yet (first deploy) — no secrets to verify."
+              exit 0
+            fi
+            echo "::error::Could not list Worker secrets: $(tail -3 /tmp/secret-err)"
+            echo "::error::This check did not run, so it cannot pass. Fix the credential or retry."
+            exit 1
           fi
           # Two sections. [required] has no default in code and fails the
           # deploy; [recommended] has a working fallback and only warns.
           # Treating everything as required would block deploys over config the
           # app does not need.
-          manifest="$GITHUB_WORKSPACE/scripts/required-secrets.txt"
+          # Path is relative to the repo root, NOT to working-directory. It
+          # said $GITHUB_WORKSPACE/scripts/... which was right before the app
+          # moved under apps/ — afterwards awk could not open the file, the
+          # name loops iterated zero times, and the step printed "all required
+          # secrets present" for a Worker with none of them set. A preflight
+          # that cannot read its manifest must fail, not pass.
+          manifest="$GITHUB_WORKSPACE/apps/founders-click/scripts/required-secrets.txt"
+          if [ ! -r "$manifest" ]; then
+            echo "::error::Secret manifest not found at $manifest — this check cannot run."
+            exit 1
+          fi
           names_in() {
             awk -v want="$1" '
               /^\[/ { section = $0; next }
@@ -173,8 +190,16 @@ jobs:
             node -e "process.exit(JSON.parse(require('fs').readFileSync('/tmp/secrets.json','utf8')).some(s=>s.name==='$1')?0:1)"
           }
 
+          required_names="$(names_in required)"
+          if [ -z "$required_names" ]; then
+            echo "::error::Parsed 0 required secrets from $manifest — the manifest or its"
+            echo "::error::[required] section changed shape. Refusing to report a pass."
+            exit 1
+          fi
+          echo "checking $(echo "$required_names" | wc -w) required secrets against the Worker"
+
           missing=""
-          for k in $(names_in required); do have "$k" || missing="$missing $k"; done
+          for k in $required_names; do have "$k" || missing="$missing $k"; done
           soft=""
           for k in $(names_in recommended); do have "$k" || soft="$soft $k"; done
 

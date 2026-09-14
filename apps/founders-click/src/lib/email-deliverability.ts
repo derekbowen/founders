@@ -2,9 +2,9 @@
  * EMAIL DELIVERABILITY PREFLIGHT.
  *
  * Why this exists: for sixteen months founders.click sent auth email from
- * noreply@founders.click while that domain published no SPF, no DKIM and no
- * DMARC. EmailIt accepted every send and returned 200. Microsoft and Google
- * then discarded the mail silently — unauthenticated mail from an unverified
+ * noreply@founders.click while that domain published no DKIM and no DMARC.
+ * EmailIt accepted every send and returned 200. Microsoft and Google then
+ * discarded the mail silently — unauthenticated mail from an unverified
  * domain is dropped, not bounced. The result was a platform where every
  * signup dead-ended at "check your email" and nothing anywhere reported a
  * failure, because there was no failure to report: the send genuinely
@@ -15,6 +15,16 @@
  * module reads exactly that, so a deploy can refuse to ship, and an operator
  * can see the truth on one page, without waiting on an inbox that may never
  * chime.
+ *
+ * ON LOOKING IN THE RIGHT PLACE. An earlier version of this file read SPF at
+ * the apex only, and reported "no SPF" for a domain that authenticated
+ * perfectly well. SPF authorises the ENVELOPE sender (MAIL FROM /
+ * Return-Path), not the From header, and every serious ESP delegates the
+ * envelope to a subdomain it controls — founders.click's is
+ * emailit.founders.click, which carries both the bounce MX and the SPF record.
+ * Gating on the apex made a satisfied condition look like a blocker and sent
+ * an operator chasing a record that was never required. So: when the apex
+ * publishes no SPF, find the actual return path before saying SPF is missing.
  *
  * Resolution is over DNS-over-HTTPS because this runs inside a Cloudflare
  * Worker, which has no UDP and therefore no ordinary resolver.
@@ -35,6 +45,26 @@ const COMMON_DKIM_SELECTORS = [
   "s2",
 ] as const;
 
+/**
+ * Labels ESPs commonly use for a delegated return-path (bounce) subdomain.
+ * Probed only when the apex publishes no SPF, and only ever believed when the
+ * candidate also has an MX — that MX is what makes it a return path rather
+ * than an arbitrary subdomain that happens to carry a TXT record.
+ */
+const COMMON_RETURN_PATH_LABELS = [
+  "emailit",
+  "em",
+  "mail",
+  "mailer",
+  "mta",
+  "smtp",
+  "bounce",
+  "bounces",
+  "pm-bounces",
+  "mg",
+  "ses",
+] as const;
+
 export type RecordCheck = {
   /**
    * present — the record exists.
@@ -49,6 +79,27 @@ export type RecordCheck = {
   value?: string;
   /** Populated when a record is present but unusable, or when the lookup failed. */
   problem?: string;
+  /**
+   * The name the record was actually found on, when that is not the sending
+   * domain itself. Set for SPF published on a delegated return path.
+   */
+  foundOn?: string;
+};
+
+/** The envelope domain mail is really sent with, when it is not the apex. */
+export type ReturnPath = {
+  domain: string;
+  /** "configured" — the operator named it. "discovered" — found by probe. */
+  via: "configured" | "discovered";
+  /** The bounce host its MX points at; the evidence that it is a return path. */
+  mx: string | null;
+  /** Its SPF record, when it publishes one. */
+  spf: string | null;
+  /**
+   * True when the return path sits under the sending domain's organisational
+   * domain, which is what DMARC's default (relaxed) SPF alignment requires.
+   */
+  alignsRelaxed: boolean;
 };
 
 export type DeliverabilityReport = {
@@ -56,6 +107,8 @@ export type DeliverabilityReport = {
   spf: RecordCheck;
   dkim: RecordCheck & { selector?: string };
   dmarc: RecordCheck;
+  /** The delegated envelope domain, when SPF lives there rather than the apex. */
+  returnPath?: ReturnPath;
   /**
    * pass    — mail from this domain authenticates; delivery is plausible.
    * warn    — it will authenticate, but something is set up to fail later.
@@ -75,19 +128,35 @@ export type DeliverabilityReport = {
 
 type DohAnswer = { name: string; type: number; data: string };
 
-async function resolveTxtOverHttps(name: string, fetchImpl: typeof fetch): Promise<string[]> {
-  const url = `${DOH_ENDPOINT}?name=${encodeURIComponent(name)}&type=TXT`;
+async function queryDoh(
+  name: string,
+  type: "TXT" | "MX",
+  fetchImpl: typeof fetch,
+): Promise<DohAnswer[]> {
+  const url = `${DOH_ENDPOINT}?name=${encodeURIComponent(name)}&type=${type}`;
   const res = await fetchImpl(url, { headers: { accept: "application/dns-json" } });
   if (!res.ok) throw new Error(`DoH ${res.status} for ${name}`);
   const body = (await res.json()) as { Answer?: DohAnswer[] };
-  return (body.Answer ?? [])
+  return body.Answer ?? [];
+}
+
+async function resolveTxtOverHttps(name: string, fetchImpl: typeof fetch): Promise<string[]> {
+  return (await queryDoh(name, "TXT", fetchImpl))
     .filter((a) => a.type === 16)
     // DoH returns TXT quoted, and long records arrive split into chunks.
     .map((a) => a.data.replace(/^"|"$/g, "").replace(/"\s+"/g, ""));
 }
 
+async function resolveMxOverHttps(name: string, fetchImpl: typeof fetch): Promise<string[]> {
+  return (await queryDoh(name, "MX", fetchImpl))
+    .filter((a) => a.type === 15)
+    // "10 feedback-smtp.ffdc-1.emailit.com." — priority, then the exchange.
+    .map((a) => a.data.trim().split(/\s+/).slice(1).join(" ").replace(/\.$/, ""))
+    .filter(Boolean);
+}
+
 /**
- * Resolve TXT, preferring the platform resolver when there is one.
+ * Resolve a record, preferring the platform resolver when there is one.
  *
  * A Worker has no UDP and must use DoH. CI runners and laptops do have a
  * resolver, and reaching for it first means the preflight keeps working from
@@ -95,17 +164,19 @@ async function resolveTxtOverHttps(name: string, fetchImpl: typeof fetch): Promi
  * where a false "record missing" would be most misleading.
  *
  * Throws when the name cannot be resolved at all; returns [] for a name that
- * resolves with no TXT records.
+ * resolves with no records of that type.
  */
-async function resolveTxt(name: string, fetchImpl?: typeof fetch): Promise<string[]> {
-  if (!fetchImpl) {
+async function resolveVia<T>(
+  node: () => Promise<T[]>,
+  https: () => Promise<T[]>,
+  usingStub: boolean,
+): Promise<T[]> {
+  if (!usingStub) {
     try {
-      const dns = await import("node:dns/promises");
       try {
-        const chunks = await dns.resolveTxt(name);
-        return chunks.map((parts) => parts.join(""));
+        return await node();
       } catch (err: any) {
-        // NXDOMAIN / NODATA are answers, not failures: the name has no TXT.
+        // NXDOMAIN / NODATA are answers, not failures: the name has no record.
         if (err?.code === "ENOTFOUND" || err?.code === "ENODATA") return [];
         throw err;
       }
@@ -115,7 +186,115 @@ async function resolveTxt(name: string, fetchImpl?: typeof fetch): Promise<strin
       if (err?.code && err.code !== "ERR_MODULE_NOT_FOUND") throw err;
     }
   }
-  return resolveTxtOverHttps(name, fetchImpl ?? fetch);
+  return https();
+}
+
+async function resolveTxt(name: string, fetchImpl?: typeof fetch): Promise<string[]> {
+  return resolveVia(
+    async () => {
+      const dns = await import("node:dns/promises");
+      const chunks = await dns.resolveTxt(name);
+      return chunks.map((parts) => parts.join(""));
+    },
+    () => resolveTxtOverHttps(name, fetchImpl ?? fetch),
+    Boolean(fetchImpl),
+  );
+}
+
+async function resolveMx(name: string, fetchImpl?: typeof fetch): Promise<string[]> {
+  return resolveVia(
+    async () => {
+      const dns = await import("node:dns/promises");
+      const mx = await dns.resolveMx(name);
+      return mx.map((m) => m.exchange);
+    },
+    () => resolveMxOverHttps(name, fetchImpl ?? fetch),
+    Boolean(fetchImpl),
+  );
+}
+
+const spfIn = (records: string[]): string | undefined =>
+  records.find((t) => t.toLowerCase().startsWith("v=spf1"));
+
+/**
+ * Is `candidate` inside `domain`'s organisational domain? That is what DMARC
+ * relaxed alignment (the default, and what `aspf=r` means) requires of the
+ * SPF-authenticated domain.
+ */
+const underOrgDomain = (candidate: string, domain: string): boolean =>
+  candidate === domain || candidate.endsWith(`.${domain}`);
+
+/**
+ * Probe one name as a possible return path.
+ *
+ * A candidate the operator named is believed on their say-so. A candidate we
+ * guessed has to prove itself: an MX (it receives bounces) AND an SPF record
+ * (it authorises senders). Without both it is just a subdomain.
+ */
+async function probeReturnPath(
+  name: string,
+  via: ReturnPath["via"],
+  domain: string,
+  fetchImpl?: typeof fetch,
+): Promise<ReturnPath | null> {
+  let mx: string[] = [];
+  try {
+    mx = await resolveMx(name, fetchImpl);
+  } catch {
+    /* a candidate we cannot resolve is simply not the return path */
+  }
+  if (via === "discovered" && mx.length === 0) return null;
+
+  let spf: string | undefined;
+  try {
+    spf = spfIn(await resolveTxt(name, fetchImpl));
+  } catch {
+    /* same */
+  }
+  if (via === "discovered" && !spf) return null;
+
+  return {
+    domain: name,
+    via,
+    mx: mx[0] ?? null,
+    spf: spf ?? null,
+    alignsRelaxed: underOrgDomain(name, domain),
+  };
+}
+
+/**
+ * Find the envelope domain mail is actually sent with.
+ *
+ * Only called when the apex publishes no SPF, so the cost lands on the path
+ * that was previously reported — wrongly — as a hard failure. The guessed
+ * candidates go out together, and the first hit in preference order wins.
+ */
+async function findReturnPath(
+  domain: string,
+  opts: { returnPathDomain?: string; dkimSelector?: string; fetchImpl?: typeof fetch },
+): Promise<ReturnPath | null> {
+  const configured = opts.returnPathDomain?.trim().toLowerCase().replace(/\.$/, "");
+  if (configured) {
+    const found = await probeReturnPath(configured, "configured", domain, opts.fetchImpl);
+    if (found) return found;
+  }
+
+  // The provider's DKIM selector is the best guess available: a provider that
+  // delegates a return path usually names it with the same label it signs
+  // with. emailit.founders.click is exactly this case.
+  const labels = [
+    ...(opts.dkimSelector ? [opts.dkimSelector.trim().toLowerCase()] : []),
+    ...COMMON_RETURN_PATH_LABELS,
+  ];
+  const seen = new Set<string>();
+  const candidates = labels
+    .map((label) => `${label}.${domain}`)
+    .filter((name) => name !== configured && !seen.has(name) && (seen.add(name), true));
+
+  const results = await Promise.all(
+    candidates.map((name) => probeReturnPath(name, "discovered", domain, opts.fetchImpl)),
+  );
+  return results.find((r): r is ReturnPath => r !== null) ?? null;
 }
 
 /**
@@ -124,10 +303,13 @@ async function resolveTxt(name: string, fetchImpl?: typeof fetch): Promise<strin
  * `dkimSelector` skips the guesswork when the provider's selector is known;
  * otherwise a short list of common selectors is probed. A miss there is
  * reported as "not found", never as "absent" — an unprobed selector may exist.
+ *
+ * `returnPathDomain` names the envelope domain when the operator knows it.
+ * Without it, one is discovered — but only when the apex has no SPF of its own.
  */
 export async function checkSendingDomain(
   domain: string,
-  opts: { dkimSelector?: string; fetchImpl?: typeof fetch } = {},
+  opts: { dkimSelector?: string; returnPathDomain?: string; fetchImpl?: typeof fetch } = {},
 ): Promise<DeliverabilityReport> {
   // Deliberately not defaulted: an undefined impl means "use the platform
   // resolver if there is one", which resolveTxt handles.
@@ -137,11 +319,11 @@ export async function checkSendingDomain(
   const spf: RecordCheck = { status: "absent", present: false };
   const dkim: RecordCheck & { selector?: string } = { status: "absent", present: false };
   const dmarc: RecordCheck = { status: "absent", present: false };
+  let returnPath: ReturnPath | undefined;
 
-  // --- SPF: authorises which servers may send as this domain --------------
+  // --- SPF: authorises which servers may send as the ENVELOPE domain ------
   try {
-    const txt = await resolveTxt(domain, fetchImpl);
-    const record = txt.find((t) => t.toLowerCase().startsWith("v=spf1"));
+    const record = spfIn(await resolveTxt(domain, fetchImpl));
     if (record) {
       spf.status = "present";
       spf.present = true;
@@ -155,6 +337,30 @@ export async function checkSendingDomain(
   } catch (err) {
     spf.status = "unknown";
     spf.problem = `lookup failed: ${err instanceof Error ? err.message : String(err)}`;
+  }
+
+  // No SPF at the apex is not the same as no SPF. Before calling it missing,
+  // look where the envelope sender actually lives.
+  if (spf.status === "absent") {
+    try {
+      returnPath =
+        (await findReturnPath(domain, {
+          returnPathDomain: opts.returnPathDomain,
+          dkimSelector: opts.dkimSelector,
+          fetchImpl,
+        })) ?? undefined;
+    } catch {
+      /* discovery is best-effort; a failure here leaves SPF absent as read */
+    }
+    if (returnPath?.spf) {
+      spf.status = "present";
+      spf.present = true;
+      spf.value = returnPath.spf;
+      spf.foundOn = returnPath.domain;
+      if (/[+]all\b/.test(returnPath.spf)) {
+        spf.problem = 'ends in "+all", which authorises every sender on the internet';
+      }
+    }
   }
 
   // --- DKIM: cryptographically signs the message --------------------------
@@ -224,6 +430,7 @@ export async function checkSendingDomain(
       spf,
       dkim,
       dmarc,
+      returnPath,
       verdict: "fail",
       indeterminate: true,
       findings: [
@@ -239,13 +446,17 @@ export async function checkSendingDomain(
   if (!spf.present && !dkim.present) {
     verdict = "fail";
     findings.push(
-      `${domain} publishes neither SPF nor DKIM. Mail sent as this domain will be ` +
-        `discarded by Gmail and Microsoft, usually without a bounce. Nothing will arrive.`,
+      `${domain} publishes neither SPF nor DKIM, and no delegated return path publishes ` +
+        `SPF either. Mail sent as this domain will be discarded by Gmail and Microsoft, ` +
+        `usually without a bounce. Nothing will arrive.`,
     );
   } else {
     if (!spf.present) {
       verdict = "fail";
-      findings.push(`${domain} publishes no SPF record. Receivers cannot verify the sender.`);
+      findings.push(
+        `${domain} publishes no SPF record, and no delegated return path was found that ` +
+          `does. Receivers cannot verify the envelope sender.`,
+      );
     }
     if (!dkim.present) {
       verdict = "fail";
@@ -258,6 +469,18 @@ export async function checkSendingDomain(
     }
   }
 
+  // SPF on a delegated return path is the normal ESP arrangement, not a
+  // shortfall — say so plainly, because the opposite reading is what made an
+  // earlier version of this check raise a blocker over nothing.
+  if (spf.present && spf.foundOn) {
+    findings.push(
+      `SPF is published on ${spf.foundOn}, the return path (bounce MX ` +
+        `${returnPath?.mx ?? "present"}), not on ${domain}. That is where it belongs: SPF ` +
+        `authenticates the envelope sender, and ${domain} is only the From header. No SPF ` +
+        `record is required on ${domain} itself.`,
+    );
+  }
+
   if (spf.problem) {
     verdict = verdict === "fail" ? "fail" : "warn";
     findings.push(`SPF: ${spf.problem}`);
@@ -266,6 +489,26 @@ export async function checkSendingDomain(
     verdict = "fail";
     findings.push(`DKIM: ${dkim.problem}`);
   }
+
+  // Alignment: SPF passing is not the same as SPF aligning for DMARC.
+  if (spf.present && spf.foundOn && returnPath) {
+    if (!returnPath.alignsRelaxed) {
+      verdict = verdict === "fail" ? "fail" : "warn";
+      findings.push(
+        `The return path ${returnPath.domain} is outside ${domain}, so the SPF leg cannot ` +
+          `align for DMARC under any policy. DMARC will pass only on the DKIM signature — ` +
+          `confirm the provider signs with d=${domain}.`,
+      );
+    } else if (dmarc.present && /aspf\s*=\s*s/i.test(dmarc.value ?? "")) {
+      verdict = verdict === "fail" ? "fail" : "warn";
+      findings.push(
+        `DMARC sets aspf=s (strict), but SPF is on ${returnPath.domain} rather than ` +
+          `${domain}, so the SPF leg will not align. Either relax it to aspf=r or rely on ` +
+          `DKIM alone for DMARC.`,
+      );
+    }
+  }
+
   if (!dmarc.present && verdict !== "fail") {
     verdict = "warn";
     findings.push(
@@ -285,6 +528,7 @@ export async function checkSendingDomain(
     spf,
     dkim,
     dmarc,
+    returnPath,
     verdict,
     indeterminate: false,
     findings,
@@ -311,4 +555,15 @@ export function sendingDomainFromEnv(env: {
   }
   const configured = env.EMAILIT_SENDER_DOMAIN?.trim();
   return configured ? configured.toLowerCase() : null;
+}
+
+/**
+ * The envelope domain, when the operator has named it. Saves the probe and
+ * removes the guesswork from the one lookup that decides whether SPF counts.
+ */
+export function returnPathFromEnv(env: {
+  EMAILIT_RETURN_PATH_DOMAIN?: string;
+}): string | undefined {
+  const configured = env.EMAILIT_RETURN_PATH_DOMAIN?.trim();
+  return configured ? configured.toLowerCase() : undefined;
 }

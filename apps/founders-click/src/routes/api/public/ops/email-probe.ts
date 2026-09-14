@@ -30,7 +30,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { timingSafeEqual } from "node:crypto";
 import { decodeSecret } from "@/lib/auth-email-hook";
-import { checkSendingDomain, sendingDomainFromEnv } from "@/lib/email-deliverability";
+import {
+  checkSendingDomain,
+  returnPathFromEnv,
+  sendingDomainFromEnv,
+} from "@/lib/email-deliverability";
 import { sendEmail } from "@/lib/email.server";
 
 function json(body: unknown, status = 200) {
@@ -96,6 +100,7 @@ export const Route = createFileRoute("/api/public/ops/email-probe")({
           emailitApiKeyConfigured: Boolean(process.env.EMAILIT_API_KEY),
           hookSecretConfigured: Boolean(process.env.SEND_EMAIL_HOOK_SECRET),
           dkimSelectorConfigured: process.env.EMAILIT_DKIM_SELECTOR ?? null,
+          returnPathConfigured: process.env.EMAILIT_RETURN_PATH_DOMAIN ?? null,
         };
 
         let deliverability: unknown = null;
@@ -103,6 +108,12 @@ export const Route = createFileRoute("/api/public/ops/email-probe")({
           try {
             deliverability = await checkSendingDomain(domain, {
               dkimSelector: process.env.EMAILIT_DKIM_SELECTOR,
+              // SPF lives on the envelope domain, which for every serious ESP
+              // is a delegated subdomain. Without this the check reads the
+              // apex and reports a blocker that does not exist.
+              returnPathDomain: returnPathFromEnv({
+                EMAILIT_RETURN_PATH_DOMAIN: process.env.EMAILIT_RETURN_PATH_DOMAIN,
+              }),
             });
           } catch (err) {
             deliverability = {

@@ -24,7 +24,11 @@ import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { checkSendingDomain, sendingDomainFromEnv } from "../src/lib/email-deliverability";
+import {
+  checkSendingDomain,
+  returnPathFromEnv,
+  sendingDomainFromEnv,
+} from "../src/lib/email-deliverability";
 
 const args = process.argv.slice(2);
 const flag = (name: string): string | undefined => {
@@ -259,7 +263,12 @@ await check("auth email can authenticate (SPF/DKIM/DMARC)", async () => {
 
   let report;
   try {
-    report = await checkSendingDomain(domain, { dkimSelector: process.env.EMAILIT_DKIM_SELECTOR });
+    report = await checkSendingDomain(domain, {
+      dkimSelector: process.env.EMAILIT_DKIM_SELECTOR,
+      returnPathDomain: returnPathFromEnv({
+        EMAILIT_RETURN_PATH_DOMAIN: process.env.EMAILIT_RETURN_PATH_DOMAIN,
+      }),
+    });
   } catch (e: any) {
     return ["SKIP", `DNS lookup unavailable from here: ${e?.message ?? e}`];
   }
@@ -268,9 +277,17 @@ await check("auth email can authenticate (SPF/DKIM/DMARC)", async () => {
   // than failing a deploy over this runner's networking.
   if (report.indeterminate) return ["SKIP", report.findings[0] ?? "DNS lookup failed"];
 
-  const state = `SPF ${report.spf.status}, DKIM ${report.dkim.status}, DMARC ${report.dmarc.status}`;
+  const where = report.spf.foundOn ? ` (SPF on ${report.spf.foundOn})` : "";
+  const state = `SPF ${report.spf.status}, DKIM ${report.dkim.status}, DMARC ${report.dmarc.status}${where}`;
   if (report.verdict === "fail") return ["FAIL", `${state} — ${report.findings[0]}`];
-  if (report.verdict === "warn") return ["FAIL", `${state} — ${report.findings[0]}`];
+  // A warn means mail DOES authenticate — something is merely set up to
+  // degrade later. Failing a production deploy over, say, a DMARC record with
+  // no rua= is the same mistake as failing it over an apex SPF record that was
+  // never required: a satisfied condition read as a blocker. Surface it in
+  // full, and let --strict be the thing that refuses to ship on it.
+  if (report.verdict === "warn") {
+    return [STRICT ? "FAIL" : "PASS", `${state} — WARN: ${report.findings.join("; ")}`];
+  }
   return ["PASS", state];
 });
 
