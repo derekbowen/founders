@@ -11,20 +11,27 @@
  * succeeded, the delivery did not.
  *
  * A send API returning 200 is therefore NOT evidence that mail works. The
- * only cheap standing proof is the DNS the receiving world checks. This
- * module reads exactly that, so a deploy can refuse to ship, and an operator
- * can see the truth on one page, without waiting on an inbox that may never
- * chime.
+ * only cheap standing proof is the DNS the receiving world checks.
  *
- * ON LOOKING IN THE RIGHT PLACE. An earlier version of this file read SPF at
- * the apex only, and reported "no SPF" for a domain that authenticated
- * perfectly well. SPF authorises the ENVELOPE sender (MAIL FROM /
- * Return-Path), not the From header, and every serious ESP delegates the
- * envelope to a subdomain it controls — founders.click's is
- * emailit.founders.click, which carries both the bounce MX and the SPF record.
- * Gating on the apex made a satisfied condition look like a blocker and sent
- * an operator chasing a record that was never required. So: when the apex
- * publishes no SPF, find the actual return path before saying SPF is missing.
+ * ON CHECKING THE RIGHT NAME. SPF authorises the RFC5321 envelope sender
+ * (MAIL FROM / Return-Path), NOT the RFC5322 From header. Every serious ESP
+ * delegates the envelope to a subdomain it controls; founders.click's is
+ * emailit.founders.click, which carries both the bounce MX and the SPF
+ * record. Two opposite mistakes follow from forgetting that, and this module
+ * is built to make both impossible:
+ *
+ *   1. Reading SPF at the apex and calling a miss a failure. That reported a
+ *      blocker on a domain which authenticated perfectly well, and cost 22
+ *      re-checks of a record that was never required.
+ *
+ *   2. Reading SPF at the apex, FINDING it, and calling that a pass. Equally
+ *      wrong and more dangerous, because it is silent: if the envelope is
+ *      emailit.founders.click, an SPF record on founders.click authorises
+ *      nothing the receiver will check. An apex record is false comfort.
+ *
+ * So the envelope domain is resolved FIRST, by explicit precedence, and SPF
+ * is evaluated against whatever that resolves to. The presence of an apex SPF
+ * record never short-circuits that resolution.
  *
  * Resolution is over DNS-over-HTTPS because this runs inside a Cloudflare
  * Worker, which has no UDP and therefore no ordinary resolver.
@@ -47,9 +54,7 @@ const COMMON_DKIM_SELECTORS = [
 
 /**
  * Labels ESPs commonly use for a delegated return-path (bounce) subdomain.
- * Probed only when the apex publishes no SPF, and only ever believed when the
- * candidate also has an MX — that MX is what makes it a return path rather
- * than an arbitrary subdomain that happens to carry a TXT record.
+ * Candidates only — see `qualifies()` for what a candidate must prove.
  */
 const COMMON_RETURN_PATH_LABELS = [
   "emailit",
@@ -64,6 +69,21 @@ const COMMON_RETURN_PATH_LABELS = [
   "mg",
   "ses",
 ] as const;
+
+/**
+ * MX targets that identify a bounce host rather than an ordinary mailbox
+ * server. Matching one raises confidence in a heuristic pick; it is never
+ * required, and never sufficient on its own.
+ */
+const KNOWN_BOUNCE_HOSTS: RegExp[] = [
+  /^feedback-smtp\./i,
+  /(^|\.)emailit\.com$/i,
+  /(^|\.)amazonses\.com$/i,
+  /(^|\.)pm-bounces\./i,
+  /(^|\.)mailgun\.org$/i,
+  /(^|\.)sendgrid\.net$/i,
+  /(^|\.)mtasv\.net$/i,
+];
 
 export type RecordCheck = {
   /**
@@ -81,34 +101,61 @@ export type RecordCheck = {
   problem?: string;
   /**
    * The name the record was actually found on, when that is not the sending
-   * domain itself. Set for SPF published on a delegated return path.
+   * domain itself. Set for SPF read at a delegated envelope domain.
    */
   foundOn?: string;
 };
 
-/** The envelope domain mail is really sent with, when it is not the apex. */
-export type ReturnPath = {
+/**
+ * How the envelope domain was established, in precedence order. The first one
+ * that yields a name wins; nothing later is consulted.
+ *
+ * configured — EMAILIT_RETURN_PATH_DOMAIN, set by the operator.
+ * observed   — a MAIL FROM / Return-Path actually seen on sent mail.
+ * esp        — the return path the provider reports for this sending domain.
+ * discovered — found by probing DNS. Must prove itself; see `qualifies()`.
+ * apex       — nothing delegated the envelope, so it is the sending domain.
+ */
+export type EnvelopeSource = "configured" | "observed" | "esp" | "discovered" | "apex";
+
+export type EnvelopeDomain = {
   domain: string;
-  /** "configured" — the operator named it. "discovered" — found by probe. */
-  via: "configured" | "discovered";
-  /** The bounce host its MX points at; the evidence that it is a return path. */
+  source: EnvelopeSource;
+  /** The bounce host its MX points at, when it has one. */
   mx: string | null;
   /** Its SPF record, when it publishes one. */
   spf: string | null;
+  /** True when the SPF lookup against this name failed rather than answered. */
+  spfLookupFailed?: boolean;
+  /** What supported a heuristic pick. Empty for a name given to us. */
+  evidence: string[];
   /**
-   * True when the return path sits under the sending domain's organisational
-   * domain, which is what DMARC's default (relaxed) SPF alignment requires.
+   * True when the envelope domain sits inside the sending domain's
+   * organisational domain, which is what DMARC relaxed SPF alignment (the
+   * default, and what aspf=r means) requires.
    */
   alignsRelaxed: boolean;
 };
 
 export type DeliverabilityReport = {
   domain: string;
+  /** The envelope domain SPF was evaluated against. Never assumed to be the apex. */
+  envelope: EnvelopeDomain;
+  /** SPF **at the envelope domain**. This is the one that decides the verdict. */
   spf: RecordCheck;
+  /**
+   * SPF at the sending domain itself, reported separately and always read.
+   * When the envelope is delegated this record authorises nothing a receiver
+   * checks — it is recorded so an operator can see that, not so it can pass.
+   */
+  apexSpf: RecordCheck;
   dkim: RecordCheck & { selector?: string };
   dmarc: RecordCheck;
-  /** The delegated envelope domain, when SPF lives there rather than the apex. */
-  returnPath?: ReturnPath;
+  /**
+   * A name that looks like a return path (bounce MX, ESP hostname) but
+   * publishes no SPF, so it could not be selected. Usually the real problem.
+   */
+  suspectEnvelope?: { domain: string; mx: string | null; why: string };
   /**
    * pass    — mail from this domain authenticates; delivery is plausible.
    * warn    — it will authenticate, but something is set up to fail later.
@@ -216,85 +263,171 @@ async function resolveMx(name: string, fetchImpl?: typeof fetch): Promise<string
 const spfIn = (records: string[]): string | undefined =>
   records.find((t) => t.toLowerCase().startsWith("v=spf1"));
 
+const normaliseName = (raw: string | undefined | null): string | undefined => {
+  const n = raw?.trim().toLowerCase().replace(/\.$/, "");
+  return n ? n : undefined;
+};
+
 /**
  * Is `candidate` inside `domain`'s organisational domain? That is what DMARC
- * relaxed alignment (the default, and what `aspf=r` means) requires of the
+ * relaxed alignment (the default, and what aspf=r means) requires of the
  * SPF-authenticated domain.
  */
 const underOrgDomain = (candidate: string, domain: string): boolean =>
   candidate === domain || candidate.endsWith(`.${domain}`);
 
-/**
- * Probe one name as a possible return path.
- *
- * A candidate the operator named is believed on their say-so. A candidate we
- * guessed has to prove itself: an MX (it receives bounces) AND an SPF record
- * (it authorises senders). Without both it is just a subdomain.
- */
-async function probeReturnPath(
-  name: string,
-  via: ReturnPath["via"],
-  domain: string,
-  fetchImpl?: typeof fetch,
-): Promise<ReturnPath | null> {
+type Probe = { domain: string; mx: string[]; spf?: string; spfLookupFailed: boolean };
+
+async function probe(name: string, fetchImpl?: typeof fetch): Promise<Probe> {
   let mx: string[] = [];
   try {
     mx = await resolveMx(name, fetchImpl);
   } catch {
-    /* a candidate we cannot resolve is simply not the return path */
+    // An MX we cannot read is supporting evidence we simply do not have. It
+    // never decides anything on its own, so a failure here is not fatal.
   }
-  if (via === "discovered" && mx.length === 0) return null;
-
   let spf: string | undefined;
+  let spfLookupFailed = false;
   try {
     spf = spfIn(await resolveTxt(name, fetchImpl));
   } catch {
-    /* same */
+    spfLookupFailed = true;
   }
-  if (via === "discovered" && !spf) return null;
+  return { domain: name, mx, spf, spfLookupFailed };
+}
 
-  return {
-    domain: name,
-    via,
-    mx: mx[0] ?? null,
-    spf: spf ?? null,
-    alignsRelaxed: underOrgDomain(name, domain),
-  };
+const looksLikeBounceHost = (host: string): boolean =>
+  KNOWN_BOUNCE_HOSTS.some((re) => re.test(host));
+
+/**
+ * Does a GUESSED candidate prove itself?
+ *
+ * SPF is REQUIRED: without it there is nothing to evaluate, and picking such
+ * a name would only move the false negative somewhere new.
+ *
+ * MX is NOT required. It is supporting evidence, and deliberately not the
+ * only kind: an ESP can delegate a return path whose MX we cannot read, or
+ * which is published on a CNAME target. Requiring it universally would make
+ * this EmailIt-shaped rather than correct. What IS required is that something
+ * beyond a bare SPF record ties the name to mail — otherwise any subdomain
+ * carrying an SPF record would be mistaken for the envelope, which is the
+ * same class of error in the opposite direction.
+ *
+ * Accepted supporting evidence, any one of which suffices:
+ *   - an MX record (the name receives mail, consistent with bounce handling);
+ *   - the label matches the provider's DKIM selector (ESPs name the return
+ *     path with the label they sign with — emailit.founders.click is this).
+ *
+ * An MX matching a known bounce-host pattern is recorded as additional
+ * confidence, never as the qualifying signal on its own.
+ */
+function qualifies(p: Probe, label: string, dkimSelector?: string): string[] | null {
+  if (!p.spf) return null;
+  const evidence: string[] = [];
+  if (p.mx.length > 0) evidence.push(`MX ${p.mx[0]}`);
+  if (p.mx.some(looksLikeBounceHost)) evidence.push("MX matches a known bounce-host pattern");
+  if (dkimSelector && label === dkimSelector.trim().toLowerCase()) {
+    evidence.push(`label matches the DKIM selector "${dkimSelector}"`);
+  }
+  // SPF plus nothing else is a subdomain with an SPF record, not an envelope.
+  if (evidence.length === 0) return null;
+  return evidence;
 }
 
 /**
- * Find the envelope domain mail is actually sent with.
- *
- * Only called when the apex publishes no SPF, so the cost lands on the path
- * that was previously reported — wrongly — as a hard failure. The guessed
- * candidates go out together, and the first hit in preference order wins.
+ * Probe the guessed candidates and return the first that qualifies, plus the
+ * most convincing near-miss (a bounce-looking name with no SPF), which is
+ * usually the actual misconfiguration.
  */
-async function findReturnPath(
+async function discoverEnvelope(
   domain: string,
-  opts: { returnPathDomain?: string; dkimSelector?: string; fetchImpl?: typeof fetch },
-): Promise<ReturnPath | null> {
-  const configured = opts.returnPathDomain?.trim().toLowerCase().replace(/\.$/, "");
-  if (configured) {
-    const found = await probeReturnPath(configured, "configured", domain, opts.fetchImpl);
-    if (found) return found;
+  opts: { dkimSelector?: string; fetchImpl?: typeof fetch },
+): Promise<{ found?: { probe: Probe; evidence: string[] }; suspect?: Probe }> {
+  const selectorLabel = normaliseName(opts.dkimSelector);
+  const labels = [...(selectorLabel ? [selectorLabel] : []), ...COMMON_RETURN_PATH_LABELS];
+
+  const seen = new Set<string>();
+  const ordered = labels.filter((l) => !seen.has(l) && (seen.add(l), true));
+
+  // One round trip rather than a dozen: the candidates are independent.
+  const probes = await Promise.all(ordered.map((l) => probe(`${l}.${domain}`, opts.fetchImpl)));
+
+  let suspect: Probe | undefined;
+  for (let i = 0; i < probes.length; i++) {
+    const p = probes[i]!;
+    const evidence = qualifies(p, ordered[i]!, opts.dkimSelector);
+    if (evidence) return { found: { probe: p, evidence }, suspect };
+    // Near-miss worth reporting: it behaves like a return path but publishes
+    // no SPF, so mail sent through it fails SPF outright.
+    if (!suspect && !p.spf && p.mx.some(looksLikeBounceHost)) suspect = p;
+  }
+  return { suspect };
+}
+
+/**
+ * Resolve the envelope domain by precedence, then read SPF there.
+ *
+ * The apex is the LAST resort, reached only when nothing delegated the
+ * envelope. An SPF record on the apex is never a reason to stop looking.
+ */
+async function resolveEnvelope(
+  domain: string,
+  apex: Probe,
+  opts: {
+    returnPathDomain?: string;
+    observedReturnPath?: string;
+    espReturnPath?: string;
+    dkimSelector?: string;
+    fetchImpl?: typeof fetch;
+  },
+): Promise<{ envelope: EnvelopeDomain; suspect?: Probe }> {
+  const build = (p: Probe, source: EnvelopeSource, evidence: string[]): EnvelopeDomain => ({
+    domain: p.domain,
+    source,
+    mx: p.mx[0] ?? null,
+    spf: p.spf ?? null,
+    spfLookupFailed: p.spfLookupFailed,
+    evidence,
+    alignsRelaxed: underOrgDomain(p.domain, domain),
+  });
+
+  // 1-3: a name we were given. Taken on the giver's authority — including
+  // when it turns out to publish no SPF, which is a real finding about the
+  // real envelope rather than a reason to look elsewhere.
+  const given: Array<[string | undefined, EnvelopeSource]> = [
+    [normaliseName(opts.returnPathDomain), "configured"],
+    [normaliseName(opts.observedReturnPath), "observed"],
+    [normaliseName(opts.espReturnPath), "esp"],
+  ];
+  for (const [name, source] of given) {
+    if (!name) continue;
+    const p = name === apex.domain ? apex : await probe(name, opts.fetchImpl);
+    return { envelope: build(p, source, []) };
   }
 
-  // The provider's DKIM selector is the best guess available: a provider that
-  // delegates a return path usually names it with the same label it signs
-  // with. emailit.founders.click is exactly this case.
-  const labels = [
-    ...(opts.dkimSelector ? [opts.dkimSelector.trim().toLowerCase()] : []),
-    ...COMMON_RETURN_PATH_LABELS,
-  ];
-  const seen = new Set<string>();
-  const candidates = labels
-    .map((label) => `${label}.${domain}`)
-    .filter((name) => name !== configured && !seen.has(name) && (seen.add(name), true));
+  // 4: heuristic discovery. Runs whether or not the apex publishes SPF.
+  const { found, suspect } = await discoverEnvelope(domain, {
+    dkimSelector: opts.dkimSelector,
+    fetchImpl: opts.fetchImpl,
+  });
+  if (found) return { envelope: build(found.probe, "discovered", found.evidence), suspect };
 
-  const results = await Promise.all(
-    candidates.map((name) => probeReturnPath(name, "discovered", domain, opts.fetchImpl)),
-  );
-  return results.find((r): r is ReturnPath => r !== null) ?? null;
+  // 5: nothing delegated the envelope, so the apex is the envelope.
+  return { envelope: build(apex, "apex", []), suspect };
+}
+
+function toRecordCheck(spf: string | undefined, lookupFailed: boolean): RecordCheck {
+  if (lookupFailed) {
+    return { status: "unknown", present: false, problem: "lookup failed" };
+  }
+  if (!spf) return { status: "absent", present: false };
+  const check: RecordCheck = { status: "present", present: true, value: spf };
+  // "+all" authorises the entire internet, which is the same as no SPF for
+  // anti-abuse purposes and is treated as a failure by some receivers.
+  if (/[+]all\b/.test(spf)) {
+    check.problem = 'ends in "+all", which authorises every sender on the internet';
+  }
+  return check;
 }
 
 /**
@@ -304,64 +437,45 @@ async function findReturnPath(
  * otherwise a short list of common selectors is probed. A miss there is
  * reported as "not found", never as "absent" — an unprobed selector may exist.
  *
- * `returnPathDomain` names the envelope domain when the operator knows it.
- * Without it, one is discovered — but only when the apex has no SPF of its own.
+ * The envelope options take precedence over each other in the order listed on
+ * `EnvelopeSource`. Supplying any of them disables discovery entirely.
  */
 export async function checkSendingDomain(
   domain: string,
-  opts: { dkimSelector?: string; returnPathDomain?: string; fetchImpl?: typeof fetch } = {},
+  opts: {
+    dkimSelector?: string;
+    /** EMAILIT_RETURN_PATH_DOMAIN — the operator's declaration. */
+    returnPathDomain?: string;
+    /** A MAIL FROM / Return-Path actually observed on sent mail. */
+    observedReturnPath?: string;
+    /** The return path the provider reports for this sending domain. */
+    espReturnPath?: string;
+    fetchImpl?: typeof fetch;
+  } = {},
 ): Promise<DeliverabilityReport> {
   // Deliberately not defaulted: an undefined impl means "use the platform
   // resolver if there is one", which resolveTxt handles.
   const fetchImpl = opts.fetchImpl;
   const findings: string[] = [];
 
-  const spf: RecordCheck = { status: "absent", present: false };
   const dkim: RecordCheck & { selector?: string } = { status: "absent", present: false };
   const dmarc: RecordCheck = { status: "absent", present: false };
-  let returnPath: ReturnPath | undefined;
 
-  // --- SPF: authorises which servers may send as the ENVELOPE domain ------
-  try {
-    const record = spfIn(await resolveTxt(domain, fetchImpl));
-    if (record) {
-      spf.status = "present";
-      spf.present = true;
-      spf.value = record;
-      // "+all" authorises the entire internet, which is the same as no SPF
-      // for anti-abuse purposes and is treated as a failure by some receivers.
-      if (/[+]all\b/.test(record)) {
-        spf.problem = 'ends in "+all", which authorises every sender on the internet';
-      }
-    }
-  } catch (err) {
-    spf.status = "unknown";
-    spf.problem = `lookup failed: ${err instanceof Error ? err.message : String(err)}`;
-  }
+  // The apex is always read — as the last-resort envelope, and so an operator
+  // can see an apex record that authorises nothing a receiver checks.
+  const apex = await probe(domain, fetchImpl);
+  const apexSpf = toRecordCheck(apex.spf, apex.spfLookupFailed);
 
-  // No SPF at the apex is not the same as no SPF. Before calling it missing,
-  // look where the envelope sender actually lives.
-  if (spf.status === "absent") {
-    try {
-      returnPath =
-        (await findReturnPath(domain, {
-          returnPathDomain: opts.returnPathDomain,
-          dkimSelector: opts.dkimSelector,
-          fetchImpl,
-        })) ?? undefined;
-    } catch {
-      /* discovery is best-effort; a failure here leaves SPF absent as read */
-    }
-    if (returnPath?.spf) {
-      spf.status = "present";
-      spf.present = true;
-      spf.value = returnPath.spf;
-      spf.foundOn = returnPath.domain;
-      if (/[+]all\b/.test(returnPath.spf)) {
-        spf.problem = 'ends in "+all", which authorises every sender on the internet';
-      }
-    }
-  }
+  const { envelope, suspect } = await resolveEnvelope(domain, apex, {
+    returnPathDomain: opts.returnPathDomain,
+    observedReturnPath: opts.observedReturnPath,
+    espReturnPath: opts.espReturnPath,
+    dkimSelector: opts.dkimSelector,
+    fetchImpl,
+  });
+
+  const spf = toRecordCheck(envelope.spf ?? undefined, Boolean(envelope.spfLookupFailed));
+  if (envelope.domain !== domain) spf.foundOn = envelope.domain;
 
   // --- DKIM: cryptographically signs the message --------------------------
   const selectors = opts.dkimSelector ? [opts.dkimSelector] : [...COMMON_DKIM_SELECTORS];
@@ -407,11 +521,17 @@ export async function checkSendingDomain(
     dmarc.problem = `lookup failed: ${err instanceof Error ? err.message : String(err)}`;
   }
 
+  const suspectEnvelope = suspect
+    ? {
+        domain: suspect.domain,
+        mx: suspect.mx[0] ?? null,
+        why: "has a bounce-host MX but publishes no SPF record",
+      }
+    : undefined;
+
+  const base = { domain, envelope, spf, apexSpf, dkim, dmarc, suspectEnvelope };
+
   // --- Verdict ------------------------------------------------------------
-  // SPF and DKIM are what decide whether mail is accepted at all. Gmail and
-  // Microsoft both require at least one to pass for unauthenticated bulk mail,
-  // and since 2024 both require DMARC for bulk senders. Missing both is not a
-  // warning: it is the explanation for mail that never arrives.
   let verdict: DeliverabilityReport["verdict"] = "pass";
 
   // A lookup that never got an answer is reported as its own state. It still
@@ -426,11 +546,7 @@ export async function checkSendingDomain(
       dmarc.status === "unknown" ? "DMARC" : null,
     ].filter(Boolean);
     return {
-      domain,
-      spf,
-      dkim,
-      dmarc,
-      returnPath,
+      ...base,
       verdict: "fail",
       indeterminate: true,
       findings: [
@@ -443,19 +559,24 @@ export async function checkSendingDomain(
     };
   }
 
+  const where =
+    envelope.source === "apex"
+      ? `${domain} (the envelope is not delegated)`
+      : `${envelope.domain} (envelope, ${envelope.source})`;
+
   if (!spf.present && !dkim.present) {
     verdict = "fail";
     findings.push(
-      `${domain} publishes neither SPF nor DKIM, and no delegated return path publishes ` +
-        `SPF either. Mail sent as this domain will be discarded by Gmail and Microsoft, ` +
-        `usually without a bounce. Nothing will arrive.`,
+      `Neither SPF at ${where} nor DKIM at ${domain} is published. Mail sent as this ` +
+        `domain will be discarded by Gmail and Microsoft, usually without a bounce. ` +
+        `Nothing will arrive.`,
     );
   } else {
     if (!spf.present) {
       verdict = "fail";
       findings.push(
-        `${domain} publishes no SPF record, and no delegated return path was found that ` +
-          `does. Receivers cannot verify the envelope sender.`,
+        `No SPF record at ${where}. Receivers check SPF against the envelope sender, ` +
+          `so this is the record that decides the SPF leg.`,
       );
     }
     if (!dkim.present) {
@@ -469,15 +590,26 @@ export async function checkSendingDomain(
     }
   }
 
-  // SPF on a delegated return path is the normal ESP arrangement, not a
+  // The false-comfort case, stated explicitly: an apex record that authorises
+  // nothing a receiver will check, next to an envelope that has none.
+  if (!spf.present && apexSpf.present && envelope.source !== "apex") {
+    findings.push(
+      `${domain} does publish SPF, but the envelope sender is ${envelope.domain}, so that ` +
+        `record authorises nothing receivers check. It is not a substitute for SPF on ` +
+        `${envelope.domain}.`,
+    );
+  }
+
+  // SPF on a delegated envelope is the normal ESP arrangement, not a
   // shortfall — say so plainly, because the opposite reading is what made an
   // earlier version of this check raise a blocker over nothing.
-  if (spf.present && spf.foundOn) {
+  if (spf.present && envelope.source !== "apex") {
+    const via = envelope.evidence.length ? `; ${envelope.evidence.join("; ")}` : "";
     findings.push(
-      `SPF is published on ${spf.foundOn}, the return path (bounce MX ` +
-        `${returnPath?.mx ?? "present"}), not on ${domain}. That is where it belongs: SPF ` +
-        `authenticates the envelope sender, and ${domain} is only the From header. No SPF ` +
-        `record is required on ${domain} itself.`,
+      `SPF is published on ${envelope.domain}, the envelope sender (${envelope.source}${via}), ` +
+        `not on ${domain}. That is where it belongs: SPF authenticates the envelope, and ` +
+        `${domain} is only the From header. No SPF record is required on ${domain} itself` +
+        `${apexSpf.present ? ", though one is published" : ""}.`,
     );
   }
 
@@ -490,19 +622,30 @@ export async function checkSendingDomain(
     findings.push(`DKIM: ${dkim.problem}`);
   }
 
+  // A name that behaves like a return path but publishes no SPF is usually
+  // the real misconfiguration, even when something else satisfied the check.
+  if (suspectEnvelope) {
+    verdict = verdict === "fail" ? "fail" : "warn";
+    findings.push(
+      `${suspectEnvelope.domain} ${suspectEnvelope.why} (MX ${suspectEnvelope.mx}). If mail ` +
+        `actually leaves with that envelope, the SPF leg fails regardless of what ` +
+        `${envelope.domain} publishes.`,
+    );
+  }
+
   // Alignment: SPF passing is not the same as SPF aligning for DMARC.
-  if (spf.present && spf.foundOn && returnPath) {
-    if (!returnPath.alignsRelaxed) {
+  if (spf.present && envelope.source !== "apex") {
+    if (!envelope.alignsRelaxed) {
       verdict = verdict === "fail" ? "fail" : "warn";
       findings.push(
-        `The return path ${returnPath.domain} is outside ${domain}, so the SPF leg cannot ` +
-          `align for DMARC under any policy. DMARC will pass only on the DKIM signature — ` +
-          `confirm the provider signs with d=${domain}.`,
+        `The envelope ${envelope.domain} is outside ${domain}, so the SPF leg cannot align ` +
+          `for DMARC under any policy. DMARC will pass only on the DKIM signature — confirm ` +
+          `the provider signs with d=${domain}.`,
       );
     } else if (dmarc.present && /aspf\s*=\s*s/i.test(dmarc.value ?? "")) {
       verdict = verdict === "fail" ? "fail" : "warn";
       findings.push(
-        `DMARC sets aspf=s (strict), but SPF is on ${returnPath.domain} rather than ` +
+        `DMARC sets aspf=s (strict), but the envelope is ${envelope.domain} rather than ` +
           `${domain}, so the SPF leg will not align. Either relax it to aspf=r or rely on ` +
           `DKIM alone for DMARC.`,
       );
@@ -523,17 +666,7 @@ export async function checkSendingDomain(
     findings.push(`${domain} authenticates: SPF, DKIM and DMARC all present.`);
   }
 
-  return {
-    domain,
-    spf,
-    dkim,
-    dmarc,
-    returnPath,
-    verdict,
-    indeterminate: false,
-    findings,
-    checkedAt: new Date().toISOString(),
-  };
+  return { ...base, verdict, indeterminate: false, findings, checkedAt: new Date().toISOString() };
 }
 
 /**
@@ -558,12 +691,30 @@ export function sendingDomainFromEnv(env: {
 }
 
 /**
- * The envelope domain, when the operator has named it. Saves the probe and
- * removes the guesswork from the one lookup that decides whether SPF counts.
+ * The envelope domain as configuration knows it, in precedence order. Each is
+ * a domain, or an address whose domain part is taken — MAIL_FROM in
+ * particular is naturally written as an address.
  */
 export function returnPathFromEnv(env: {
   EMAILIT_RETURN_PATH_DOMAIN?: string;
-}): string | undefined {
-  const configured = env.EMAILIT_RETURN_PATH_DOMAIN?.trim();
-  return configured ? configured.toLowerCase() : undefined;
+  MAIL_FROM?: string;
+  EMAILIT_ESP_RETURN_PATH_DOMAIN?: string;
+}): {
+  returnPathDomain?: string;
+  observedReturnPath?: string;
+  espReturnPath?: string;
+} {
+  const asDomain = (raw?: string): string | undefined => {
+    const v = raw?.trim();
+    if (!v) return undefined;
+    const inner = v.match(/<([^>]+)>/)?.[1]?.trim() ?? v;
+    const at = inner.lastIndexOf("@");
+    const host = at > -1 && at < inner.length - 1 ? inner.slice(at + 1) : inner;
+    return normaliseName(host);
+  };
+  return {
+    returnPathDomain: asDomain(env.EMAILIT_RETURN_PATH_DOMAIN),
+    observedReturnPath: asDomain(env.MAIL_FROM),
+    espReturnPath: asDomain(env.EMAILIT_ESP_RETURN_PATH_DOMAIN),
+  };
 }

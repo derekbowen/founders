@@ -13,11 +13,17 @@
  * Set EMAILIT_DKIM_SELECTOR when the provider's selector is known — a probe
  * across common selectors can miss a real key published under another name.
  *
- * Set EMAILIT_RETURN_PATH_DOMAIN when the envelope (bounce) domain is known.
- * SPF authorises the envelope sender, not the From header, so a domain whose
- * ESP delegates the return path to a subdomain needs no SPF of its own — this
- * check looks there before reporting SPF missing. Naming it explicitly skips
- * the probe and removes the guess.
+ * SPF is evaluated against the ENVELOPE sender, never assumed to be the apex.
+ * The envelope is resolved in this order, and the first hit wins:
+ *
+ *   EMAILIT_RETURN_PATH_DOMAIN  the operator's declaration
+ *   MAIL_FROM                   a Return-Path actually observed on sent mail
+ *   EMAILIT_ESP_RETURN_PATH_DOMAIN  what the provider reports
+ *   DNS discovery               a candidate that proves itself
+ *   the sending domain          only if nothing delegated the envelope
+ *
+ * An SPF record on the apex never ends that search: if the envelope is
+ * delegated, an apex record authorises nothing a receiver checks.
  */
 import {
   checkSendingDomain,
@@ -43,8 +49,10 @@ if (!domain) {
 const selector = process.env.EMAILIT_DKIM_SELECTOR;
 const report = await checkSendingDomain(domain, {
   dkimSelector: selector,
-  returnPathDomain: returnPathFromEnv({
+  ...returnPathFromEnv({
     EMAILIT_RETURN_PATH_DOMAIN: process.env.EMAILIT_RETURN_PATH_DOMAIN,
+    MAIL_FROM: process.env.MAIL_FROM,
+    EMAILIT_ESP_RETURN_PATH_DOMAIN: process.env.EMAILIT_ESP_RETURN_PATH_DOMAIN,
   }),
 });
 
@@ -68,15 +76,19 @@ const row = (
   if (check.problem) console.log(`         ${check.problem}`);
 };
 
+console.log(
+  `  ENV    ${report.envelope.source.padEnd(8)} ${report.envelope.domain}` +
+    `${report.envelope.mx ? `  (MX ${report.envelope.mx})` : ""}`,
+);
 row("SPF", report.spf);
+// Shown whenever it differs from the envelope's, so an apex record can never
+// be mistaken for the one that counts.
+if (report.envelope.source !== "apex") {
+  const state = { present: "present", absent: "none", unknown: "UNKNOWN" }[report.apexSpf.status];
+  console.log(`  SPF@   ${state.padEnd(8)} ${report.apexSpf.value ?? ""}  (apex — not checked by receivers)`);
+}
 row("DKIM", report.dkim.selector ? { ...report.dkim, value: `selector "${report.dkim.selector}"` } : report.dkim);
 row("DMARC", report.dmarc);
-if (report.returnPath) {
-  console.log(
-    `  PATH   ${report.returnPath.via === "configured" ? "declared" : "found   "} ` +
-      `${report.returnPath.domain}${report.returnPath.mx ? `  (MX ${report.returnPath.mx})` : ""}`,
-  );
-}
 
 console.log("");
 for (const finding of report.findings) console.log(`  - ${finding}`);
@@ -93,16 +105,16 @@ if (report.indeterminate) {
 // gets mistaken for a big one and deferred.
 const fixes: string[] = [];
 if (!report.spf.present) {
-  // Reached only when neither the apex nor any return path authorises a
-  // sender. Publishing at the apex is the one-record answer; delegating the
-  // envelope to the ESP is the other, and is what most providers prefer.
+  // Reached when the ENVELOPE sender publishes no SPF — which an apex record
+  // does not fix when the envelope is delegated.
   fixes.push(
     `    SPF     TXT  @        v=spf1 include:_spf.emailit.com ~all\n` +
       `            Without it, Microsoft in particular drops mail from a domain\n` +
       `            with no sending reputation even when DKIM signs correctly.\n` +
-      `            Alternatively, if EmailIt gave you a return-path subdomain,\n` +
-      `            publish its records and set EMAILIT_RETURN_PATH_DOMAIN — SPF\n` +
-      `            belongs on the envelope domain, not necessarily on this one.`,
+      `            The envelope sender is ${report.envelope.domain}; publish it\n` +
+      `            there, or set EMAILIT_RETURN_PATH_DOMAIN if the envelope is\n` +
+      `            elsewhere. SPF on ${report.domain} does not cover a delegated\n` +
+      `            envelope.`,
   );
 }
 if (!report.dkim.present) {

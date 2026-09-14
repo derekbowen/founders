@@ -162,57 +162,19 @@ jobs:
             echo "::error::This check did not run, so it cannot pass. Fix the credential or retry."
             exit 1
           fi
-          # Two sections. [required] has no default in code and fails the
-          # deploy; [recommended] has a working fallback and only warns.
-          # Treating everything as required would block deploys over config the
-          # app does not need.
-          # Path is relative to the repo root, NOT to working-directory. It
-          # said $GITHUB_WORKSPACE/scripts/... which was right before the app
-          # moved under apps/ — afterwards awk could not open the file, the
-          # name loops iterated zero times, and the step printed "all required
-          # secrets present" for a Worker with none of them set. A preflight
-          # that cannot read its manifest must fail, not pass.
-          manifest="$GITHUB_WORKSPACE/apps/founders-click/scripts/required-secrets.txt"
-          if [ ! -r "$manifest" ]; then
-            echo "::error::Secret manifest not found at $manifest — this check cannot run."
-            exit 1
-          fi
-          names_in() {
-            awk -v want="$1" '
-              /^\[/ { section = $0; next }
-              /^[[:space:]]*#/ { next }
-              /^[[:space:]]*$/ { next }
-              /^[[:space:]]/ { next }          # continuation/comment lines
-              section == "[" want "]" { print $1 }
-            ' "$manifest"
-          }
-          have() {
-            node -e "process.exit(JSON.parse(require('fs').readFileSync('/tmp/secrets.json','utf8')).some(s=>s.name==='$1')?0:1)"
-          }
-
-          required_names="$(names_in required)"
-          if [ -z "$required_names" ]; then
-            echo "::error::Parsed 0 required secrets from $manifest — the manifest or its"
-            echo "::error::[required] section changed shape. Refusing to report a pass."
-            exit 1
-          fi
-          echo "checking $(echo "$required_names" | wc -w) required secrets against the Worker"
-
-          missing=""
-          for k in $required_names; do have "$k" || missing="$missing $k"; done
-          soft=""
-          for k in $(names_in recommended); do have "$k" || soft="$soft $k"; done
-
-          [ -n "$soft" ] && echo "::warning::Not set (code has defaults):$soft"
-
-          if [ -n "$missing" ]; then
-            echo "::error::Worker is missing REQUIRED secrets:$missing"
-            echo "::error::These have no default — the feature is broken without them."
-            echo "::error::Set each with: wrangler secret put <NAME>  (see docs/DEPLOYMENT.md)"
-            echo "::error::Note: a name set as a plaintext Text variable is NOT a secret and will still report missing."
-            exit 1
-          fi
-          echo "all required secrets present"
+          # The comparison lives in a script, not in this YAML, so its failure
+          # modes are testable — see tests/preflight-integrity.test.ts. The
+          # inline version read $GITHUB_WORKSPACE/scripts/required-secrets.txt,
+          # correct until the app moved under apps/; afterwards awk could not
+          # open the file, the loops ran zero times, and the step printed "all
+          # required secrets present" for a Worker missing every one of them.
+          #
+          # Exit codes: 0 all required present, 1 one is missing,
+          # 2 the check could not run (unreadable manifest, empty [required],
+          # unparseable secret list) — which is a failure, never a pass.
+          node "$GITHUB_WORKSPACE/apps/founders-click/scripts/check-required-secrets.mjs" \
+            "$GITHUB_WORKSPACE/apps/founders-click/scripts/required-secrets.txt" \
+            /tmp/secrets.json
 
       - name: Deploy
         id: deploy

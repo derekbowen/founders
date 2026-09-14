@@ -101,6 +101,8 @@ export const Route = createFileRoute("/api/public/ops/email-probe")({
           hookSecretConfigured: Boolean(process.env.SEND_EMAIL_HOOK_SECRET),
           dkimSelectorConfigured: process.env.EMAILIT_DKIM_SELECTOR ?? null,
           returnPathConfigured: process.env.EMAILIT_RETURN_PATH_DOMAIN ?? null,
+          observedReturnPathConfigured: process.env.MAIL_FROM ?? null,
+          espReturnPathConfigured: process.env.EMAILIT_ESP_RETURN_PATH_DOMAIN ?? null,
         };
 
         let deliverability: unknown = null;
@@ -108,11 +110,13 @@ export const Route = createFileRoute("/api/public/ops/email-probe")({
           try {
             deliverability = await checkSendingDomain(domain, {
               dkimSelector: process.env.EMAILIT_DKIM_SELECTOR,
-              // SPF lives on the envelope domain, which for every serious ESP
-              // is a delegated subdomain. Without this the check reads the
-              // apex and reports a blocker that does not exist.
-              returnPathDomain: returnPathFromEnv({
+              // SPF is evaluated against the envelope sender, which for every
+              // serious ESP is a delegated subdomain. Naming it here skips the
+              // discovery heuristic entirely.
+              ...returnPathFromEnv({
                 EMAILIT_RETURN_PATH_DOMAIN: process.env.EMAILIT_RETURN_PATH_DOMAIN,
+                MAIL_FROM: process.env.MAIL_FROM,
+                EMAILIT_ESP_RETURN_PATH_DOMAIN: process.env.EMAILIT_ESP_RETURN_PATH_DOMAIN,
               }),
             });
           } catch (err) {

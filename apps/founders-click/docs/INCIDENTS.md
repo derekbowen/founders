@@ -64,7 +64,7 @@ which is why the audit now prints it.
 | `SEND_EMAIL_HOOK_SECRET` on the Worker | present | that 401 is `invalid signature`, not `hook not configured` |
 | Signup requires the email | yes | GoTrue `/auth/v1/settings`: `mailer_autoconfirm: false` |
 | Signup is open | yes | `disable_signup: false` |
-| Google OAuth | live and configured | `/auth/v1/authorize?provider=google` 302s to Google with a real client id |
+| Google OAuth | **provider configured; end-to-end authentication unverified** | `/auth/v1/authorize?provider=google` 302s to Google with a real client id. That proves a client id is set — NOT callback handling, token exchange, session creation, or an authenticated redirect. |
 | Supabase hook URI points here | **unverified** | needs the dashboard, or a real signup |
 | `EMAILIT_API_KEY` on the Worker | **unverified** | the CI gate that proves this was inert (above) |
 | What EmailIt answers | **unverified** | the hook returns 200 and logs it; nothing else records it |
@@ -73,8 +73,9 @@ The last three are what `POST /api/public/ops/email-probe` (with `?send=1`)
 answers in one call. It is written and tested but not deployed — the live
 Worker is still build `baf9985` (2026-09-02) from the pre-consolidation trunk.
 
-Note that a customer can sign up **today** with Google and never touch the
-email path.
+Google sign-in is therefore a *candidate* path around the email dependency,
+not a demonstrated one. Nothing here establishes that a Google signup
+completes.
 
 ---
 ## 2026-09-01 — Signup down platform-wide (~65 minutes)

@@ -265,8 +265,10 @@ await check("auth email can authenticate (SPF/DKIM/DMARC)", async () => {
   try {
     report = await checkSendingDomain(domain, {
       dkimSelector: process.env.EMAILIT_DKIM_SELECTOR,
-      returnPathDomain: returnPathFromEnv({
+      ...returnPathFromEnv({
         EMAILIT_RETURN_PATH_DOMAIN: process.env.EMAILIT_RETURN_PATH_DOMAIN,
+        MAIL_FROM: process.env.MAIL_FROM,
+        EMAILIT_ESP_RETURN_PATH_DOMAIN: process.env.EMAILIT_ESP_RETURN_PATH_DOMAIN,
       }),
     });
   } catch (e: any) {
@@ -277,7 +279,7 @@ await check("auth email can authenticate (SPF/DKIM/DMARC)", async () => {
   // than failing a deploy over this runner's networking.
   if (report.indeterminate) return ["SKIP", report.findings[0] ?? "DNS lookup failed"];
 
-  const where = report.spf.foundOn ? ` (SPF on ${report.spf.foundOn})` : "";
+  const where = ` (envelope ${report.envelope.domain}, ${report.envelope.source})`;
   const state = `SPF ${report.spf.status}, DKIM ${report.dkim.status}, DMARC ${report.dmarc.status}${where}`;
   if (report.verdict === "fail") return ["FAIL", `${state} — ${report.findings[0]}`];
   // A warn means mail DOES authenticate — something is merely set up to
