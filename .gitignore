@@ -22,13 +22,14 @@ dist-ssr
 .env.*
 !.env.example
 
-# Wrangler / Cloudflare
-.wrangler/
+# Wrangler / Cloudflare — any app in the workspace
+**/.wrangler/
 .dev.vars
+**/.dev.vars
 
-# Supabase CLI cache (machine-specific)
-supabase/.temp/
-supabase/.branches/
+# Supabase CLI cache (machine-specific) — any app in the workspace
+**/supabase/.temp/
+**/supabase/.branches/
 
 # Claude Code session config (machine-specific cwd)
 .claude/launch.json

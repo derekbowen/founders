@@ -1,6 +1,11 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "founders-click",
+  // Worker name must be unique per app in this workspace. This app serves
+  // poolrentalnearme.com; the name "founders-click" here was a leftover from
+  // an abandoned rebrand and now belongs to apps/founders-click, which is what
+  // actually serves founders.click. Deploying under the old name would have
+  // published this app over that live Worker.
+  "name": "poolrentalnearme",
   "main": "@tanstack/react-start/server-entry",
   "compatibility_date": "2026-05-10",
   "compatibility_flags": ["nodejs_compat"],

@@ -1,0 +1,62 @@
+name: E2E Smoke
+
+# Required repo secrets:
+#   SMOKE_BASE_URL          — e.g. https://kindred-ease-space.lovable.app
+#   SUPABASE_TEST_EMAIL     — pre-confirmed test account (optional; signup-only path runs without)
+#   SUPABASE_TEST_PASSWORD  — password for that account
+
+
+
+# ---------------------------------------------------------------------------
+# CUTOVER STATE: manual dispatch only.
+#
+# founders.click is still deployed and monitored from derekbowen/kindred-ease-space.
+# This copy is re-anchored to apps/founders-click and ready, but its automatic
+# triggers are deliberately removed: while both repositories are live, an
+# automatic run here would race that one for the same Cloudflare Worker, and
+# two monitors would double every alert.
+#
+# To complete the cutover:
+#   1. Disable (or delete) the matching workflow in kindred-ease-space.
+#   2. Run this one via "Run workflow" and confirm it behaves.
+#   3. Restore the automatic trigger recorded below.
+# ---------------------------------------------------------------------------
+on:
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    defaults:
+      run:
+        working-directory: apps/founders-click
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Playwright
+        run: |
+          python -m pip install --upgrade pip
+          pip install playwright
+          python -m playwright install --with-deps chromium
+
+      - name: Run smoke test
+        env:
+          SMOKE_BASE_URL: ${{ secrets.SMOKE_BASE_URL }}
+          SUPABASE_TEST_EMAIL: ${{ secrets.SUPABASE_TEST_EMAIL }}
+          SUPABASE_TEST_PASSWORD: ${{ secrets.SUPABASE_TEST_PASSWORD }}
+        run: python tests/e2e/smoke.py
+
+
+      - name: Upload screenshots on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-screenshots
+          path: /tmp/browser/smoke/
+          if-no-files-found: ignore
+
