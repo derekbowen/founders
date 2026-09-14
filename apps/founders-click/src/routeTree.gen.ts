@@ -50,6 +50,7 @@ import { Route as ApiPublicHooksSyncSharetribeRouteImport } from './routes/api/p
 import { Route as ApiPublicHooksCanonicalAuditRouteImport } from './routes/api/public/hooks/canonical-audit'
 import { Route as ApiPublicHooksAuthSendEmailRouteImport } from './routes/api/public/hooks/auth-send-email'
 import { Route as ApiPublicOpsEmailProbeRouteImport } from './routes/api/public/ops/email-probe'
+import { Route as ApiPublicOpsSyncHealthRouteImport } from './routes/api/public/ops/sync-health'
 import { Route as AuthenticatedAppSettingsDomainsRouteImport } from './routes/_authenticated/app.settings.domains'
 import { Route as AuthenticatedAppSettingsApiKeysRouteImport } from './routes/_authenticated/app.settings.api-keys'
 import { Route as AuthenticatedAppSettingsAiRouteImport } from './routes/_authenticated/app.settings.ai'
@@ -316,6 +317,11 @@ const ApiPublicHooksAuthSendEmailRoute =
 const ApiPublicOpsEmailProbeRoute = ApiPublicOpsEmailProbeRouteImport.update({
   id: '/api/public/ops/email-probe',
   path: '/api/public/ops/email-probe',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicOpsSyncHealthRoute = ApiPublicOpsSyncHealthRouteImport.update({
+  id: '/api/public/ops/sync-health',
+  path: '/api/public/ops/sync-health',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAppSettingsDomainsRoute =
@@ -735,6 +741,7 @@ export interface FileRoutesByFullPath {
   '/app/settings/domains': typeof AuthenticatedAppSettingsDomainsRoute
   '/api/public/hooks/auth-send-email': typeof ApiPublicHooksAuthSendEmailRoute
   '/api/public/ops/email-probe': typeof ApiPublicOpsEmailProbeRoute
+  '/api/public/ops/sync-health': typeof ApiPublicOpsSyncHealthRoute
   '/api/public/hooks/canonical-audit': typeof ApiPublicHooksCanonicalAuditRoute
   '/api/public/hooks/sync-sharetribe': typeof ApiPublicHooksSyncSharetribeRoute
   '/app/admin/help/articles': typeof AuthenticatedAppAdminHelpArticlesRouteWithChildren
@@ -830,6 +837,7 @@ export interface FileRoutesByTo {
   '/app/settings/domains': typeof AuthenticatedAppSettingsDomainsRoute
   '/api/public/hooks/auth-send-email': typeof ApiPublicHooksAuthSendEmailRoute
   '/api/public/ops/email-probe': typeof ApiPublicOpsEmailProbeRoute
+  '/api/public/ops/sync-health': typeof ApiPublicOpsSyncHealthRoute
   '/api/public/hooks/canonical-audit': typeof ApiPublicHooksCanonicalAuditRoute
   '/api/public/hooks/sync-sharetribe': typeof ApiPublicHooksSyncSharetribeRoute
   '/app/admin/help/articles': typeof AuthenticatedAppAdminHelpArticlesRouteWithChildren
@@ -929,6 +937,7 @@ export interface FileRoutesById {
   '/_authenticated/app/settings/domains': typeof AuthenticatedAppSettingsDomainsRoute
   '/api/public/hooks/auth-send-email': typeof ApiPublicHooksAuthSendEmailRoute
   '/api/public/ops/email-probe': typeof ApiPublicOpsEmailProbeRoute
+  '/api/public/ops/sync-health': typeof ApiPublicOpsSyncHealthRoute
   '/api/public/hooks/canonical-audit': typeof ApiPublicHooksCanonicalAuditRoute
   '/api/public/hooks/sync-sharetribe': typeof ApiPublicHooksSyncSharetribeRoute
   '/_authenticated/app/admin/help/articles': typeof AuthenticatedAppAdminHelpArticlesRouteWithChildren
@@ -1256,6 +1265,7 @@ export interface RootRouteChildren {
   SWsSlugRoute: typeof SWsSlugRoute
   ApiPublicHooksAuthSendEmailRoute: typeof ApiPublicHooksAuthSendEmailRoute
   ApiPublicOpsEmailProbeRoute: typeof ApiPublicOpsEmailProbeRoute
+  ApiPublicOpsSyncHealthRoute: typeof ApiPublicOpsSyncHealthRoute
   ApiPublicHooksCanonicalAuditRoute: typeof ApiPublicHooksCanonicalAuditRoute
   ApiPublicHooksSyncSharetribeRoute: typeof ApiPublicHooksSyncSharetribeRoute
 }
@@ -1547,6 +1557,13 @@ declare module '@tanstack/react-router' {
       path: '/api/public/ops/email-probe'
       fullPath: '/api/public/ops/email-probe'
       preLoaderRoute: typeof ApiPublicOpsEmailProbeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/ops/sync-health': {
+      id: '/api/public/ops/sync-health'
+      path: '/api/public/ops/sync-health'
+      fullPath: '/api/public/ops/sync-health'
+      preLoaderRoute: typeof ApiPublicOpsSyncHealthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/app/settings/domains': {
@@ -2224,6 +2241,7 @@ const rootRouteChildren: RootRouteChildren = {
   SWsSlugRoute: SWsSlugRoute,
   ApiPublicHooksAuthSendEmailRoute: ApiPublicHooksAuthSendEmailRoute,
   ApiPublicOpsEmailProbeRoute: ApiPublicOpsEmailProbeRoute,
+  ApiPublicOpsSyncHealthRoute: ApiPublicOpsSyncHealthRoute,
   ApiPublicHooksCanonicalAuditRoute: ApiPublicHooksCanonicalAuditRoute,
   ApiPublicHooksSyncSharetribeRoute: ApiPublicHooksSyncSharetribeRoute,
 }

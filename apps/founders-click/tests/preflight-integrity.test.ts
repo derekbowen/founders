@@ -13,6 +13,7 @@
  */
 import { spawnSync } from "node:child_process";
 import { cpSync, mkdirSync, mkdtempSync, rmSync, writeFileSync, readFileSync } from "node:fs";
+import { namesIn } from "../scripts/check-required-secrets.mjs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -36,6 +37,16 @@ function t(name: string, cond: boolean, extra = "") {
 function run(cmd: string, args: string[], cwd?: string): { code: number; out: string } {
   const res = spawnSync(cmd, args, { cwd, encoding: "utf8" });
   return { code: res.status ?? -1, out: `${res.stdout ?? ""}${res.stderr ?? ""}` };
+}
+
+/** Every env name referenced anywhere in the app, for the "is it used?" check. */
+function execSyncSafe(): string {
+  const r = spawnSync(
+    "grep",
+    ["-rhoE", "(process\\.env|Deno\\.env\\.get\\()[.\"]?[A-Z_0-9]+", "src", "supabase"],
+    { cwd: APP, encoding: "utf8" },
+  );
+  return r.stdout ?? "";
 }
 
 const temps: string[] = [];
@@ -91,20 +102,19 @@ console.log("\n=== canonical audit: a real tree is scanned and counted ===");
 // ---------------------------------------------------------------------------
 const SECRETS = join(APP, "scripts/check-required-secrets.mjs");
 const MANIFEST = join(APP, "scripts/required-secrets.txt");
-const allSix = JSON.stringify([
-  "SUPABASE_URL",
-  "SUPABASE_PUBLISHABLE_KEY",
-  "SUPABASE_SERVICE_ROLE_KEY",
-  "EMAILIT_API_KEY",
-  "CLOUDFLARE_API_TOKEN",
-  "CLOUDFLARE_ZONE_ID",
-].map((name) => ({ name })));
+// Derived from the manifest, never hardcoded: a literal list silently goes
+// stale the moment a secret is promoted, and then the happy-path test fails
+// for a reason that has nothing to do with what it is testing.
+const MANIFEST_TEXT = readFileSync(MANIFEST, "utf8");
+const REQUIRED = namesIn(MANIFEST_TEXT, "required");
+const RECOMMENDED = namesIn(MANIFEST_TEXT, "recommended");
+const allRequired = JSON.stringify(REQUIRED.map((name) => ({ name })));
 
 console.log("\n=== secrets preflight: a missing manifest is a failure ===");
 {
   const d = temp();
   const secrets = join(d, "secrets.json");
-  writeFileSync(secrets, allSix);
+  writeFileSync(secrets, allRequired);
 
   const r = run("node", [SECRETS, join(d, "does-not-exist.txt"), secrets]);
   t("exits 2 (the check could not run)", r.code === 2, `exit ${r.code}: ${r.out.slice(0, 160)}`);
@@ -152,7 +162,7 @@ console.log("\n=== secrets preflight: it actually detects a missing secret ===")
   writeFileSync(
     secrets,
     JSON.stringify(
-      JSON.parse(allSix).filter((s: { name: string }) => s.name !== "EMAILIT_API_KEY"),
+      JSON.parse(allRequired).filter((s: { name: string }) => s.name !== "EMAILIT_API_KEY"),
     ),
   );
 
@@ -165,13 +175,52 @@ console.log("\n=== secrets preflight: the happy path, and the real manifest ==="
 {
   const d = temp();
   const secrets = join(d, "secrets.json");
-  writeFileSync(secrets, allSix);
+  writeFileSync(secrets, allRequired);
 
   const r = run("node", [SECRETS, MANIFEST, secrets]);
   t("exits 0 when every required secret is present", r.code === 0, `exit ${r.code}: ${r.out.slice(0, 200)}`);
   t("reports how many it checked — 0 would mean it did nothing",
-    /checking 6 required and 9 recommended/.test(r.out), r.out.slice(0, 200));
+    r.out.includes(`checking ${REQUIRED.length} required and ${RECOMMENDED.length} recommended`),
+    r.out.slice(0, 200));
   t("warns about the recommended ones", /Not set \(code has defaults\)/.test(r.out), r.out.slice(0, 240));
+}
+
+console.log("\n=== the manifest classifies the secrets that actually block a launch ===");
+{
+  // CRON_SECRET sat in [recommended] with the note "Unset is SAFE — the hooks
+  // fail closed with 401". Both halves were false: sync-sharetribe returns 500,
+  // and unset silently disables the every-30-minute sync the welcome email
+  // promises. The repaired gate would STILL have shipped that deploy, because
+  // [recommended] only warns. This test is the thing that stops it returning
+  // to [recommended] by a well-meaning edit.
+  const manifest = MANIFEST_TEXT;
+  const required = REQUIRED;
+  const recommended = RECOMMENDED;
+
+  t("CRON_SECRET is REQUIRED, so a deploy without it fails", required.includes("CRON_SECRET"),
+    required.join(" "));
+  t("and is not also listed as merely recommended", !recommended.includes("CRON_SECRET"),
+    recommended.join(" "));
+  // The manifest still quotes both disproven claims — on purpose, to explain
+  // why they were wrong. So assert they appear only as a refuted quotation,
+  // never as a live statement about how the hook behaves.
+  const quotesOldClaim = /fail closed with 401|Unset is SAFE/i.test(manifest);
+  t("if the disproven claims appear, they are marked as wrong",
+    !quotesOldClaim || /Both halves were wrong/.test(manifest), "claim present without refutation");
+  t("the manifest records the promotion, so the reason survives an edit",
+    /PROMOTED FROM \[recommended\]/.test(manifest));
+
+  // The other secrets whose absence breaks a customer-visible path outright.
+  for (const name of ["SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY", "EMAILIT_API_KEY"]) {
+    t(`${name} is required`, required.includes(name), required.join(" "));
+  }
+
+  // Every name the manifest lists must actually be read by the code, or the
+  // gate blocks deploys over configuration nothing consumes.
+  const src = execSyncSafe();
+  for (const name of required) {
+    t(`${name} is actually read somewhere in the app`, src.includes(name), "not referenced");
+  }
 }
 
 console.log("\n=== the workflow passes a path that exists ===");
