@@ -185,9 +185,34 @@ domain.
 
 > **Status: documented, not yet exercised as a drill.** Prior CI-published
 > versions now exist to roll back to — `kindred-ease-space` deploy-app.yml runs
-> #10, #11, #14 and #16 all shipped successfully — so the precondition that
-> previously blocked the drill is gone. Record the version IDs here the first
-> time it is performed for real.
+> #10, #11, #14, #16 and #17 all shipped successfully — so the precondition
+> that previously blocked the drill is gone. Record the version IDs here the
+> first time a rollback is performed for real.
+>
+> Rolling *forward* is proven. See "Proof of deployment control" below.
+
+## Proof of deployment control — 2026-09-17
+
+Run #17 of `kindred-ease-space`'s `deploy-app.yml`, a deliberately
+version-only change, exercised the whole path end to end:
+
+| Step | Evidence |
+| --- | --- |
+| Commit | `0fadfa9657db71083fa9eed640be4e647483ce90`, pushed to `main` 23:37:18 UTC |
+| CI | run #17, all 16 steps green — typecheck, suites, build, Worker artifact, secret preflight, route isolation, propagation, smoke |
+| Deploy ran from git | `event: push`, `head_branch: main` — not a dashboard action, not Lovable |
+| Production changed | `/api/public/version` went 404 → `{"sha":"0fadfa9…","environment":"production"}` within 60s |
+| Site healthy after | `/`, `/login`, `/signup`, `/app`, `/sitemap.xml` all 200; auth hook still answers `401 invalid signature`, which is the *correct* refusal and proves signup is configured |
+| Rollback target known | `baf9985` (run #16) was serving before; `eccbd56` (run #14) is the prior success — **not** `53b8730`, whose run #15 failed, so no Worker version exists for it |
+
+Push-to-green: **102 seconds.** The propagation gate needed 33s to see eight
+consecutive reads of the new SHA, which is why it exists: a single matching
+read during a rollout proves nothing.
+
+The one thing this did **not** prove is the monorepo path. It ran in
+`kindred-ease-space`, which is still the repository that ships production. The
+monorepo cutover remains blocked on `CRON_SECRET` — see the header comment in
+`.github/workflows/deploy-founders-click.yml`.
 
 Cloudflare retains previous Worker versions. Rollback is a routing/version
 change only — **no app deploy touches the database**, so nothing needs undoing
