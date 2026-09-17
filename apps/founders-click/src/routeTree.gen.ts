@@ -32,6 +32,7 @@ import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/ap
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
 import { Route as SWsSlugRouteImport } from './routes/s.$ws.$slug'
 import { Route as HelpCategoryArticleRouteImport } from './routes/help.$category.$article'
+import { Route as ApiPublicVersionRouteImport } from './routes/api/public/version'
 import { Route as ApiPublicSitemapByHostRouteImport } from './routes/api/public/sitemap-by-host'
 import { Route as ApiPublicPageLookupRouteImport } from './routes/api/public/page-lookup'
 import { Route as ApiPublicEdgeHealthRouteImport } from './routes/api/public/edge-health'
@@ -46,11 +47,11 @@ import { Route as AuthenticatedAppCoachRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedAppBillingRouteImport } from './routes/_authenticated/app.billing'
 import { Route as AuthenticatedAppAffiliatesRouteImport } from './routes/_authenticated/app.affiliates'
 import { Route as AuthenticatedAppAddonsRouteImport } from './routes/_authenticated/app.addons'
+import { Route as ApiPublicOpsSyncHealthRouteImport } from './routes/api/public/ops/sync-health'
+import { Route as ApiPublicOpsEmailProbeRouteImport } from './routes/api/public/ops/email-probe'
 import { Route as ApiPublicHooksSyncSharetribeRouteImport } from './routes/api/public/hooks/sync-sharetribe'
 import { Route as ApiPublicHooksCanonicalAuditRouteImport } from './routes/api/public/hooks/canonical-audit'
 import { Route as ApiPublicHooksAuthSendEmailRouteImport } from './routes/api/public/hooks/auth-send-email'
-import { Route as ApiPublicOpsEmailProbeRouteImport } from './routes/api/public/ops/email-probe'
-import { Route as ApiPublicOpsSyncHealthRouteImport } from './routes/api/public/ops/sync-health'
 import { Route as AuthenticatedAppSettingsDomainsRouteImport } from './routes/_authenticated/app.settings.domains'
 import { Route as AuthenticatedAppSettingsApiKeysRouteImport } from './routes/_authenticated/app.settings.api-keys'
 import { Route as AuthenticatedAppSettingsAiRouteImport } from './routes/_authenticated/app.settings.ai'
@@ -221,6 +222,11 @@ const HelpCategoryArticleRoute = HelpCategoryArticleRouteImport.update({
   path: '/$article',
   getParentRoute: () => HelpCategoryRoute,
 } as any)
+const ApiPublicVersionRoute = ApiPublicVersionRouteImport.update({
+  id: '/api/public/version',
+  path: '/api/public/version',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicSitemapByHostRoute = ApiPublicSitemapByHostRouteImport.update({
   id: '/api/public/sitemap-by-host',
   path: '/api/public/sitemap-by-host',
@@ -296,6 +302,16 @@ const AuthenticatedAppAddonsRoute = AuthenticatedAppAddonsRouteImport.update({
   path: '/addons',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
+const ApiPublicOpsSyncHealthRoute = ApiPublicOpsSyncHealthRouteImport.update({
+  id: '/api/public/ops/sync-health',
+  path: '/api/public/ops/sync-health',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicOpsEmailProbeRoute = ApiPublicOpsEmailProbeRouteImport.update({
+  id: '/api/public/ops/email-probe',
+  path: '/api/public/ops/email-probe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHooksSyncSharetribeRoute =
   ApiPublicHooksSyncSharetribeRouteImport.update({
     id: '/api/public/hooks/sync-sharetribe',
@@ -314,16 +330,6 @@ const ApiPublicHooksAuthSendEmailRoute =
     path: '/api/public/hooks/auth-send-email',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiPublicOpsEmailProbeRoute = ApiPublicOpsEmailProbeRouteImport.update({
-  id: '/api/public/ops/email-probe',
-  path: '/api/public/ops/email-probe',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicOpsSyncHealthRoute = ApiPublicOpsSyncHealthRouteImport.update({
-  id: '/api/public/ops/sync-health',
-  path: '/api/public/ops/sync-health',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthenticatedAppSettingsDomainsRoute =
   AuthenticatedAppSettingsDomainsRouteImport.update({
     id: '/domains',
@@ -689,6 +695,7 @@ export interface FileRoutesByFullPath {
   '/api/public/edge-health': typeof ApiPublicEdgeHealthRoute
   '/api/public/page-lookup': typeof ApiPublicPageLookupRoute
   '/api/public/sitemap-by-host': typeof ApiPublicSitemapByHostRoute
+  '/api/public/version': typeof ApiPublicVersionRoute
   '/help/$category/$article': typeof HelpCategoryArticleRoute
   '/s/$ws/$slug': typeof SWsSlugRoute
   '/app/': typeof AuthenticatedAppIndexRoute
@@ -740,10 +747,10 @@ export interface FileRoutesByFullPath {
   '/app/settings/api-keys': typeof AuthenticatedAppSettingsApiKeysRoute
   '/app/settings/domains': typeof AuthenticatedAppSettingsDomainsRoute
   '/api/public/hooks/auth-send-email': typeof ApiPublicHooksAuthSendEmailRoute
-  '/api/public/ops/email-probe': typeof ApiPublicOpsEmailProbeRoute
-  '/api/public/ops/sync-health': typeof ApiPublicOpsSyncHealthRoute
   '/api/public/hooks/canonical-audit': typeof ApiPublicHooksCanonicalAuditRoute
   '/api/public/hooks/sync-sharetribe': typeof ApiPublicHooksSyncSharetribeRoute
+  '/api/public/ops/email-probe': typeof ApiPublicOpsEmailProbeRoute
+  '/api/public/ops/sync-health': typeof ApiPublicOpsSyncHealthRoute
   '/app/admin/help/articles': typeof AuthenticatedAppAdminHelpArticlesRouteWithChildren
   '/app/admin/help/categories': typeof AuthenticatedAppAdminHelpCategoriesRoute
   '/app/admin/help/feedback': typeof AuthenticatedAppAdminHelpFeedbackRoute
@@ -785,6 +792,7 @@ export interface FileRoutesByTo {
   '/api/public/edge-health': typeof ApiPublicEdgeHealthRoute
   '/api/public/page-lookup': typeof ApiPublicPageLookupRoute
   '/api/public/sitemap-by-host': typeof ApiPublicSitemapByHostRoute
+  '/api/public/version': typeof ApiPublicVersionRoute
   '/help/$category/$article': typeof HelpCategoryArticleRoute
   '/s/$ws/$slug': typeof SWsSlugRoute
   '/app': typeof AuthenticatedAppIndexRoute
@@ -836,10 +844,10 @@ export interface FileRoutesByTo {
   '/app/settings/api-keys': typeof AuthenticatedAppSettingsApiKeysRoute
   '/app/settings/domains': typeof AuthenticatedAppSettingsDomainsRoute
   '/api/public/hooks/auth-send-email': typeof ApiPublicHooksAuthSendEmailRoute
-  '/api/public/ops/email-probe': typeof ApiPublicOpsEmailProbeRoute
-  '/api/public/ops/sync-health': typeof ApiPublicOpsSyncHealthRoute
   '/api/public/hooks/canonical-audit': typeof ApiPublicHooksCanonicalAuditRoute
   '/api/public/hooks/sync-sharetribe': typeof ApiPublicHooksSyncSharetribeRoute
+  '/api/public/ops/email-probe': typeof ApiPublicOpsEmailProbeRoute
+  '/api/public/ops/sync-health': typeof ApiPublicOpsSyncHealthRoute
   '/app/admin/help/articles': typeof AuthenticatedAppAdminHelpArticlesRouteWithChildren
   '/app/admin/help/categories': typeof AuthenticatedAppAdminHelpCategoriesRoute
   '/app/admin/help/feedback': typeof AuthenticatedAppAdminHelpFeedbackRoute
@@ -885,6 +893,7 @@ export interface FileRoutesById {
   '/api/public/edge-health': typeof ApiPublicEdgeHealthRoute
   '/api/public/page-lookup': typeof ApiPublicPageLookupRoute
   '/api/public/sitemap-by-host': typeof ApiPublicSitemapByHostRoute
+  '/api/public/version': typeof ApiPublicVersionRoute
   '/help/$category/$article': typeof HelpCategoryArticleRoute
   '/s/$ws/$slug': typeof SWsSlugRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
@@ -936,10 +945,10 @@ export interface FileRoutesById {
   '/_authenticated/app/settings/api-keys': typeof AuthenticatedAppSettingsApiKeysRoute
   '/_authenticated/app/settings/domains': typeof AuthenticatedAppSettingsDomainsRoute
   '/api/public/hooks/auth-send-email': typeof ApiPublicHooksAuthSendEmailRoute
-  '/api/public/ops/email-probe': typeof ApiPublicOpsEmailProbeRoute
-  '/api/public/ops/sync-health': typeof ApiPublicOpsSyncHealthRoute
   '/api/public/hooks/canonical-audit': typeof ApiPublicHooksCanonicalAuditRoute
   '/api/public/hooks/sync-sharetribe': typeof ApiPublicHooksSyncSharetribeRoute
+  '/api/public/ops/email-probe': typeof ApiPublicOpsEmailProbeRoute
+  '/api/public/ops/sync-health': typeof ApiPublicOpsSyncHealthRoute
   '/_authenticated/app/admin/help/articles': typeof AuthenticatedAppAdminHelpArticlesRouteWithChildren
   '/_authenticated/app/admin/help/categories': typeof AuthenticatedAppAdminHelpCategoriesRoute
   '/_authenticated/app/admin/help/feedback': typeof AuthenticatedAppAdminHelpFeedbackRoute
@@ -985,6 +994,7 @@ export interface FileRouteTypes {
     | '/api/public/edge-health'
     | '/api/public/page-lookup'
     | '/api/public/sitemap-by-host'
+    | '/api/public/version'
     | '/help/$category/$article'
     | '/s/$ws/$slug'
     | '/app/'
@@ -1036,9 +1046,10 @@ export interface FileRouteTypes {
     | '/app/settings/api-keys'
     | '/app/settings/domains'
     | '/api/public/hooks/auth-send-email'
-    | '/api/public/ops/email-probe'
     | '/api/public/hooks/canonical-audit'
     | '/api/public/hooks/sync-sharetribe'
+    | '/api/public/ops/email-probe'
+    | '/api/public/ops/sync-health'
     | '/app/admin/help/articles'
     | '/app/admin/help/categories'
     | '/app/admin/help/feedback'
@@ -1080,6 +1091,7 @@ export interface FileRouteTypes {
     | '/api/public/edge-health'
     | '/api/public/page-lookup'
     | '/api/public/sitemap-by-host'
+    | '/api/public/version'
     | '/help/$category/$article'
     | '/s/$ws/$slug'
     | '/app'
@@ -1131,9 +1143,10 @@ export interface FileRouteTypes {
     | '/app/settings/api-keys'
     | '/app/settings/domains'
     | '/api/public/hooks/auth-send-email'
-    | '/api/public/ops/email-probe'
     | '/api/public/hooks/canonical-audit'
     | '/api/public/hooks/sync-sharetribe'
+    | '/api/public/ops/email-probe'
+    | '/api/public/ops/sync-health'
     | '/app/admin/help/articles'
     | '/app/admin/help/categories'
     | '/app/admin/help/feedback'
@@ -1178,6 +1191,7 @@ export interface FileRouteTypes {
     | '/api/public/edge-health'
     | '/api/public/page-lookup'
     | '/api/public/sitemap-by-host'
+    | '/api/public/version'
     | '/help/$category/$article'
     | '/s/$ws/$slug'
     | '/_authenticated/app/'
@@ -1229,9 +1243,10 @@ export interface FileRouteTypes {
     | '/_authenticated/app/settings/api-keys'
     | '/_authenticated/app/settings/domains'
     | '/api/public/hooks/auth-send-email'
-    | '/api/public/ops/email-probe'
     | '/api/public/hooks/canonical-audit'
     | '/api/public/hooks/sync-sharetribe'
+    | '/api/public/ops/email-probe'
+    | '/api/public/ops/sync-health'
     | '/_authenticated/app/admin/help/articles'
     | '/_authenticated/app/admin/help/categories'
     | '/_authenticated/app/admin/help/feedback'
@@ -1262,12 +1277,13 @@ export interface RootRouteChildren {
   ApiPublicEdgeHealthRoute: typeof ApiPublicEdgeHealthRoute
   ApiPublicPageLookupRoute: typeof ApiPublicPageLookupRoute
   ApiPublicSitemapByHostRoute: typeof ApiPublicSitemapByHostRoute
+  ApiPublicVersionRoute: typeof ApiPublicVersionRoute
   SWsSlugRoute: typeof SWsSlugRoute
   ApiPublicHooksAuthSendEmailRoute: typeof ApiPublicHooksAuthSendEmailRoute
-  ApiPublicOpsEmailProbeRoute: typeof ApiPublicOpsEmailProbeRoute
-  ApiPublicOpsSyncHealthRoute: typeof ApiPublicOpsSyncHealthRoute
   ApiPublicHooksCanonicalAuditRoute: typeof ApiPublicHooksCanonicalAuditRoute
   ApiPublicHooksSyncSharetribeRoute: typeof ApiPublicHooksSyncSharetribeRoute
+  ApiPublicOpsEmailProbeRoute: typeof ApiPublicOpsEmailProbeRoute
+  ApiPublicOpsSyncHealthRoute: typeof ApiPublicOpsSyncHealthRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1433,6 +1449,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HelpCategoryArticleRouteImport
       parentRoute: typeof HelpCategoryRoute
     }
+    '/api/public/version': {
+      id: '/api/public/version'
+      path: '/api/public/version'
+      fullPath: '/api/public/version'
+      preLoaderRoute: typeof ApiPublicVersionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/sitemap-by-host': {
       id: '/api/public/sitemap-by-host'
       path: '/api/public/sitemap-by-host'
@@ -1531,6 +1554,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppAddonsRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/api/public/ops/sync-health': {
+      id: '/api/public/ops/sync-health'
+      path: '/api/public/ops/sync-health'
+      fullPath: '/api/public/ops/sync-health'
+      preLoaderRoute: typeof ApiPublicOpsSyncHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/ops/email-probe': {
+      id: '/api/public/ops/email-probe'
+      path: '/api/public/ops/email-probe'
+      fullPath: '/api/public/ops/email-probe'
+      preLoaderRoute: typeof ApiPublicOpsEmailProbeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/sync-sharetribe': {
       id: '/api/public/hooks/sync-sharetribe'
       path: '/api/public/hooks/sync-sharetribe'
@@ -1550,20 +1587,6 @@ declare module '@tanstack/react-router' {
       path: '/api/public/hooks/auth-send-email'
       fullPath: '/api/public/hooks/auth-send-email'
       preLoaderRoute: typeof ApiPublicHooksAuthSendEmailRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/ops/email-probe': {
-      id: '/api/public/ops/email-probe'
-      path: '/api/public/ops/email-probe'
-      fullPath: '/api/public/ops/email-probe'
-      preLoaderRoute: typeof ApiPublicOpsEmailProbeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/ops/sync-health': {
-      id: '/api/public/ops/sync-health'
-      path: '/api/public/ops/sync-health'
-      fullPath: '/api/public/ops/sync-health'
-      preLoaderRoute: typeof ApiPublicOpsSyncHealthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/app/settings/domains': {
@@ -2238,12 +2261,13 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicEdgeHealthRoute: ApiPublicEdgeHealthRoute,
   ApiPublicPageLookupRoute: ApiPublicPageLookupRoute,
   ApiPublicSitemapByHostRoute: ApiPublicSitemapByHostRoute,
+  ApiPublicVersionRoute: ApiPublicVersionRoute,
   SWsSlugRoute: SWsSlugRoute,
   ApiPublicHooksAuthSendEmailRoute: ApiPublicHooksAuthSendEmailRoute,
-  ApiPublicOpsEmailProbeRoute: ApiPublicOpsEmailProbeRoute,
-  ApiPublicOpsSyncHealthRoute: ApiPublicOpsSyncHealthRoute,
   ApiPublicHooksCanonicalAuditRoute: ApiPublicHooksCanonicalAuditRoute,
   ApiPublicHooksSyncSharetribeRoute: ApiPublicHooksSyncSharetribeRoute,
+  ApiPublicOpsEmailProbeRoute: ApiPublicOpsEmailProbeRoute,
+  ApiPublicOpsSyncHealthRoute: ApiPublicOpsSyncHealthRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

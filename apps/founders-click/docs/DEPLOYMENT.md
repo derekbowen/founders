@@ -2,8 +2,6 @@
 
 ## GitHub Actions is the canonical production path
 
-`.github/workflows/deploy-app.yml` is **authoritative** for founders.click.
-
 **Publishing from Lovable is not a release.** It must not be used to ship
 founders.click, and a Lovable publish does not constitute a deployment of
 record. This is not a preference — the Lovable relay reported successful
@@ -12,8 +10,33 @@ and nothing anywhere contradicted it.
 
 | What | Workflow | Trigger |
 | --- | --- | --- |
-| Application (`founders-click`) | `deploy-app.yml` | push to `main`, or manual |
-| Edge proxy (`founders-edge`) | `deploy-edge-worker.yml` | manual only, type `deploy` |
+| Application (`founders-click`) | `deploy-founders-click.yml` | manual only, **until cutover** |
+| Edge proxy (`founders-edge`) | `deploy-founders-edge.yml` | manual only, type `deploy` |
+
+## Where production actually comes from, today
+
+Verified 2026-09-17 against live deployment metadata, not config files.
+
+| Question | Answer |
+| --- | --- |
+| Deployment model | **git-driven** — not Lovable, not manual, not mixed |
+| Repository | `derekbowen/kindred-ease-space`, branch `main` |
+| Workflow | its `deploy-app.yml`, on push to `main` |
+| Last release | run #16, 2026-09-02 03:46 UTC |
+| Serving commit | `baf9985e1ada8500bc5bd414f967824b6b13772d` |
+| Runtime | Cloudflare Worker `founders-click`, account-owned |
+| Vercel | not involved; no `vercel.json` in either app |
+
+`https://www.founders.click/api/public/version` reports that SHA, and it
+matches `kindred-ease-space@main` exactly. **There is no drift between that
+repository and production.** The drift this monorepo has been diagnosing is
+between *this* repo and both of them: `apps/founders-click` was imported from
+`baf9985` and has moved on, while production has not.
+
+Lovable's last production publish predates the 2026-09-01 CI cutover. The
+signup outage recorded in `INCIDENTS.md` is the proof: that cutover severed an
+auth-email endpoint which had only ever existed in Lovable's build lineage —
+which could only happen because CI, not Lovable, became the thing that ships.
 
 They stay separate, and the edge stays manual until there is production
 validation strong enough to trust it unattended. A bad app deploy breaks our
@@ -160,14 +183,32 @@ domain.
 
 ## Rollback
 
-> **Status: documented, NOT yet exercised against a real prior version.**
-> There is currently only one deployment lineage and no CI-published version to
-> roll back to. Perform the drill in step 3 below once a second deploy exists,
-> and update this line to record the version IDs used.
+> **Status: documented, not yet exercised as a drill.** Prior CI-published
+> versions now exist to roll back to — `kindred-ease-space` deploy-app.yml runs
+> #10, #11, #14 and #16 all shipped successfully — so the precondition that
+> previously blocked the drill is gone. Record the version IDs here the first
+> time it is performed for real.
 
 Cloudflare retains previous Worker versions. Rollback is a routing/version
 change only — **no app deploy touches the database**, so nothing needs undoing
 on the data side.
+
+**Step 0 — know what is serving, and what it would go back to.** Deployment
+identity is answered by the running build itself, which cannot be stale because
+the SHA is compiled into the bundle:
+
+```bash
+# Current production SHA, build time, and which environment answered.
+curl -s https://www.founders.click/api/public/version
+# => {"sha":"baf9985…","shaShort":"baf9985","builtAt":"…","environment":"production"}
+
+# The prior SHA is the commit before that one on the deploying branch.
+git log --oneline -5 <deploying-repo>/main
+```
+
+`/api/public/edge-health` answers GET with the same three fields and predates
+the dedicated route; either works, but `/api/public/version` is the one to
+build tooling against.
 
 ```bash
 cd .output/server                     # any dir with the generated wrangler.json
@@ -181,7 +222,7 @@ bunx wrangler versions list --name founders-click
 bunx wrangler rollback --name founders-click --version-id <PREVIOUS_VERSION_ID>
 
 # 3. Prove the rollback took effect — do NOT trust the command's own output.
-curl -s https://www.founders.click/api/public/edge-health | jq -r .sha
+curl -s https://www.founders.click/api/public/version | jq -r .sha
 #    must now report the OLDER commit
 bun scripts/smoke-production.ts https://www.founders.click
 ```

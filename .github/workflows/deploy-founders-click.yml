@@ -32,10 +32,33 @@ name: Deploy App
 # automatic run here would race that one for the same Cloudflare Worker, and
 # two monitors would double every alert.
 #
+# VERIFIED 2026-09-17 — production is git-driven, from that other repository:
+#   www.founders.click serves baf9985e1ada8500bc5bd414f967824b6b13772d, which
+#   is kindred-ease-space@main HEAD, shipped by its deploy-app.yml run #16 on
+#   2026-09-02. Lovable does not publish production and has not since the
+#   2026-09-01 cutover. There is no drift between that repo and production;
+#   the drift is between this monorepo and both of them.
+#
 # To complete the cutover:
-#   1. Disable (or delete) the matching workflow in kindred-ease-space.
-#   2. Run this one via "Run workflow" and confirm it behaves.
-#   3. Restore the automatic trigger recorded below.
+#   1. Disable (or delete) deploy-app.yml AND production-monitor.yml in
+#      kindred-ease-space. The monitor runs there on a */30 schedule, so it
+#      is the live one — this repo's monitor-founders-click.yml is the copy
+#      whose schedule is commented out. Exactly one of each must be active.
+#   2. Set CRON_SECRET on the Worker. BLOCKING, and new since this comment was
+#      first written: required-secrets.txt promoted CRON_SECRET to [required]
+#      on 2026-09-14, so the "required Worker secrets are configured" preflight
+#      below now FAILS the deploy while it is unset. kindred-ease-space still
+#      lists it as [recommended], which is why deploys succeed there and would
+#      not here. This is a real dependency on the CRON_SECRET remediation, not
+#      a lint to suppress.
+#   3. Run this one via "Run workflow" and confirm it behaves.
+#   4. Restore the automatic trigger recorded below.
+#
+# A fifth step is already done: the repository's original root-level
+# deploy.yml — a May-era workflow that ran `npm ci` and `npm run build` at the
+# repo root and deployed with the provisioning token (which holds no Workers
+# permission) — was removed. It still triggered on push to main, so merging the
+# monorepo would have fired that dead workflow instead of this one.
 # ---------------------------------------------------------------------------
 #
 # Original trigger:
