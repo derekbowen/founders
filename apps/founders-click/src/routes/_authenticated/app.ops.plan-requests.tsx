@@ -249,8 +249,18 @@ function EntitlementGrantsPage() {
                 </dd>
               </div>
               <div>
-                <dt className="text-muted-foreground">Commercial pages</dt>
-                <dd className="font-mono font-medium">
+                {/* The RAW STORED COLUMNS, not an entitlement. They survive a
+                    lapse, so this can read 25 while the effective limit is 0.
+                    Struck through when they are contributing nothing, so an
+                    operator cannot mistake a stored number for capacity. */}
+                <dt className="text-muted-foreground">Stored (Stripe)</dt>
+                <dd
+                  className={`font-mono font-medium ${
+                    ent.canPublish && ent.billingState !== "granted"
+                      ? ""
+                      : "text-muted-foreground line-through"
+                  }`}
+                >
                   {ent.pageLimitBase + ent.pageLimitAddon + ent.pageLimitBonus}
                 </dd>
               </div>

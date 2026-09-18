@@ -124,6 +124,29 @@ function BillingPage() {
     usagePct >= 100 ? "text-red-500" : usagePct >= 90 ? "text-amber-500" : "text-emerald-500";
   const barTone = usagePct >= 100 ? "bg-red-500" : usagePct >= 90 ? "bg-amber-500" : "bg-primary";
 
+  // Only ever break capacity into parts that are ACTUALLY IN FORCE. The stored
+  // columns outlive a lapsed subscription, so printing "100 plan + 50 extra
+  // capacity" beside a limit of 0 tells the customer they have capacity they do
+  // not have — the same mistake, in the UI, that this release fixed in the gate.
+  // `pageLimit` is the one number that decides anything; this only explains it.
+  const capacityParts: string[] = [];
+  if (ent?.canPublish) {
+    if (ent.billingState !== "granted") {
+      // 'granted' means Stripe refused and the grant is the whole allowance, so
+      // the paid columns contribute nothing and must not be listed.
+      if (ent.pageLimitAddon > 0) {
+        capacityParts.push(`${ent.pageLimitBase.toLocaleString()} plan`);
+        capacityParts.push(`${ent.pageLimitAddon.toLocaleString()} extra capacity`);
+      }
+      if (ent.pageLimitBonus > 0) {
+        capacityParts.push(`${ent.pageLimitBonus.toLocaleString()} bonus`);
+      }
+    }
+    if (ent.pageLimitGranted > 0) {
+      capacityParts.push(`${ent.pageLimitGranted.toLocaleString()} complimentary`);
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -233,10 +256,9 @@ function BillingPage() {
               {ent ? `${ent.remaining.toLocaleString()} publishing slots remaining` : ""}
               {ent && ent.draftPages > 0 && ` · ${ent.draftPages.toLocaleString()} drafts (free)`}
             </div>
-            {ent && ent.pageLimitAddon > 0 && (
+            {capacityParts.length > 0 && (
               <div className="mt-1 text-xs text-muted-foreground">
-                {ent.pageLimitBase.toLocaleString()} plan + {ent.pageLimitAddon.toLocaleString()}{" "}
-                extra capacity
+                {capacityParts.join(" + ")}
               </div>
             )}
           </CardContent>
