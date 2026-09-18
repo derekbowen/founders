@@ -4,6 +4,7 @@ import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { recordPage404 } from "@/lib/page-data.helpers.server";
 import { decideCapacity } from "@/lib/billing-capacity";
+import { readGrantedPagesOrNull } from "@/lib/entitlement-grants.server";
 
 const sb = () => supabaseAdmin as any;
 
@@ -182,12 +183,21 @@ export const getPublicTenantPage = createServerFn({ method: "GET" })
             billingError.message,
           );
         } else if (billing) {
+          // A free beta account has no Stripe object, so on billing facts alone
+          // it reads as "no subscription" and would be withheld. Its grant is
+          // what entitles it — the same resolver, not a bypass.
+          //
+          // `null` means the grant read itself failed. That is not evidence of
+          // no grant, so it takes the same fail-open path as a billing read
+          // error above: serve, and log.
+          const granted = await readGrantedPagesOrNull(workspaceId);
           const decision = decideCapacity({
             subscriptionStatus: billing.subscription_status,
             trialEndsAt: billing.trial_ends_at,
             currentPeriodEnd: billing.current_period_end,
+            grantedPages: granted ?? 0,
           });
-          if (!decision.serve) {
+          if (granted !== null && !decision.serve) {
             console.warn(
               `[getPublicTenantPage] withholding ${host ?? "?"}/${data.slug}: ${decision.state} — ${decision.reason}`,
             );
@@ -289,10 +299,7 @@ export const getPublicTenantPage = createServerFn({ method: "GET" })
       // route-template change takes effect immediately instead of requiring a
       // full listing re-sync. The persisted marketplace_url is a legacy
       // fallback only — never the authority.
-      const resolvedListings = await resolveListingUrls(
-        workspaceId,
-        (listings ?? []) as any[],
-      );
+      const resolvedListings = await resolveListingUrls(workspaceId, (listings ?? []) as any[]);
 
       return {
         page: {

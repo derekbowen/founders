@@ -45,12 +45,21 @@ export type BillingFacts = {
   subscriptionStatus: string | null | undefined;
   trialEndsAt: string | null | undefined;
   currentPeriodEnd: string | null | undefined;
+  /**
+   * Total pages granted by a platform admin and active right now — the sum of
+   * `workspace_entitlement_grants.page_limit` over unrevoked, started,
+   * unexpired rows. Free beta and test accounts carry no Stripe object at all,
+   * so without this every one of them would read as "no subscription" and be
+   * refused publishing no matter how large the grant.
+   */
+  grantedPages?: number | null;
 };
 
 export type BillingState =
   | "active" // paying, in good standing
   | "trialing" // trial running, not yet expired
   | "trial_expired" // trial ended, never converted
+  | "granted" // no usable Stripe state, but an admin grant is active
   | "grace" // payment failing, still inside the retry window
   | "lapsed" // cancelled, unpaid, or past the grace window
   | "stale" // status says live but Stripe has gone quiet past a full cycle
@@ -75,11 +84,14 @@ function parseDate(value: string | null | undefined): number | null {
 const DAY_MS = 86_400_000;
 
 /**
- * Decide what a workspace may do, from its billing facts alone.
+ * The Stripe half of the decision: what the subscription alone would allow,
+ * ignoring any admin grant. Kept separate so `decideCapacity` can ask "would
+ * Stripe have refused this?" without re-deriving it, and so paid capacity can
+ * be counted only when Stripe itself says the workspace may publish.
  *
  * `now` is injectable so the rules are testable without freezing clocks.
  */
-export function decideCapacity(facts: BillingFacts, now: number = Date.now()): CapacityDecision {
+function stripeCapacity(facts: BillingFacts, now: number = Date.now()): CapacityDecision {
   const status = (facts.subscriptionStatus ?? "").trim().toLowerCase();
   const trialEnds = parseDate(facts.trialEndsAt);
   const periodEnd = parseDate(facts.currentPeriodEnd);
@@ -143,9 +155,9 @@ export function decideCapacity(facts: BillingFacts, now: number = Date.now()): C
       if (now < deadline) {
         return serveOnly(
           "grace",
-          `Payment failed and is being retried. Pages stay up until ${new Date(
-            deadline,
-          ).toISOString().slice(0, 10)}; publishing is paused until payment succeeds.`,
+          `Payment failed and is being retried. Pages stay up until ${new Date(deadline)
+            .toISOString()
+            .slice(0, 10)}; publishing is paused until payment succeeds.`,
         );
       }
       return stop("lapsed", "Payment failed and the retry window has closed.");
@@ -157,9 +169,9 @@ export function decideCapacity(facts: BillingFacts, now: number = Date.now()): C
       if (periodEnd !== null && now < periodEnd) {
         return serveOnly(
           "grace",
-          `Subscription cancelled. Pages stay up until the paid period ends on ${new Date(
-            periodEnd,
-          ).toISOString().slice(0, 10)}.`,
+          `Subscription cancelled. Pages stay up until the paid period ends on ${new Date(periodEnd)
+            .toISOString()
+            .slice(0, 10)}.`,
         );
       }
       return stop("lapsed", "Subscription cancelled and the paid period has ended.");
@@ -191,15 +203,64 @@ export function decideCapacity(facts: BillingFacts, now: number = Date.now()): C
   }
 }
 
+/** Grants are whole pages; a negative or fractional grant is a data error, not a credit. */
+export function normalizeGrantedPages(value: number | null | undefined): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) return 0;
+  return Math.max(0, Math.trunc(value));
+}
+
+/**
+ * Decide what a workspace may do, from its billing facts AND any active admin
+ * grant.
+ *
+ * A grant is additive and rescuing: it adds capacity to a paying workspace, and
+ * it restores serving and publishing to one Stripe would refuse. That is what
+ * makes a free beta account behave like a real entitled customer rather than
+ * needing a hidden bypass somewhere in the serving path.
+ *
+ * It is deliberately NOT a downgrade: a grant never reduces what a paying
+ * customer already has, because the paid and granted components are summed
+ * rather than compared.
+ *
+ * Mirrored in SQL by public.workspace_capacity(); tests/entitlement-grants.test.ts
+ * asserts the two agree for every state.
+ */
+export function decideCapacity(facts: BillingFacts, now: number = Date.now()): CapacityDecision {
+  const stripe = stripeCapacity(facts, now);
+  const granted = normalizeGrantedPages(facts.grantedPages);
+  if (granted === 0) return stripe;
+  if (stripe.publish) {
+    // Already entitled through Stripe. The grant still adds pages — see
+    // effectivePageLimit — but the state stays the commercial one, because
+    // "Subscription active" is the true and more useful thing to tell them.
+    return stripe;
+  }
+  return {
+    state: "granted",
+    serve: true,
+    publish: true,
+    reason:
+      `Complimentary access granted by founders.click (${granted} page${granted === 1 ? "" : "s"}).` +
+      (stripe.state === "unknown" ? "" : ` Commercial status: ${stripe.state}.`),
+  };
+}
+
 /**
  * The page limit actually in force, given the stored limits and the billing
  * facts. A workspace that may not publish has no capacity, whatever its
  * columns say — which is what stops a missed webhook from reading as a grant.
  */
 export function effectivePageLimit(
-  stored: { base: number; addon: number; bonus: number },
+  stored: { base: number; addon: number; bonus: number; granted?: number | null },
   decision: CapacityDecision,
 ): number {
-  if (!decision.publish) return 0;
-  return stored.base + stored.addon + stored.bonus;
+  const granted = normalizeGrantedPages(stored.granted);
+  // ADDITIVE, never greater-of. Paid capacity counts only while Stripe itself
+  // says the workspace may publish — the `granted` state is produced exactly
+  // when Stripe refused, so paid contributes nothing there and the grant is the
+  // whole allowance. A lapsed plan plus a 50-page grant is 50 pages, not 50
+  // plus whatever page_limit_base happens to still say.
+  const stripeEntitled = decision.publish && decision.state !== "granted";
+  const paid = stripeEntitled ? stored.base + stored.addon + stored.bonus : 0;
+  return paid + granted;
 }

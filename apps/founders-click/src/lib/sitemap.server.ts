@@ -1,5 +1,6 @@
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { decideCapacity } from "@/lib/billing-capacity";
+import { readGrantedPagesOrNull } from "@/lib/entitlement-grants.server";
 
 const sb = () => supabaseAdmin as any;
 
@@ -90,12 +91,17 @@ export async function tenantSitemapXml(hostname: string): Promise<string | null>
   if (billingError) {
     console.error("[tenantSitemapXml] billing read failed, emitting anyway:", billingError.message);
   } else if (billing) {
+    // Same reasoning as the page-serving gate: a beta account is entitled by
+    // its grant, not by Stripe. `null` means the grant read failed, which is
+    // not evidence of no grant — emit the sitemap rather than blank it.
+    const granted = await readGrantedPagesOrNull(workspaceId);
     const decision = decideCapacity({
       subscriptionStatus: billing.subscription_status,
       trialEndsAt: billing.trial_ends_at,
       currentPeriodEnd: billing.current_period_end,
+      grantedPages: granted ?? 0,
     });
-    if (!decision.serve) {
+    if (granted !== null && !decision.serve) {
       // An empty urlset, not null: the host IS a verified tenant host, so
       // falling back to the platform sitemap would advertise founders.click
       // URLs on the customer's domain.

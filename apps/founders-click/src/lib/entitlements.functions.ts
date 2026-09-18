@@ -4,6 +4,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { planByKey, TRIAL_PAGE_LIMIT } from "@/lib/plan-catalog";
 import { decideCapacity, effectivePageLimit, type BillingState } from "@/lib/billing-capacity";
+import { readGrantedPages } from "@/lib/entitlement-grants.server";
 
 const sb = () => supabaseAdmin as any;
 
@@ -16,6 +17,12 @@ export type PageEntitlement = {
   pageLimitBase: number;
   pageLimitAddon: number;
   pageLimitBonus: number;
+  /**
+   * Pages from active admin grants (beta/promotional/manual). Additive on top
+   * of paid capacity, and the entire allowance for a workspace with no usable
+   * subscription — see workspace_entitlement_grants.
+   */
+  pageLimitGranted: number;
   publishedPages: number;
   draftPages: number;
   suspendedPages: number;
@@ -73,7 +80,7 @@ async function countByStatus(workspaceId: string, status: string): Promise<numbe
 }
 
 export async function readEntitlement(workspaceId: string): Promise<PageEntitlement> {
-  const [wsRes, published, drafts, suspended, { data: bal }] = await Promise.all([
+  const [wsRes, published, drafts, suspended, { data: bal }, granted] = await Promise.all([
     sb()
       .from("workspaces")
       .select(
@@ -85,6 +92,10 @@ export async function readEntitlement(workspaceId: string): Promise<PageEntitlem
     countByStatus(workspaceId, "draft"),
     countByStatus(workspaceId, "billing_suspended"),
     sb().from("credit_balances").select("balance").eq("workspace_id", workspaceId).maybeSingle(),
+    // Fails CLOSED here, unlike the public serving path: this read drives the
+    // admin/app view and the pre-publish check, where under-reporting capacity
+    // shows a confusing number, and over-reporting it hands out free pages.
+    readGrantedPages(workspaceId),
   ]);
   const ws = wsRes.data;
   if (!ws) {
@@ -113,8 +124,9 @@ export async function readEntitlement(workspaceId: string): Promise<PageEntitlem
     subscriptionStatus: ws.subscription_status,
     trialEndsAt: ws.trial_ends_at,
     currentPeriodEnd: ws.current_period_end,
+    grantedPages: granted,
   });
-  const limit = effectivePageLimit({ base, addon, bonus }, decision);
+  const limit = effectivePageLimit({ base, addon, bonus, granted }, decision);
 
   const status: string = ws.subscription_status ?? "trialing";
   const isTrial = status === "trialing";
@@ -129,6 +141,7 @@ export async function readEntitlement(workspaceId: string): Promise<PageEntitlem
     pageLimitBase: base,
     pageLimitAddon: addon,
     pageLimitBonus: bonus,
+    pageLimitGranted: granted,
     publishedPages: published,
     draftPages: drafts,
     suspendedPages: suspended,

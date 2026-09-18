@@ -184,10 +184,9 @@ export const NAV_SECTIONS: NavSection[] = [
       },
       {
         to: "/app/ops/plan-requests",
-        label: "Plan Requests",
+        label: "Entitlements & Beta",
         icon: HandCoins,
         internalOnly: true,
-        stub: true,
       },
       { to: "/app/ops/admin-team", label: "Admin Team", icon: Users, stub: true },
 
