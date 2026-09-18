@@ -78,12 +78,35 @@ CREATE POLICY "members read own workspace grants"
   FOR SELECT TO authenticated
   USING (public.is_workspace_member(workspace_id, auth.uid()));
 
+-- PRIVILEGES ARE STATED EXPLICITLY, in both directions. Found during branch
+-- validation, and worth spelling out because the first version of this file got
+-- it wrong in a way that only a rebuild reveals:
+--
+--   * Supabase's ALTER DEFAULT PRIVILEGES grants SELECT on new public tables to
+--     BOTH anon and authenticated. On production that made the read policy below
+--     work by accident — and silently handed `anon` a read privilege this design
+--     never intended. Only RLS was standing in front of it.
+--   * A preview branch does not carry those default privileges. There,
+--     `authenticated` had no SELECT at all, so the policy below was dead code and
+--     a member could not see their own grant.
+--
+-- The same file therefore behaved differently in two environments, in opposite
+-- directions. Neither is acceptable for an entitlement table, so nothing here is
+-- left to a default.
+GRANT SELECT ON public.workspace_entitlement_grants TO authenticated;
+
 -- WRITES ARE TABLE-PRIVILEGE DENIED, not merely policy-denied. This is the
 -- lesson of 20260830010000_lock_entitlement_writes.sql: a permissive USING
 -- clause scoped by workspace still lets a member write ANY column of a row they
 -- can see, so a workspace owner could have granted themselves capacity. RLS
 -- alone is the wrong mechanism for this; the privilege is.
 REVOKE INSERT, UPDATE, DELETE ON public.workspace_entitlement_grants FROM authenticated, anon;
+
+-- `anon` gets nothing at all. Who has been given free capacity, and why, is not
+-- public. Relying on RLS to return zero rows to an unauthenticated caller would
+-- work, but it makes a disclosure boundary depend on a policy staying correct
+-- rather than on the privilege never being there.
+REVOKE ALL ON public.workspace_entitlement_grants FROM anon;
 
 -- ---------------------------------------------------------------------------
 -- 2. Active-grant capacity. One definition, used by every caller.
@@ -310,6 +333,8 @@ UNION ALL SELECT 'grants not writable by anon',
        NOT has_table_privilege('anon', 'public.workspace_entitlement_grants', 'INSERT')
 UNION ALL SELECT 'grants readable by authenticated (RLS-scoped)',
        has_table_privilege('authenticated', 'public.workspace_entitlement_grants', 'SELECT')
+UNION ALL SELECT 'grants NOT readable by anon',
+       NOT has_table_privilege('anon', 'public.workspace_entitlement_grants', 'SELECT')
 UNION ALL SELECT 'RLS enabled on grants',
        (SELECT relrowsecurity FROM pg_class WHERE oid = 'public.workspace_entitlement_grants'::regclass)
 UNION ALL SELECT 'workspace_capacity not executable by anon',
