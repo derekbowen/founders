@@ -25,12 +25,9 @@ Deno.serve(async (req) => {
   try {
     const url = new URL(req.url);
     const token = req.headers.get("x-driver-token") ?? url.searchParams.get("token") ?? "";
-    // The driver token lives ONLY in the function's environment (DRIVE_TOKEN,
-    // set with `supabase secrets set`). The previous build hardcoded it here,
-    // in a public repository; that value is treated as compromised and must
-    // never be restored. With no DRIVE_TOKEN configured the function refuses
-    // every call rather than falling back to anything.
-    // Resolution order: DRIVE_TOKEN in the function environment, else the
+    // The previous build hardcoded the driver token here, in a public
+    // repository; that value is treated as compromised and must never be
+    // restored. Resolution order: DRIVE_TOKEN in the function environment, else the
     // Vault secret of the same name through the service-role-only accessor
     // public._drive_token() (created by the 2026-09-22 containment migration).
     // The value is generated inside the database and never leaves it except
