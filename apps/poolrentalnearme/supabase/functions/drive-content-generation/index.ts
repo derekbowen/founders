@@ -23,9 +23,16 @@ Deno.serve(async (req) => {
   try {
     const url = new URL(req.url);
     const token = req.headers.get("x-driver-token") ?? url.searchParams.get("token") ?? "";
-    // Hardcoded driver token — rotate by editing this constant and redeploying.
-    const expected = "6e85780dcbe7b1f7a7fbd8ce2d425a496bc675bb5ccf55f7";
-    if (token !== expected) {
+    // The driver token lives ONLY in the function's environment (DRIVE_TOKEN,
+    // set with `supabase secrets set`). The previous build hardcoded it here,
+    // in a public repository; that value is treated as compromised and must
+    // never be restored. With no DRIVE_TOKEN configured the function refuses
+    // every call rather than falling back to anything.
+    const expected = Deno.env.get("DRIVE_TOKEN") ?? "";
+    if (expected.length < 32) {
+      return json({ error: "Driver disabled: DRIVE_TOKEN is not configured" }, 503);
+    }
+    if (!token || !timingSafeEqual(token, expected)) {
       return json({ error: "Unauthorized" }, 401);
     }
 
@@ -113,4 +120,15 @@ function json(body: unknown, status = 200) {
     status,
     headers: { ...CORS, "Content-Type": "application/json" },
   });
+}
+
+// Constant-time comparison so a wrong token cannot be narrowed byte by byte.
+function timingSafeEqual(a: string, b: string): boolean {
+  const enc = new TextEncoder();
+  const x = enc.encode(a);
+  const y = enc.encode(b);
+  if (x.length !== y.length) return false;
+  let diff = 0;
+  for (let i = 0; i < x.length; i++) diff |= x[i] ^ y[i];
+  return diff === 0;
 }
