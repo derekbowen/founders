@@ -3,9 +3,11 @@
 // invoked unattended (e.g. from a sandbox curl loop or pg_cron) so the user
 // doesn't have to keep the admin browser tab open.
 //
-// Auth: a shared token passed as ?token=... (or x-driver-token header) that
-// must equal env DRIVE_TOKEN. If DRIVE_TOKEN is unset, the function refuses
-// to run.
+// Auth: a shared token passed in the x-driver-token header (or ?token=, kept
+// for compatibility — prefer the header, query strings end up in edge logs)
+// that must equal DRIVE_TOKEN from the function environment or, failing that,
+// the Vault secret DRIVE_TOKEN read via public._drive_token(). With neither
+// configured the function refuses every call with 503.
 
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
@@ -28,17 +30,25 @@ Deno.serve(async (req) => {
     // in a public repository; that value is treated as compromised and must
     // never be restored. With no DRIVE_TOKEN configured the function refuses
     // every call rather than falling back to anything.
-    const expected = Deno.env.get("DRIVE_TOKEN") ?? "";
+    // Resolution order: DRIVE_TOKEN in the function environment, else the
+    // Vault secret of the same name through the service-role-only accessor
+    // public._drive_token() (created by the 2026-09-22 containment migration).
+    // The value is generated inside the database and never leaves it except
+    // through that accessor; nothing here ever logs or returns it.
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, serviceKey);
+    let expected = Deno.env.get("DRIVE_TOKEN") ?? "";
     if (expected.length < 32) {
-      return json({ error: "Driver disabled: DRIVE_TOKEN is not configured" }, 503);
+      const { data: vaultToken } = await supabase.rpc("_drive_token");
+      expected = typeof vaultToken === "string" ? vaultToken : "";
+    }
+    if (expected.length < 32) {
+      return json({ error: "Driver disabled: no DRIVE_TOKEN is configured" }, 503);
     }
     if (!token || !timingSafeEqual(token, expected)) {
       return json({ error: "Unauthorized" }, 401);
     }
-
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, serviceKey);
 
     const maxBatches = Math.min(Number(url.searchParams.get("maxBatches") ?? 60), 200);
     const count = Math.min(Number(url.searchParams.get("count") ?? 10), 10);
