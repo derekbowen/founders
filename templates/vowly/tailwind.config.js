@@ -28,10 +28,7 @@ export default {
         lift: "0 2px 4px rgb(42 32 35 / 0.05), 0 20px 40px -16px rgb(42 32 35 / 0.22)",
       },
       maxWidth: {
-        content: [
-  './index.html',
-  './src/**/*.{js,ts,jsx,tsx}'
-],
+        content: '1280px',
       },
     },
   },

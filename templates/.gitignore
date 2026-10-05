@@ -3,3 +3,5 @@
 node_modules/
 .gallery-src/
 dist/
+.store-src/
+.image-cache/

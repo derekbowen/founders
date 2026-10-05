@@ -26,10 +26,7 @@ export default {
         card: '0 1px 2px rgb(14 26 43 / 0.06), 0 4px 16px rgb(14 26 43 / 0.06)',
         lift: '0 8px 30px rgb(14 26 43 / 0.12)',
       },
-      maxWidth: { content: [
-  './index.html',
-  './src/**/*.{js,ts,jsx,tsx}'
-] },
+      maxWidth: { content: '1280px' },
     },
   },
   plugins: [],

@@ -43,26 +43,50 @@ template folder also works without a second install.
 | `tools/build-gallery.mjs` | Builds each template for the gallery (see below) |
 | `tools/screenshots.mjs` | Captures previews and checks each page renders (needs Chromium) |
 | `tools/gallery-index.mjs` | Writes the gallery page |
+| `tools/build-store-previews.mjs` | Builds the previews the founders.click template store serves (see below) |
+| `tools/store-thumbnails.mjs` | Captures the store's 960×720 catalog thumbnails and checks those previews render |
 
 The gallery build never edits a template's source. It copies each template and changes the copy
 so it runs from a sub-folder: `BrowserRouter` becomes `HashRouter`, absolute paths to files in
 `public/` become relative, and Vite builds with base `./`. It also adds an "All templates" link
 to each built copy.
 
+## The founders.click template store
+
+The store at founders.click/sharetribe-templates lives in the `kindred-ease-space` app, which
+serves each template's preview from `public/template-previews/<slug>/` and its card image from
+`public/template-thumbnails/<slug>.jpg`. To rebuild those from this library:
+
+```sh
+node templates/tools/build-store-previews.mjs <kindred-ease-space>/public/template-previews [slug...]
+node templates/tools/store-thumbnails.mjs <kindred-ease-space>/public [slug...]
+```
+
+The store build follows the store's own preview rules: every photo is self-hosted under
+`images/`, photos the exports left out are downloaded once from the Magic Patterns CDN (cached in
+`templates/.image-cache/`) and shipped with the preview, photos are recompressed, and maps use
+OpenStreetMap tiles. The store's catalog entries (name, price, flow, highlights) live in that
+app's `src/lib/template-store.ts` and `supabase/functions/_shared/template-catalog.ts`.
+
 ## Known issues in the exports
 
-- **Missing photos: CampOut, Harborly, Harvestly, Tutorly.** They load photos from
-  `/generated-images/…`, which Magic Patterns did not include in the export, so those photos show
-  as empty. Re-export the designs with their assets and put the files in
-  `<slug>/public/generated-images/`.
-- **Partly missing photos: Craftly.** 11 of the photos its data references are not in `public/`.
+- **Missing photos: CampOut, Harborly, Harvestly, Tutorly; 11 of Craftly's.** They load photos
+  from `/generated-images/…` (Craftly from its `public/` root), which Magic Patterns did not include
+  in the export, so run locally those photos show as empty. Dressly loads its photos straight from
+  `cdn.magicpatterns.com` instead. The files still exist on that CDN; the store previews download
+  and ship them (above), but the sources here don't have them yet, so a zip made from these
+  folders would not include them.
 - **Fixed: Bulkly, Stashly, Harborly, Vowly.** Their `tailwind.config.js` `content` globs did not
   match the source files, so Tailwind generated no utility classes and the pages rendered
   unstyled. In Bulkly and Stashly the globs were pasted into a helper's accumulator instead of the
   exported config. In Harborly and Vowly they pointed at the project root, but the export keeps the
   source under `src/`. Each config now sets `content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}']`
-  at the top level.
-- Maps (Leaflet) load tiles from OpenStreetMap / CARTO, so they need network access.
+  at the top level. Harborly's and Vowly's paste had also replaced the `maxWidth.content` value
+  that `max-w-content` containers use, so their pages stretched on wide screens; it is now
+  `1280px`.
+- **CARTO map tiles need an API key now.** Most designs use CARTO basemaps
+  (`basemaps.cartocdn.com`), which answer every request with an "API key required" tile. Add a
+  CARTO key or switch the tile URL (the store previews use OpenStreetMap's standard tiles).
 
 ## Templates
 
