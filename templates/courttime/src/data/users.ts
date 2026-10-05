@@ -1,0 +1,18 @@
+import { User } from '../types/marketplace';
+
+export const currentUserId = 'u-me';
+
+export const users: User[] = [
+{ id: 'u-me', name: 'Jordan Lee', role: 'both', bio: 'Weekend 4.0 tennis player and weekday pickleball convert. I also host a private half court in East Austin — come shoot around.', location: 'East Austin', joined: 'March 2024', sports: ['tennis', 'pickleball', 'basketball'], verified: true, responseTime: 'within an hour' },
+{ id: 'u-1', name: 'Barton Hills Tennis Club', role: 'host', bio: 'Family-run tennis club since 1987 with 12 lit hard courts, a full-service pro shop and junior programs.', location: 'Barton Hills', joined: 'June 2023', sports: ['tennis'], verified: true, responseTime: 'within an hour' },
+{ id: 'u-2', name: 'Westlake Racquet Club', role: 'host', bio: 'Clay and indoor tennis in the hills. Members and guests welcome on every court.', location: 'Westlake', joined: 'August 2023', sports: ['tennis'], verified: true, responseTime: 'within 2 hours' },
+{ id: 'u-3', name: 'The Kitchen Club', role: 'host', bio: 'Austin’s home for indoor pickleball — eight courts, leagues, clinics and the best open play in town.', location: 'North Burnet', joined: 'January 2024', sports: ['pickleball'], verified: true, responseTime: 'within 30 minutes' },
+{ id: 'u-4', name: 'Padel Haus Austin', role: 'host', bio: 'Panoramic glass courts, coaching for first-timers and Americano nights every week.', location: 'South Lamar', joined: 'February 2024', sports: ['padel'], verified: true, responseTime: 'within an hour' },
+{ id: 'u-5', name: 'Hyde Park Gym', role: 'host', bio: 'Neighborhood gym with a regulation hardwood court and indoor volleyball. Leagues and drop-in runs daily.', location: 'Hyde Park', joined: 'May 2023', sports: ['basketball', 'volleyball'], verified: true, responseTime: 'within 3 hours' },
+{ id: 'u-6', name: 'Mopac Futbol Center', role: 'host', bio: 'Small-sided turf fields and futsal for pickup, leagues and team training.', location: 'Northwest Hills', joined: 'September 2023', sports: ['soccer'], verified: true, responseTime: 'within 2 hours' },
+{ id: 'u-7', name: 'Austin Community Courts', role: 'host', bio: 'Non-profit managing public pickleball and sand volleyball courts across the city. Bookings fund resurfacing.', location: 'Citywide', joined: 'April 2023', sports: ['pickleball', 'volleyball'], verified: true, responseTime: 'within a day' },
+{ id: 'u-8', name: 'Priya Shah', role: 'player', bio: 'Pickup hooper and 3.5 pickleballer.', location: 'Mueller', joined: 'July 2024', sports: ['basketball', 'pickleball'], verified: true },
+{ id: 'u-9', name: 'Marcus Bell', role: 'player', bio: 'Former college guard, now coaching youth teams.', location: 'Hyde Park', joined: 'May 2025', sports: ['basketball'], verified: false },
+{ id: 'u-10', name: 'Elena Ruiz', role: 'player', bio: 'Training for the city 3x3 tournament.', location: 'Travis Heights', joined: 'October 2024', sports: ['basketball', 'volleyball'], verified: true },
+{ id: 'u-11', name: 'Rainey Street Athletic', role: 'host', bio: 'Boutique rooftop athletic club downtown.', location: 'Rainey Street', joined: 'June 2026', sports: ['tennis'], verified: true, responseTime: 'within an hour' },
+{ id: 'u-12', name: 'East Side Padel Club', role: 'host', bio: 'Outdoor padel with a beer garden attached.', location: 'East Austin', joined: 'March 2025', sports: ['padel'], verified: true, responseTime: 'within 2 hours' }];

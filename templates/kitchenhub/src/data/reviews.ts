@@ -1,0 +1,26 @@
+import type { Review } from '../types/marketplace';
+
+export const reviews: Review[] = [
+{ id: 'r1', listingId: 'k-101', author: 'Andre Wallace', business: 'Wallace Events Catering', rating: 5, date: '2026-09-26', body: 'Cooked for a 300-person wedding out of here. The hood line and two walk-ins made it painless, and Maya had the space spotless and ready at 4 a.m.' },
+{ id: 'r2', listingId: 'k-101', author: 'Luis Romero', business: 'Taquería Romero', rating: 5, date: '2026-09-12', body: 'Best commissary I have used in Chicago. Keycard access means I prep on my own schedule.' },
+{ id: 'r3', listingId: 'k-101', author: 'Grace Thompson', business: 'Golden Crumb Bakery', rating: 4, date: '2026-08-30', body: 'Great equipment and storage. Mixer is a 20 qt — bring your own if you need bigger batches.' },
+{ id: 'r4', listingId: 'k-102', author: 'Sofia Marino', business: 'Marino Focaccia', rating: 5, date: '2026-09-20', body: 'The deck oven is a dream. Daniel is generous with tips and the bench space is huge.' },
+{ id: 'r5', listingId: 'k-102', author: 'Maya Okafor', business: 'Southside Kitchens Co.', rating: 5, date: '2026-09-02', body: 'Booked for a holiday cookie run — retarder space and sheeter saved us hours.' },
+{ id: 'r6', listingId: 'k-103', author: 'Tomás Vega', business: 'Smoke & Salt BBQ', rating: 5, date: '2026-09-18', body: 'Parking, water and grease disposal all in one place. My truck lives here now.' },
+{ id: 'r7', listingId: 'k-103', author: 'Kim Nguyen', business: 'Bánh Mì Bus', rating: 4, date: '2026-08-22', body: 'Solid commissary, fryers are well-maintained. Gets busy on Friday mornings.' },
+{ id: 'r8', listingId: 'k-104', author: 'Rachel Stone', business: 'Greenfork Meals', rating: 5, date: '2026-09-24', body: 'We scaled to 3,000 meals a week here. The packing line and blast chillers are unmatched.' },
+{ id: 'r9', listingId: 'k-104', author: 'Maya Okafor', business: 'Southside Kitchens Co.', rating: 5, date: '2026-09-21', body: 'Spotless, organized and the gluten-free zone is properly separated. Marcus is super responsive.' },
+{ id: 'r10', listingId: 'k-105', author: 'Jun Park', business: 'Park Supper Club', rating: 5, date: '2026-09-10', body: 'Beautiful space for a chef’s table. The stacked ovens handled a 9-course menu easily.' },
+{ id: 'r11', listingId: 'k-105', author: 'Leah Cohen', business: 'Cohen Creative', rating: 4, date: '2026-08-19', body: 'We shot a cookbook here — the light is incredible. Limited cold storage though.' },
+{ id: 'r12', listingId: 'k-106', author: 'Bianca Ortiz', business: 'Ortiz Catering', rating: 5, date: '2026-09-15', body: 'Hot boxes included is a huge perk. Loaded two vans from the dock in 20 minutes.' },
+{ id: 'r13', listingId: 'k-106', author: 'Devon Price', business: 'Price Provisions', rating: 4, date: '2026-08-28', body: 'Great kitchen, tilt skillet works perfectly. Parking out back is tight.' },
+{ id: 'r14', listingId: 'k-107', author: 'Amara Diallo', business: 'Diallo Sauce Co.', rating: 5, date: '2026-09-08', body: 'Perfect for small-batch hot sauce runs and product photos in the same session.' },
+{ id: 'r15', listingId: 'k-108', author: 'Greg Holt', business: 'FuelBox Meals', rating: 5, date: '2026-09-17', body: 'We rent a pallet position in the freezer and prep twice a week. Super reliable.' },
+{ id: 'r16', listingId: 'k-108', author: 'Nadia Farah', business: 'Farah Foods', rating: 4, date: '2026-08-25', body: 'Huge walk-ins. Prep area could use one more sink but overall excellent.' },
+{ id: 'r17', listingId: 'k-109', author: 'Chloe Martin', business: 'Petit Four Studio', rating: 5, date: '2026-09-22', body: 'Marble slabs and a tempering machine for $34/hr? Unreal. My go-to for wedding cakes.' },
+{ id: 'r18', listingId: 'k-109', author: 'Hannah Kim', business: 'Seoul Bowl', rating: 5, date: '2026-09-01', body: 'Quiet and calm — Elena keeps it immaculate.' },
+{ id: 'r19', listingId: 'k-110', author: 'Marco Bellini', business: 'Bellini Pasta', rating: 4, date: '2026-09-14', body: 'Great value for a startup. Shared space can get loud but everyone is friendly.' },
+{ id: 'r20', listingId: 'k-110', author: 'Ivy Chen', business: 'Dumpling Dept.', rating: 5, date: '2026-08-31', body: 'Affordable, clean, and Priya helped us through our first health inspection.' },
+{ id: 'r21', listingId: 'k-111', author: 'Omar Haddad', business: 'Za’atar Nights', rating: 5, date: '2026-09-19', body: 'Ran a sold-out pop-up. The wood oven and dining room made it feel like our own restaurant.' },
+{ id: 'r22', listingId: 'k-112', author: 'Hannah Kim', business: 'Seoul Bowl', rating: 5, date: '2026-09-23', body: 'Six stations means my whole team fits. Walk-in is always organized.' },
+{ id: 'r23', listingId: 'k-112', author: 'Ben Archer', business: 'Archer Bakeshop', rating: 4, date: '2026-09-05', body: 'Love the 60 qt mixer. Street parking can be hit or miss during the day.' }];

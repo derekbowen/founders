@@ -1,0 +1,63 @@
+/* @import url() FONT IMPORTS MUST ALWAYS BE AT THE VERY TOP OF THIS FILE, ABOVE THE TAILWIND IMPORTS — DO NOT DELETE THIS COMMENT */
+@import url('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css');
+
+/* CRITICAL: THE FOLLOWING TAILWIND IMPORTS MUST NEVER BE DELETED OR REORDERED — DO NOT DELETE THIS COMMENT */
+@import './_designSystem/ds-97ed19b0-3b48-480a-9762-c31eea74ed4b/index.css';
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* END TAILWIND IMPORTS — ALL OTHER CSS MUST GO BELOW THIS LINE */
+
+/* Brand font + colors are injected from data/brand.ts at runtime (utils/theme.ts). */
+html,
+body,
+#root {
+  min-height: 100%;
+}
+body {
+  @apply bg-surface font-sans text-navy-900 antialiased;
+}
+.leaflet-container {
+  font-family: inherit;
+  z-index: 0;
+}
+.rent-pin {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #fff;
+  color: rgb(var(--navy-900));
+  font-weight: 600;
+  font-size: 13px;
+  border: 1px solid rgb(var(--navy-200));
+  box-shadow: 0 2px 8px rgb(15 27 51 / 0.15);
+  transition: transform 150ms ease, background 150ms ease;
+}
+.rent-pin:hover,
+.rent-pin.is-active {
+  background: rgb(var(--navy-900));
+  color: #fff;
+  border-color: rgb(var(--navy-900));
+  transform: translate(-50%, -50%) scale(1.08);
+  z-index: 1000;
+}
+.leaflet-popup-content-wrapper {
+  border-radius: 16px;
+  padding: 0;
+  overflow: hidden;
+}
+.leaflet-popup-content {
+  margin: 0;
+  width: 220px !important;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  scrollbar-width: none;
+}

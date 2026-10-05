@@ -1,0 +1,115 @@
+/* @import url() FONT IMPORTS MUST ALWAYS BE AT THE VERY TOP OF THIS FILE, ABOVE THE TAILWIND IMPORTS — DO NOT DELETE THIS COMMENT */
+@import url('https://fonts.googleapis.com/css2?family=Bitter:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css');
+
+/* CRITICAL: THE FOLLOWING TAILWIND IMPORTS MUST NEVER BE DELETED OR REORDERED — DO NOT DELETE THIS COMMENT */
+@import './_designSystem/ds-97ed19b0-3b48-480a-9762-c31eea74ed4b/index.css';
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* END TAILWIND IMPORTS — ALL OTHER CSS MUST GO BELOW THIS LINE */
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    @apply bg-sand-50 font-sans text-ink-900;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-serif;
+  }
+  :focus-visible {
+    outline: 2px solid rgb(var(--c-accent-500));
+    outline-offset: 2px;
+  }
+}
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg px-4 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60;
+  }
+  .btn-primary {
+    @apply btn bg-primary-700 text-white hover:bg-primary-800;
+  }
+  .btn-accent {
+    @apply btn bg-accent-600 text-white hover:bg-accent-700;
+  }
+  .btn-outline {
+    @apply btn border border-sand-300 bg-white text-ink-900 hover:border-ink-400 hover:bg-sand-50;
+  }
+  .btn-ghost {
+    @apply btn text-ink-700 hover:bg-sand-100;
+  }
+  .btn-lg {
+    @apply px-6 py-3 text-base;
+  }
+  .input {
+    @apply w-full rounded-lg border border-sand-300 bg-white px-3.5 py-2.5 text-sm text-ink-900 placeholder:text-ink-400 transition focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 disabled:bg-sand-100;
+  }
+  .input-error {
+    @apply border-red-600 focus:border-red-600 focus:ring-red-600/20;
+  }
+  .label {
+    @apply mb-1.5 block text-sm font-medium text-ink-700;
+  }
+  .card {
+    @apply rounded-2xl border border-sand-200 bg-white;
+  }
+  .eyebrow {
+    @apply text-xs font-semibold uppercase tracking-[0.14em] text-accent-600;
+  }
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-sand-300 bg-white px-3.5 py-1.5 text-sm font-medium text-ink-700 transition-colors hover:border-ink-400;
+  }
+  .chip-active {
+    @apply border-primary-700 bg-primary-700 text-white hover:border-primary-800;
+  }
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+/* Leaflet price pins */
+.price-pin {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+  border-radius: 9999px;
+  border: 1px solid rgb(var(--c-sand-300));
+  background: #fff;
+  color: rgb(var(--c-ink-900));
+  font: 700 12px/1 Inter, system-ui, sans-serif;
+  padding: 7px 10px;
+  box-shadow: 0 2px 8px rgb(30 35 31 / 0.18);
+  transition: transform 0.15s ease, background 0.15s ease;
+  cursor: pointer;
+}
+.price-pin:hover,
+.price-pin.is-active {
+  background: rgb(var(--c-primary-700));
+  border-color: rgb(var(--c-primary-700));
+  color: #fff;
+  transform: translate(-50%, -50%) scale(1.08);
+  z-index: 1000;
+}
+.site-pin {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 9999px;
+  background: rgb(var(--c-primary-700) / 0.18);
+  border: 2px solid rgb(var(--c-primary-700));
+}
+.leaflet-container {
+  font-family: Inter, system-ui, sans-serif;
+}

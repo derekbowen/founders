@@ -25,6 +25,13 @@ npm run dev:prnm     # poolrentalnearme  (npm, apps/poolrentalnearme)
 npm run dev:fc       # founders.click    (bun, apps/founders-click)
 ```
 
+## Template library
+
+`templates/` holds 21 marketplace front-end templates (Magic Patterns exports of
+Sharetribe-style marketplaces, one per vertical, sample data only). They are not
+apps and nothing deploys them. See [templates/README.md](templates/README.md)
+for the catalog, previews and how to build the browsable gallery.
+
 ## Deploys
 
 Only **poolrentalnearme** deploys from this repository, via

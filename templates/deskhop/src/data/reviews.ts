@@ -1,0 +1,25 @@
+import type { Review } from '../types/user';
+
+export const reviews: Review[] = [
+{ id: 'r1', listingId: 'greenhouse-shoreditch', authorId: 'u-priya', rating: 5, date: '2026-09-12', text: 'Bright, calm and the coffee is genuinely great. Booked three desks for my research team and check-in took seconds.' },
+{ id: 'r2', listingId: 'greenhouse-shoreditch', authorId: 'u-jonas', rating: 5, date: '2026-08-28', text: 'My go-to whenever I’m in London. Fast wifi, phone booths always free, and Oliver’s team is lovely.' },
+{ id: 'r3', listingId: 'kreuzberg-loft', authorId: 'u-me', rating: 5, date: '2026-09-05', text: 'Proper monitor setup and a locker for my bag. Felt like my own office for the day.' },
+{ id: 'r4', listingId: 'kreuzberg-loft', authorId: 'u-sofia', rating: 4, date: '2026-07-19', text: 'Great vibe and location. It gets a little loud around lunch, but noise-cancelling headphones fixed that.' },
+{ id: 'r5', listingId: 'canal-office-jordaan', authorId: 'u-tom', rating: 5, date: '2026-09-02', text: 'We ran a two-day design sprint here. Beautiful light, quiet, and the canal view kept everyone in a good mood.' },
+{ id: 'r6', listingId: 'canal-office-jordaan', authorId: 'u-me', rating: 5, date: '2026-06-14', text: 'Daan was super responsive and the office was spotless. Would book again in a heartbeat.' },
+{ id: 'r7', listingId: 'principe-real-meeting', authorId: 'u-me', rating: 5, date: '2026-09-18', text: 'The screen and camera setup worked first try — rare! Inês even arranged pastéis for our workshop.' },
+{ id: 'r8', listingId: 'principe-real-meeting', authorId: 'u-sofia', rating: 4, date: '2026-08-09', text: 'Lovely room, a bit warm in the afternoon but they brought a fan right away.' },
+{ id: 'r9', listingId: 'soho-skyline-office', authorId: 'u-jonas', rating: 5, date: '2026-07-30', text: 'Unreal views and everything we needed for our launch week. Expensive, but worth it.' },
+{ id: 'r10', listingId: 'mitte-phone-booth', authorId: 'u-priya', rating: 5, date: '2026-09-21', text: 'Did four user interviews back to back. Totally silent and the ring light was a nice touch.' },
+{ id: 'r11', listingId: 'mitte-phone-booth', authorId: 'u-tom', rating: 4, date: '2026-08-02', text: 'Exactly what I needed for an investor call. Stool could be comfier for long sessions.' },
+{ id: 'r12', listingId: 'lx-factory-desks', authorId: 'u-sofia', rating: 5, date: '2026-09-10', text: 'Sunlight, great people, unbeatable price. Stayed a whole week.' },
+{ id: 'r13', listingId: 'lx-factory-desks', authorId: 'u-jonas', rating: 4, date: '2026-07-04', text: 'Wifi was solid, coffee excellent. Gets busy on Fridays so book ahead.' },
+{ id: 'r14', listingId: 'clerkenwell-quiet-desks', authorId: 'u-tom', rating: 5, date: '2026-09-22', text: 'Quietest desk I’ve found in London. Maya is a wonderful host.' },
+{ id: 'r15', listingId: 'clerkenwell-quiet-desks', authorId: 'u-priya', rating: 5, date: '2026-08-15', text: 'Got more done in a day here than in a week at home.' },
+{ id: 'r16', listingId: 'ndsm-boardroom', authorId: 'u-sofia', rating: 5, date: '2026-08-21', text: 'Our offsite felt special — the ferry ride is part of the experience.' },
+{ id: 'r17', listingId: 'williamsburg-studio', authorId: 'u-jonas', rating: 5, date: '2026-09-01', text: 'Great energy, big tables and the rooftop at lunch is a treat.' },
+{ id: 'r18', listingId: 'chiado-office-2', authorId: 'u-tom', rating: 5, date: '2026-07-12', text: 'Perfect for my co-founder and me. Central, quiet, beautifully furnished.' },
+{ id: 'r19', listingId: 'kings-cross-huddle', authorId: 'u-priya', rating: 5, date: '2026-09-25', text: 'So convenient for visiting clients off the Eurostar. Screen worked perfectly.' },
+{ id: 'r20', listingId: 'kings-cross-huddle', authorId: 'u-me', rating: 4, date: '2026-06-30', text: 'Compact but well equipped. Great for 1:1s and small interviews.' },
+{ id: 'r21', listingId: 'de-pijp-booth', authorId: 'u-sofia', rating: 4, date: '2026-08-11', text: 'Handy pod with great coffee from the café. A tad warm inside.' },
+{ id: 'r22', listingId: 'prenzlauer-team-office', authorId: 'u-tom', rating: 5, date: '2026-09-08', text: 'Brought the whole team for a week. Parking included was a lifesaver.' }];

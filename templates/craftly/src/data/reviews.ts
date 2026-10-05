@@ -1,0 +1,19 @@
+import type { Review } from '../types/marketplace';
+
+export const reviews: Review[] = [
+{ id: 'r1', listingId: 'speckled-stoneware-mug', makerId: 'm1', author: 'Jordan Ellis', location: 'Seattle, WA', rating: 5, date: '2026-09-18', text: 'The weight is perfect and the handle fits my hand exactly. I bought one for myself and immediately ordered two more as gifts.' },
+{ id: 'r2', listingId: 'speckled-stoneware-mug', makerId: 'm1', author: 'Mei Lin', location: 'Oakland, CA', rating: 5, date: '2026-09-02', text: 'Arrived double-boxed with a handwritten note. The sage glaze is even prettier in person.' },
+{ id: 'r3', listingId: 'speckled-stoneware-mug', makerId: 'm1', author: 'Carlos Duarte', location: 'Denver, CO', rating: 4, date: '2026-08-21', text: 'Lovely mug. The 16 oz is a little bigger than I expected, but that just means more coffee.' },
+{ id: 'r4', listingId: 'ash-glaze-serving-bowl', makerId: 'm1', author: 'Abby Turner', location: 'Portland, OR', rating: 5, date: '2026-09-11', text: 'Picked this up at the studio — Sam showed me how the ash glaze works. It is the centerpiece of our table now.' },
+{ id: 'r5', listingId: 'bud-vase-trio', makerId: 'm1', author: 'Noor Haddad', location: 'Chicago, IL', rating: 5, date: '2026-08-30', text: 'Sweet little set. They look great with dried lavender.' },
+{ id: 'r6', listingId: 'cedar-smoke-soy-candle', makerId: 'm2', author: 'Ben Okafor', location: 'Houston, TX', rating: 5, date: '2026-09-20', text: 'Smells like a cabin in the woods without being overpowering. The wooden wick crackle is so cozy.' },
+{ id: 'r7', listingId: 'cedar-smoke-soy-candle', makerId: 'm2', author: 'Riley Chen', location: 'Boston, MA', rating: 4, date: '2026-09-04', text: 'Great throw, burns evenly. Wish the 12 oz came in a bigger jar option too.' },
+{ id: 'r8', listingId: 'hammered-stacking-rings', makerId: 'm3', author: 'Sofia Marquez', location: 'Miami, FL', rating: 5, date: '2026-09-15', text: 'Fit is perfect and the hammered texture is beautiful. I have not taken them off in two weeks.' },
+{ id: 'r9', listingId: 'freshwater-pearl-pendant', makerId: 'm3', author: 'Grace Kim', location: 'Brooklyn, NY', rating: 5, date: '2026-09-09', text: 'Delicate and elegant. My pearl has the loveliest pink sheen.' },
+{ id: 'r10', listingId: 'handwoven-wool-throw', makerId: 'm4', author: 'Hannah Wright', location: 'Boulder, CO', rating: 5, date: '2026-09-01', text: 'Worth the wait. It is heavy, warm, and the colors are so rich. A true heirloom.' },
+{ id: 'r11', listingId: 'indigo-shibori-napkins', makerId: 'm4', author: 'Marcus Lee', location: 'Austin, TX', rating: 5, date: '2026-09-22', text: 'Each napkin is a different pattern and they softened beautifully after the first wash.' },
+{ id: 'r12', listingId: 'walnut-end-grain-board', makerId: 'm5', author: 'Eli Bauer', location: 'Burlington, VT', rating: 5, date: '2026-09-24', text: 'Flawless craftsmanship. My knives glide on this thing. Tom included a tin of board butter, too.' },
+{ id: 'r13', listingId: 'carved-cherry-spoon', makerId: 'm5', author: 'Priscilla Ward', location: 'Asheville, NC', rating: 5, date: '2026-09-13', text: 'You can feel every knife cut. It has become my favorite risotto spoon.' },
+{ id: 'r14', listingId: 'fern-linocut-print', makerId: 'm6', author: 'Owen Price', location: 'Minneapolis, MN', rating: 5, date: '2026-09-07', text: 'The paper texture is gorgeous and the green ink is so deep. Framed it the day it arrived.' },
+{ id: 'r15', listingId: 'mountain-lake-riso', makerId: 'm6', author: 'Talia Brooks', location: 'Salt Lake City, UT', rating: 4, date: '2026-09-28', text: 'Beautiful colors. It came well protected in a rigid mailer.' },
+{ id: 'r16', listingId: 'letterpress-card-set', makerId: 'm6', author: 'Dev Patel', location: 'Philadelphia, PA', rating: 5, date: '2026-09-19', text: 'Almost too nice to send. The impression is deep and crisp.' }];
