@@ -1,0 +1,25 @@
+import type { Review } from '../types/marketplace';
+
+export const reviews: Review[] = [
+{ id: 'r-01', listingSlug: 'undated-daily-planner', author: 'Hannah C.', rating: 5, date: '2026-09-18', text: 'Finally a planner that is not shouting at me. I print a week at a time and it fits my binder perfectly.' },
+{ id: 'r-02', listingSlug: 'undated-daily-planner', author: 'Jonas W.', rating: 5, date: '2026-08-30', text: 'The hyperlinked tabs work flawlessly in GoodNotes. Worth every cent.' },
+{ id: 'r-03', listingSlug: 'undated-daily-planner', author: 'Priscilla M.', rating: 4, date: '2026-07-12', text: 'Lovely layout. I wish there was a dot-grid variant, but the notes area is generous.' },
+{ id: 'r-04', listingSlug: 'minimal-habit-tracker', author: 'Diego A.', rating: 5, date: '2026-09-22', text: 'I paid $3 and honestly would have paid more. Day 41 of my streak.' },
+{ id: 'r-05', listingSlug: 'minimal-habit-tracker', author: 'Mei T.', rating: 5, date: '2026-09-02', text: 'Simple and pretty. The mood tracker bonus is a nice touch.' },
+{ id: 'r-06', listingSlug: 'wedding-planning-binder', author: 'Aisha K.', rating: 5, date: '2026-09-10', text: 'This binder kept me sane. The vendor quote sheets saved us real money.' },
+{ id: 'r-07', listingSlug: 'nordic-light-photo-pack', author: 'Studio Fjell', rating: 5, date: '2026-09-25', text: 'Used three of these on a client campaign. The RAW files are beautifully exposed.' },
+{ id: 'r-08', listingSlug: 'nordic-light-photo-pack', author: 'Ravi P.', rating: 5, date: '2026-08-14', text: 'Clear commercial license, huge files, gorgeous light. Instant buy for my next pack.' },
+{ id: 'r-09', listingSlug: 'lofi-sunday-loop-kit', author: 'beatsbyjun', rating: 5, date: '2026-09-28', text: 'The MIDI files make this kit. Flipped two loops into a track the same night.' },
+{ id: 'r-10', listingSlug: 'lofi-sunday-loop-kit', author: 'Chloe R.', rating: 4, date: '2026-09-01', text: 'Warm and dusty exactly as promised. A few more drum variations would be great.' },
+{ id: 'r-11', listingSlug: 'personal-finance-dashboard', author: 'Marcus B.', rating: 5, date: '2026-09-27', text: 'Set it up in 20 minutes with the walkthrough. First time I have stuck to a budget.' },
+{ id: 'r-12', listingSlug: 'personal-finance-dashboard', author: 'Elena S.', rating: 5, date: '2026-09-09', text: 'Works perfectly in Google Sheets. The net worth chart is oddly motivating.' },
+{ id: 'r-13', listingSlug: 'freelancer-invoice-tax-tracker', author: 'Tom H.', rating: 5, date: '2026-08-21', text: 'Quarterly tax estimate was within $40 of what my accountant calculated.' },
+{ id: 'r-14', listingSlug: 'ship-it-side-projects', author: 'Nadia F.', rating: 5, date: '2026-09-15', text: 'Read one chapter per evening as suggested. Launched on day 29 with three paying customers.' },
+{ id: 'r-15', listingSlug: 'ship-it-side-projects', author: 'Kevin O.', rating: 4, date: '2026-07-30', text: 'Practical and honest. The launch email templates alone were worth it.' },
+{ id: 'r-16', listingSlug: 'the-quiet-writer', author: 'Isabel G.', rating: 5, date: '2026-08-08', text: 'Gentle, wise and short enough to reread every month.' },
+{ id: 'r-17', listingSlug: 'ux-research-workbook', author: 'Lucas D.', rating: 5, date: '2026-09-19', text: 'Better than the bootcamp I paid $3k for. The interview scripts are gold.' },
+{ id: 'r-18', listingSlug: 'ux-research-workbook', author: 'Sana Q.', rating: 5, date: '2026-08-26', text: 'The Figma templates are clean and the exercises built my first case study.' },
+{ id: 'r-19', listingSlug: 'watercolor-basics-workbook', author: 'Grace L.', rating: 5, date: '2026-09-05', text: 'The tracing sheets are genius for beginners. Week 3 botanicals are on my fridge.' },
+{ id: 'r-20', listingSlug: 'cinematic-ambient-pads', author: 'Owen M.', rating: 5, date: '2026-09-11', text: 'Perfect beds for my documentary. Loop points are seamless.' },
+{ id: 'r-21', listingSlug: 'desk-workspace-flatlays', author: 'Bright SaaS Co.', rating: 4, date: '2026-07-04', text: 'Blank-screen versions are super handy for product mockups.' },
+{ id: 'r-22', listingSlug: 'drum-breaks-vol-3', author: 'Femi A.', rating: 5, date: '2026-09-30', text: 'Grabbed it free, came back and paid $10. These breaks knock.' }];

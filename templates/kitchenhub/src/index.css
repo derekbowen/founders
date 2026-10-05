@@ -1,0 +1,65 @@
+/* @import url() FONT IMPORTS MUST ALWAYS BE AT THE VERY TOP OF THIS FILE, ABOVE THE TAILWIND IMPORTS — DO NOT DELETE THIS COMMENT */
+@import url('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css');
+
+/* CRITICAL: THE FOLLOWING TAILWIND IMPORTS MUST NEVER BE DELETED OR REORDERED — DO NOT DELETE THIS COMMENT */
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* END TAILWIND IMPORTS — ALL OTHER CSS MUST GO BELOW THIS LINE */
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  body {
+    @apply bg-white font-sans text-steel-900;
+  }
+  ::selection {
+    @apply bg-primary/20;
+  }
+}
+/* Map price markers */
+.leaflet-container {
+  font-family: inherit;
+  background: rgb(var(--c-steel-100));
+}
+.price-marker-wrap {
+  background: transparent;
+  border: 0;
+}
+.price-marker {
+  display: inline-flex;
+  align-items: center;
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #fff;
+  color: rgb(var(--c-steel-900));
+  border: 1px solid rgb(var(--c-steel-200));
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.18);
+  font: 600 12px/1 var(--font-body), sans-serif;
+  transition: transform 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+}
+.price-marker:hover,
+.price-marker.is-active {
+  background: rgb(var(--c-steel-900));
+  color: #fff;
+  border-color: transparent;
+  transform: translate(-50%, -50%) scale(1.1);
+}
+.leaflet-popup-content-wrapper {
+  border-radius: 12px;
+  padding: 0;
+  overflow: hidden;
+}
+.leaflet-popup-content {
+  margin: 0;
+  width: 220px !important;
+}
+/* Range inputs */
+input[type='range'] {
+  accent-color: rgb(var(--c-primary));
+}

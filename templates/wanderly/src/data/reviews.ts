@@ -1,0 +1,27 @@
+import type { Review } from '../types/marketplace';
+
+export const reviews: Review[] = [
+{ id: 'r1', experienceId: 'alfama-tascas-food-walk', author: 'Hannah', country: 'United Kingdom', date: '2026-09-14', rating: 5, text: 'Inês is a gem. We ate things we would never have found on our own and left with a list of places for the rest of the trip.' },
+{ id: 'r2', experienceId: 'alfama-tascas-food-walk', author: 'Marcus', country: 'United States', date: '2026-09-02', rating: 5, text: 'Best thing we did in Lisbon. Generous portions — skip breakfast. The ginjinha stop at the viewpoint was magic.' },
+{ id: 'r3', experienceId: 'alfama-tascas-food-walk', author: 'Léa', country: 'France', date: '2026-08-21', rating: 5, text: 'Small group, real places, great stories. Felt like walking with a friend.' },
+{ id: 'r4', experienceId: 'arrabida-sea-kayak', author: 'Jonas', country: 'Germany', date: '2026-09-10', rating: 5, text: 'The water is unbelievably clear. Rui knows every cove and made us feel safe the whole time.' },
+{ id: 'r5', experienceId: 'arrabida-sea-kayak', author: 'Priya', country: 'India', date: '2026-08-28', rating: 4, text: 'Gorgeous coastline. A bit windy on the way back but the picnic made up for it!' },
+{ id: 'r6', experienceId: 'mouraria-fado-night', author: 'Sofia', country: 'Italy', date: '2026-09-18', rating: 5, text: 'Goosebumps. The tiny taverna was full of locals singing along. Unforgettable.' },
+{ id: 'r7', experienceId: 'roma-norte-tacos-after-dark', author: 'Ethan', country: 'Canada', date: '2026-09-20', rating: 5, text: 'Diego is hilarious and the tacos were life changing. The mezcal tasting was a perfect break.' },
+{ id: 'r8', experienceId: 'roma-norte-tacos-after-dark', author: 'Aiko', country: 'Japan', date: '2026-09-05', rating: 5, text: 'We went back to the al pastor stand twice more during our trip.' },
+{ id: 'r9', experienceId: 'mole-from-scratch', author: 'Grace', country: 'Australia', date: '2026-09-12', rating: 5, text: 'Rosa welcomed us like family. Grinding the mole by hand was so satisfying and the meal was incredible.' },
+{ id: 'r10', experienceId: 'murals-and-mezcal', author: 'Tom', country: 'Ireland', date: '2026-08-30', rating: 5, text: 'Seeing a working studio was a highlight. Diego knows everyone in the scene.' },
+{ id: 'r11', experienceId: 'gion-golden-hour-photo-walk', author: 'Olivia', country: 'United States', date: '2026-09-16', rating: 5, text: 'My phone photos have never looked this good. Yuki timed everything perfectly for the light.' },
+{ id: 'r12', experienceId: 'gion-golden-hour-photo-walk', author: 'Daniel', country: 'Spain', date: '2026-09-01', rating: 5, text: 'Great mix of technique and local stories. The edited portraits were a lovely bonus.' },
+{ id: 'r13', experienceId: 'machiya-tea-ceremony', author: 'Mia', country: 'Netherlands', date: '2026-09-08', rating: 5, text: 'Serene and beautifully explained. Kenji made it approachable without losing the meaning.' },
+{ id: 'r14', experienceId: 'arashiyama-bamboo-dawn-hike', author: 'Lucas', country: 'Brazil', date: '2026-08-25', rating: 5, text: 'We had the bamboo grove almost to ourselves. Worth the early alarm 100%.' },
+{ id: 'r15', experienceId: 'el-born-tapas-vermut', author: 'Chloe', country: 'United Kingdom', date: '2026-09-19', rating: 5, text: 'Marta is so warm and knowledgeable. The vermut bodega felt frozen in time.' },
+{ id: 'r16', experienceId: 'el-born-tapas-vermut', author: 'Ben', country: 'United States', date: '2026-09-03', rating: 4, text: 'Fantastic food. Would have loved one more stop but we were very full!' },
+{ id: 'r17', experienceId: 'rooftop-paella-masterclass', author: 'Isabella', country: 'Mexico', date: '2026-09-15', rating: 5, text: 'Cooking paella with that sunset view — dreamy. Recipes worked perfectly at home too.' },
+{ id: 'r18', experienceId: 'gaudi-through-a-lens', author: 'Noah', country: 'Sweden', date: '2026-08-29', rating: 5, text: 'Pau showed us angles of Park Güell I\u2019d never seen in any guidebook.' },
+{ id: 'r19', experienceId: 'riad-tagine-cooking-class', author: 'Emma', country: 'Germany', date: '2026-09-11', rating: 5, text: 'From the souk to the rooftop, Fatima made every minute special. Still dreaming of that tagine.' },
+{ id: 'r20', experienceId: 'riad-tagine-cooking-class', author: 'Ravi', country: 'Singapore', date: '2026-08-24', rating: 5, text: 'Loved building our own spice blend. Very hands-on and generous.' },
+{ id: 'r21', experienceId: 'sea-point-dolphin-kayak', author: 'Zoe', country: 'New Zealand', date: '2026-09-17', rating: 5, text: 'A pod of 50 dolphins swam right under our kayak. Thabo was brilliant.' },
+{ id: 'r22', experienceId: 'city-bowl-jazz-bars', author: 'Kwame', country: 'Ghana', date: '2026-09-09', rating: 5, text: 'Three incredible venues and a great host. Cape jazz is something else.' },
+{ id: 'r23', experienceId: 'bo-kaap-photo-walk-lunch', author: 'Anna', country: 'Poland', date: '2026-09-06', rating: 5, text: 'Amina\u2019s stories brought the neighborhood to life, and her mother\u2019s curry was the best meal of our trip.' },
+{ id: 'r24', experienceId: 'bo-kaap-photo-walk-lunch', author: 'James', country: 'United States', date: '2026-08-27', rating: 4, text: 'Beautiful walk and lovely family. Go on a sunny day for the best photos.' }];

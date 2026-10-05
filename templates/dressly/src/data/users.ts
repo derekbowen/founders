@@ -1,0 +1,137 @@
+import type { User } from '../types/marketplace';
+
+export const currentUserId = 'me';
+
+export const users: User[] = [
+{
+  id: 'me',
+  name: 'Olivia Hart',
+  city: 'New York, NY',
+  initials: 'OH',
+  avatarColor: '#94585c',
+  bio: 'Event planner with a closet full of party dresses. I keep everything steamed, stored and ready to ship within a day.',
+  joined: 'March 2024',
+  responseTime: 'within 1 hour',
+  rentalsCompleted: 48,
+  rating: 4.9,
+  reviewCount: 41,
+  usualSize: 4
+},
+{
+  id: 'u1',
+  name: 'Camille Laurent',
+  city: 'Brooklyn, NY',
+  initials: 'CL',
+  avatarColor: '#6b4f4f',
+  bio: 'Stylist and vintage hunter. My closet leans romantic: florals, puff sleeves and anything you could wear to a garden wedding.',
+  joined: 'June 2023',
+  responseTime: 'within 2 hours',
+  rentalsCompleted: 132,
+  rating: 4.9,
+  reviewCount: 116,
+  usualSize: 6
+},
+{
+  id: 'u2',
+  name: 'Priya Shah',
+  city: 'Austin, TX',
+  initials: 'PS',
+  avatarColor: '#3f5e57',
+  bio: 'Attorney by day, black tie enthusiast by night. All gowns are professionally cleaned between every rental.',
+  joined: 'January 2024',
+  responseTime: 'within 3 hours',
+  rentalsCompleted: 64,
+  rating: 4.9,
+  reviewCount: 52
+},
+{
+  id: 'u3',
+  name: 'Sofia Marino',
+  city: 'Los Angeles, CA',
+  initials: 'SM',
+  avatarColor: '#1f1f1f',
+  bio: 'Costume designer for film. I collect statement eveningwear and love seeing it go to new events.',
+  joined: 'September 2022',
+  responseTime: 'within 1 hour',
+  rentalsCompleted: 210,
+  rating: 5,
+  reviewCount: 188
+},
+{
+  id: 'u4',
+  name: 'Amara Okafor',
+  city: 'Chicago, IL',
+  initials: 'AO',
+  avatarColor: '#7a4a2e',
+  bio: 'Gala season is my favorite season. Expect embellishment, velvet and drama.',
+  joined: 'November 2023',
+  responseTime: 'within 4 hours',
+  rentalsCompleted: 77,
+  rating: 4.8,
+  reviewCount: 69
+},
+{
+  id: 'u5',
+  name: 'Hannah Lee',
+  city: 'San Francisco, CA',
+  initials: 'HL',
+  avatarColor: '#4b5874',
+  bio: 'Bridesmaid eleven times over. My closet is basically a wedding-guest boutique.',
+  joined: 'April 2024',
+  responseTime: 'within 2 hours',
+  rentalsCompleted: 39,
+  rating: 4.8,
+  reviewCount: 33
+},
+{
+  id: 'u6',
+  name: 'Jules Bennett',
+  city: 'Nashville, TN',
+  initials: 'JB',
+  avatarColor: '#8a6d3b',
+  bio: 'Travel writer. Resort and vacation dresses that pack well and photograph even better.',
+  joined: 'February 2024',
+  responseTime: 'within 5 hours',
+  rentalsCompleted: 28,
+  rating: 4.7,
+  reviewCount: 24
+},
+{
+  id: 'u7',
+  name: 'Maya Chen',
+  city: 'Jersey City, NJ',
+  initials: 'MC',
+  avatarColor: '#5a6b4f',
+  bio: 'Always looking for something fun to wear.',
+  joined: 'May 2025',
+  responseTime: 'within 1 day',
+  rentalsCompleted: 6,
+  rating: 5,
+  reviewCount: 6
+},
+{
+  id: 'u8',
+  name: 'Zoe Alvarez',
+  city: 'Queens, NY',
+  initials: 'ZA',
+  avatarColor: '#7b5a73',
+  bio: 'Wedding season survivor.',
+  joined: 'August 2025',
+  responseTime: 'within 1 day',
+  rentalsCompleted: 3,
+  rating: 4.7,
+  reviewCount: 3
+},
+{
+  id: 'u9',
+  name: 'Grace Kim',
+  city: 'Boston, MA',
+  initials: 'GK',
+  avatarColor: '#4f5d6b',
+  bio: 'Renting for every RSVP.',
+  joined: 'July 2025',
+  responseTime: 'within 1 day',
+  rentalsCompleted: 9,
+  rating: 4.9,
+  reviewCount: 9
+}];

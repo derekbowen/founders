@@ -1,0 +1,147 @@
+import type { Brand } from '../types/marketplace';
+
+export const brands: Brand[] = [
+{
+  id: 'fern-field',
+  name: 'Fern & Field Provisions',
+  tagline: 'Small-batch organic pantry staples',
+  location: 'Portland, OR',
+  state: 'Oregon',
+  founded: 2017,
+  ownerName: 'Priya Natarajan',
+  story:
+  'Fern & Field started as a farmers-market granola stand and now supplies 600+ cafés and grocers. Every batch is baked by hand in our Portland kitchen with organic oats and Oregon-grown nuts.',
+  values: ['organic', 'vegan', 'women-owned'],
+  rating: 4.8,
+  reviewCount: 217,
+  retailerCount: 612,
+  minOrderValue: 150,
+  responseTime: 'Replies within 2 hours',
+  monogramColor: '#2F5D3A'
+},
+{
+  id: 'kettle-hollow',
+  name: 'Kettle Hollow Coffee Co.',
+  tagline: 'Direct-trade coffee, roasted to order',
+  location: 'Asheville, NC',
+  state: 'North Carolina',
+  founded: 2014,
+  ownerName: 'Marcus Bell',
+  story:
+  'We roast twice a week in a converted mill on the French Broad River, buying directly from four partner farms in Colombia, Ethiopia and Guatemala.',
+  values: ['organic'],
+  rating: 4.7,
+  reviewCount: 141,
+  retailerCount: 388,
+  minOrderValue: 200,
+  responseTime: 'Replies within 4 hours',
+  monogramColor: '#1E2A44'
+},
+{
+  id: 'saltwork',
+  name: 'Saltwork Apothecary',
+  tagline: 'Ocean-mineral bath & body care',
+  location: 'Portland, ME',
+  state: 'Maine',
+  founded: 2019,
+  ownerName: 'Hannah Okafor',
+  story:
+  'Cold-process soaps and oils made with hand-harvested Maine kelp and sea salt. Plastic-free packaging, always vegan, never tested on animals.',
+  values: ['vegan', 'women-owned'],
+  rating: 4.9,
+  reviewCount: 162,
+  retailerCount: 294,
+  minOrderValue: 100,
+  responseTime: 'Replies within 1 hour',
+  monogramColor: '#3E6B73'
+},
+{
+  id: 'linen-loam',
+  name: 'Linen & Loam',
+  tagline: 'Washed linens and natural home goods',
+  location: 'Hudson, NY',
+  state: 'New York',
+  founded: 2016,
+  ownerName: 'Claire Dubois',
+  story:
+  'European flax, woven and stonewashed in small runs. We design pieces that soften with every wash and look at home in a boutique window or a café kitchen.',
+  values: ['organic', 'women-owned'],
+  rating: 4.8,
+  reviewCount: 147,
+  retailerCount: 341,
+  minOrderValue: 150,
+  responseTime: 'Replies within 3 hours',
+  monogramColor: '#8A5A3B'
+},
+{
+  id: 'paperboat',
+  name: 'Paperboat Stationery',
+  tagline: 'Letterpress cards and everyday paper goods',
+  location: 'Brooklyn, NY',
+  state: 'New York',
+  founded: 2012,
+  ownerName: 'Theo Park',
+  story:
+  'Printed on antique Heidelberg presses in our Gowanus studio. Recycled cotton papers, soy inks, and designs that sell through year-round.',
+  values: [],
+  rating: 4.8,
+  reviewCount: 327,
+  retailerCount: 905,
+  minOrderValue: 100,
+  responseTime: 'Replies within 6 hours',
+  monogramColor: '#B54A32'
+},
+{
+  id: 'wild-coast',
+  name: 'Wild Coast Pet Co.',
+  tagline: 'Single-ingredient treats for dogs & cats',
+  location: 'Bellingham, WA',
+  state: 'Washington',
+  founded: 2020,
+  ownerName: 'Rosa Jimenez',
+  story:
+  'Human-grade, single-ingredient treats made in small batches on the Washington coast. Pet shops love the sell-through; pets love the salmon.',
+  values: ['organic', 'women-owned'],
+  rating: 4.7,
+  reviewCount: 103,
+  retailerCount: 236,
+  minOrderValue: 100,
+  responseTime: 'Replies within 2 hours',
+  monogramColor: '#1F6F6B'
+},
+{
+  id: 'northline',
+  name: 'Northline Knit Co.',
+  tagline: 'Merino knitwear made in Minnesota',
+  location: 'Minneapolis, MN',
+  state: 'Minnesota',
+  founded: 2015,
+  ownerName: 'Erik Lindqvist',
+  story:
+  'Knit on vintage machines in a former flour mill. Responsibly sourced merino, built for real winters and repeat customers.',
+  values: [],
+  rating: 4.7,
+  reviewCount: 109,
+  retailerCount: 271,
+  minOrderValue: 250,
+  responseTime: 'Replies within 5 hours',
+  monogramColor: '#334155'
+},
+{
+  id: 'mesa-clay',
+  name: 'Mesa Clay Studio',
+  tagline: 'Wheel-thrown stoneware for everyday rituals',
+  location: 'Santa Fe, NM',
+  state: 'New Mexico',
+  founded: 2018,
+  ownerName: 'Lucia Herrera',
+  story:
+  'Each piece is thrown, trimmed and glazed by a team of five potters using high-desert clay. Food-safe, dishwasher-safe and made to be used daily.',
+  values: ['women-owned'],
+  rating: 4.9,
+  reviewCount: 88,
+  retailerCount: 164,
+  minOrderValue: 200,
+  responseTime: 'Replies within 1 day',
+  monogramColor: '#A0522D'
+}];

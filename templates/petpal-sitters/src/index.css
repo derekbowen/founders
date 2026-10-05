@@ -1,0 +1,71 @@
+/* @import url() FONT IMPORTS MUST ALWAYS BE AT THE VERY TOP OF THIS FILE, ABOVE THE TAILWIND IMPORTS — DO NOT DELETE THIS COMMENT */
+/* Brand font — if you change brand.font.family in data/brand.ts, update this import too. */
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap');
+@import url('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css');
+
+/* CRITICAL: THE FOLLOWING TAILWIND IMPORTS MUST NEVER BE DELETED OR REORDERED — DO NOT DELETE THIS COMMENT */
+@import './_designSystem/ds-97ed19b0-3b48-480a-9762-c31eea74ed4b/index.css';
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* END TAILWIND IMPORTS — ALL OTHER CSS MUST GO BELOW THIS LINE */
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+body {
+  background-color: rgb(var(--canvas));
+  color: #292524;
+  font-family: var(--font-sans), 'Nunito', ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.scrollbar-none {
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+input[type='date']::-webkit-calendar-picker-indicator {
+  opacity: 0.55;
+  cursor: pointer;
+}
+input[type='range'] {
+  accent-color: rgb(var(--primary-500));
+}
+/* Map markers */
+.leaflet-container {
+  font-family: inherit;
+  background: #f5f2ec;
+}
+.pp-marker-wrap {
+  background: transparent;
+  border: none;
+}
+.pp-marker {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  transform: translate(-50%, -50%);
+  padding: 4px 10px;
+  border-radius: 9999px;
+  background: #ffffff;
+  color: #1c1917;
+  font-weight: 800;
+  font-size: 13px;
+  line-height: 18px;
+  border: 1px solid rgba(28, 25, 23, 0.1);
+  box-shadow: 0 2px 8px rgba(28, 25, 23, 0.18);
+  transition: transform 150ms ease, background-color 150ms ease;
+  cursor: pointer;
+}
+.pp-marker:hover {
+  transform: translate(-50%, -50%) scale(1.06);
+}
+.pp-marker.is-active {
+  background: rgb(var(--primary-500));
+  border-color: rgb(var(--primary-600));
+  transform: translate(-50%, -50%) scale(1.12);
+}

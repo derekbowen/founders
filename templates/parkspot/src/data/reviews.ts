@@ -1,0 +1,26 @@
+import type { Review } from '../types/review';
+
+export const reviews: Review[] = [
+{ id: 'r-01', listingId: 'l-01', authorId: 'u-jordan', rating: 5, date: '2026-09-14', text: 'Walked to the Warriors game in four minutes and was home before the garage lines cleared. The keypad worked first try.' },
+{ id: 'r-02', listingId: 'l-01', authorId: 'u-olivia', rating: 5, date: '2026-08-30', text: 'Spotless garage, and the EV charger was a lovely bonus. Maya replied within minutes.' },
+{ id: 'r-03', listingId: 'l-01', authorId: 'u-sam', rating: 4, date: '2026-08-02', text: 'Tight turn into the garage with a big SUV, but plenty of room once inside.' },
+{ id: 'r-04', listingId: 'l-02', authorId: 'u-marcus', rating: 5, date: '2026-09-20', text: 'Attendant was friendly and the lot felt very secure. Easy exit after the game.' },
+{ id: 'r-05', listingId: 'l-02', authorId: 'u-priya', rating: 5, date: '2026-09-05', text: 'Fit my work van with no issues. Will book every home game.' },
+{ id: 'r-06', listingId: 'l-03', authorId: 'u-maya', rating: 5, date: '2026-09-18', text: 'Perfect for Saturday brunch on 24th. Jordan’s instructions were crystal clear.' },
+{ id: 'r-07', listingId: 'l-03', authorId: 'u-diego', rating: 5, date: '2026-08-21', text: 'Easy in and out. Much better than circling the block for 20 minutes.' },
+{ id: 'r-08', listingId: 'l-04', authorId: 'u-jordan', rating: 5, date: '2026-09-10', text: 'Parked, plugged in, caught Caltrain. Car was at 90% when I got back.' },
+{ id: 'r-09', listingId: 'l-04', authorId: 'u-chen', rating: 4, date: '2026-08-11', text: 'Great spot. The chain lock took a moment to figure out but it’s noted in the instructions.' },
+{ id: 'r-10', listingId: 'l-05', authorId: 'u-jordan', rating: 5, date: '2026-09-17', text: 'Shuttle was waiting both ways. Saved about $80 versus SFO long-term.' },
+{ id: 'r-11', listingId: 'l-05', authorId: 'u-olivia', rating: 5, date: '2026-07-29', text: 'Ten days away, came back to a car exactly as I left it. Priya is a pro.' },
+{ id: 'r-12', listingId: 'l-06', authorId: 'u-maya', rating: 5, date: '2026-09-01', text: 'Gate felt secure and the spot was easy to find. Steps from Valencia.' },
+{ id: 'r-13', listingId: 'l-06', authorId: 'u-marcus', rating: 4, date: '2026-07-19', text: 'Narrow pad, so fold your mirrors. Otherwise great value.' },
+{ id: 'r-14', listingId: 'l-07', authorId: 'u-diego', rating: 5, date: '2026-09-22', text: 'Plate recognition is magic. Drove in, parked, done. Daily rate beats every garage nearby.' },
+{ id: 'r-15', listingId: 'l-07', authorId: 'u-sam', rating: 4, date: '2026-08-25', text: 'Low clearance for roof racks — check the height limit. Bay was always open.' },
+{ id: 'r-16', listingId: 'l-08', authorId: 'u-priya', rating: 5, date: '2026-08-10', text: 'Booked for Outside Lands and it was the best decision of the weekend.' },
+{ id: 'r-17', listingId: 'l-09', authorId: 'u-olivia', rating: 5, date: '2026-09-12', text: 'Smart door link worked flawlessly. Two minutes to the show.' },
+{ id: 'r-18', listingId: 'l-10', authorId: 'u-chen', rating: 4, date: '2026-08-14', text: 'Small but exactly as described. My Mini fit with room to spare.' },
+{ id: 'r-19', listingId: 'l-11', authorId: 'u-jordan', rating: 5, date: '2026-09-08', text: 'Used it all week for a conference. In-and-out privileges were great.' },
+{ id: 'r-20', listingId: 'l-11', authorId: 'u-maya', rating: 5, date: '2026-07-30', text: 'Charging bays were free when I arrived. Clean and well lit.' },
+{ id: 'r-21', listingId: 'l-12', authorId: 'u-sam', rating: 5, date: '2026-08-27', text: 'Huge spaces, easy to park a pickup. Quiet neighborhood.' },
+{ id: 'r-22', listingId: 'l-13', authorId: 'u-diego', rating: 5, date: '2026-09-15', text: 'Fast charger and a massive garage. Took T-Third to the game.' },
+{ id: 'r-23', listingId: 'l-14', authorId: 'u-marcus', rating: 5, date: '2026-09-03', text: 'Shuttle came within 10 minutes. Felt very secure with the fence and cameras.' }];

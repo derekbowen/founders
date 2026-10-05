@@ -1,0 +1,29 @@
+export const images = {
+  hero: "/a686df08-4397-42b0-b116-6319028f9580.jpg",
+  aboutTeam: "/6580159c-f472-47b5-a983-4bcf5b7cfc88.jpg",
+  hostCta: "/6a19dfb2-dadf-45ca-b2b8-c153c65d113a.jpg",
+  // Destinations
+  destLisbon: "/473a548b-5b69-4c6e-a788-f6a430dd1350.jpg",
+  destCdmx: "/b774399e-660a-4a56-8476-04efc1237830.jpg",
+  destKyoto: "/f5c3f429-08c8-4880-bdbe-56d79d7bd6f4.jpg",
+  destBarcelona: "/93cc45d6-b8b2-4566-9f10-77997a79d738.jpg",
+  destMarrakech: "/c291d0f6-a546-44c4-bdf6-048c36ad24b2.jpg",
+  destCapeTown: "/31b6c9f2-2885-4593-92f3-ac3f2b9f809b.jpg",
+  // Experiences
+  alfamaFood: "/d961dbc9-9c30-4bcd-914b-283e88efe2f3.jpg",
+  arrabidaKayak: "/ac7e28ac-ca72-4b85-8e09-3716a57609fa.jpg",
+  fadoNight: "/d03eb402-12d2-4cb5-8402-3e6d5caa3f33.jpg",
+  cdmxTacos: "/1dc3d364-50af-4b40-a1bd-16bb197b3654.jpg",
+  cdmxMole: "/f6df1281-6545-4d19-9964-8ec52172107d.jpg",
+  cdmxMurals: "/30be70bb-03b1-430f-9265-8cb4ba2cb6d2.jpg",
+  kyotoGion: "/b5bb7c7b-611f-42e9-94a1-e6483207504f.jpg",
+  kyotoTea: "/7beb8201-fc44-4d76-89b7-0c0f6c3d706c.jpg",
+  kyotoBamboo: "/1334ccbc-a602-43bb-b9f4-b792374a3896.jpg",
+  bcnTapas: "/5b848eba-e210-40c3-af56-cf98727b20e9.jpg",
+  bcnPaella: "/5010ee82-9099-4ee1-be0d-6def932bcbea.jpg",
+  bcnGaudi: "/bb6efcad-2074-40b7-a681-0da47d40bbd9.jpg",
+  marrakechTagine: "/d6b7a93a-4c4a-4cd1-91af-82579a635586.jpg",
+  capeTownKayak: "/3cf8a827-1267-42b9-9acb-e1b39ed639d5.jpg",
+  capeTownJazz: "/4d790fb2-e9e9-4e14-af61-a2627de80b35.jpg",
+  boKaapPhoto: "/5889ff6e-0bf8-43ed-8c86-11391a48cd83.jpg"
+};

@@ -1,0 +1,22 @@
+export const images = {
+  hero: "/b7f15baa-acac-4f0b-80e0-ada4326411d3.jpg",
+  tennisClay: "/1bd37c80-6202-48e2-8608-0174f09ad1ec.jpg",
+  tennisIndoor: "/ee0561ce-e13f-4687-beba-a6f8f4f187cf.jpg",
+  tennisNight: "/bf3ff2e4-1ea9-4f91-a2b7-4741546b3c08.jpg",
+  tennisRooftop: "/f04fe7b1-7b7c-4e28-a9cd-4335d2bc38c2.jpg",
+  pickleballOutdoor: "/68660d61-9bc0-4464-bffc-c38b71a00b53.jpg",
+  pickleballIndoor: "/a524eed9-b1b8-4cb6-8726-a04f720e3d6a.jpg",
+  pickleballPark: "/6828d593-fb4b-4948-8c47-10006cc6879f.jpg",
+  padelGlass: "/07448245-5738-4e60-812d-46d0171dd0c9.jpg",
+  padelOutdoor: "/0fd13020-bf3d-4d25-a3fe-191359388fd0.jpg",
+  basketballIndoor: "/6b6bcd6f-a308-44e2-9547-cc8d94ef5027.jpg",
+  basketballOutdoor: "/7f50d3c3-f8fd-4dd9-bbf6-c146a62167d8.jpg",
+  soccerTurf: "/9159eead-3bc5-4a8c-bc68-fe2ab5d38b19.jpg",
+  futsalIndoor: "/a370eb38-9f44-4deb-9517-9c13cfd2c7d2.jpg",
+  volleyballBeach: "/dbcacf99-a86e-4176-8add-be15a30f02b5.jpg",
+  volleyballIndoor: "/06d31d32-e66a-4fe6-853b-9870d0625fe9.jpg",
+  coach: "/71796b18-d43c-46c6-a798-d64078292c87.jpg",
+  equipment: "/e2a97e5e-3482-4bb8-828e-ac0c751602e1.jpg",
+  lockerRoom: "/7cd010bc-d53b-4b1b-9b19-1065e9e73b20.jpg",
+  openPlay: "/3d89bd3c-32e1-4172-8e22-d60408dbd8c5.jpg"
+};

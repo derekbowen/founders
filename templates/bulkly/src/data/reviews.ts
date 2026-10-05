@@ -1,0 +1,147 @@
+import type { Review } from '../types/marketplace';
+
+export const reviews: Review[] = [
+{
+  id: 'r1',
+  productId: 'maple-pecan-granola',
+  brandId: 'fern-field',
+  author: 'Dana K.',
+  store: 'Little Owl Café',
+  storeType: 'Café',
+  location: 'Seattle, WA',
+  rating: 5,
+  date: '2026-09-12',
+  body: 'Sold through 4 cases in under three weeks. The display case looks great on our counter and the reorder arrived in 3 days.'
+},
+{
+  id: 'r2',
+  productId: 'maple-pecan-granola',
+  brandId: 'fern-field',
+  author: 'Miguel T.',
+  store: 'Blue Door Grocery',
+  storeType: 'Grocery',
+  location: 'Sacramento, CA',
+  rating: 5,
+  date: '2026-08-29',
+  body: 'Customers ask for it by name now. Tiered pricing at 5+ cases made it a no-brainer to stock deeper.'
+},
+{
+  id: 'r3',
+  productId: 'maple-pecan-granola',
+  brandId: 'fern-field',
+  author: 'Aisha R.',
+  store: 'Harbor Provisions',
+  storeType: 'Specialty food',
+  location: 'Boston, MA',
+  rating: 4,
+  date: '2026-08-04',
+  body: 'Great product and margin. One pouch arrived with a small tear but Priya credited us right away.'
+},
+{
+  id: 'r4',
+  productId: 'sea-salt-dark-chocolate',
+  brandId: 'fern-field',
+  author: 'Jen L.',
+  store: 'Corner Pantry Market',
+  storeType: 'Grocery',
+  location: 'Oakland, CA',
+  rating: 5,
+  date: '2026-09-02',
+  body: 'Best impulse item at our register. Wrapper quality is premium and the counter box is a nice touch.'
+},
+{
+  id: 'r5',
+  productId: 'house-blend-whole-bean',
+  brandId: 'kettle-hollow',
+  author: 'Sam O.',
+  store: 'Westside Bottle Shop',
+  storeType: 'Bottle shop',
+  location: 'Denver, CO',
+  rating: 5,
+  date: '2026-09-18',
+  body: 'Roast dates are always within 3 days of delivery. Our coffee shelf finally has a local-feeling blend people repurchase.'
+},
+{
+  id: 'r6',
+  productId: 'sea-kelp-bar-soap',
+  brandId: 'saltwork',
+  author: 'Priscilla M.',
+  store: 'Tide & Thyme',
+  storeType: 'Gift shop',
+  location: 'Newport, RI',
+  rating: 5,
+  date: '2026-09-09',
+  body: 'Smells like the coast. We restock monthly. Paper bands look beautiful stacked in a basket.'
+},
+{
+  id: 'r7',
+  productId: 'stonewashed-linen-tea-towel',
+  brandId: 'linen-loam',
+  author: 'Ruth B.',
+  store: 'Hearth Home Goods',
+  storeType: 'Home boutique',
+  location: 'Asheville, NC',
+  rating: 5,
+  date: '2026-08-21',
+  body: 'Quality is on par with towels we used to import at twice the cost. Assorted colors per case is really helpful for merchandising.'
+},
+{
+  id: 'r8',
+  productId: 'letterpress-cards-assorted',
+  brandId: 'paperboat',
+  author: 'Kevin W.',
+  store: 'Inkwell Books',
+  storeType: 'Bookstore',
+  location: 'Chicago, IL',
+  rating: 5,
+  date: '2026-09-25',
+  body: 'Our top-selling card line three years running. Sleeved cards mean zero damage on the rack.'
+},
+{
+  id: 'r9',
+  productId: 'peanut-butter-dog-biscuits',
+  brandId: 'wild-coast',
+  author: 'Lena F.',
+  store: 'Pawsome Pet Supply',
+  storeType: 'Pet shop',
+  location: 'Austin, TX',
+  rating: 5,
+  date: '2026-09-14',
+  body: 'Clean ingredient list sells itself. We moved from 2 to 6 cases a month.'
+},
+{
+  id: 'r10',
+  productId: 'speckled-stoneware-mug',
+  brandId: 'mesa-clay',
+  author: 'Owen C.',
+  store: 'Grain & Grind',
+  storeType: 'Café',
+  location: 'Tucson, AZ',
+  rating: 5,
+  date: '2026-08-30',
+  body: 'We use them in-house and sell them at the register. Lead time is longer but worth it — not a single chip after months of daily use.'
+},
+{
+  id: 'r11',
+  productId: 'merino-rib-beanie',
+  brandId: 'northline',
+  author: 'Hailey S.',
+  store: 'North Fork Outfitters',
+  storeType: 'Outdoor retail',
+  location: 'Duluth, MN',
+  rating: 4,
+  date: '2026-09-20',
+  body: 'Soft and warm, customers love the colors. Wish the minimum mix allowed choosing colors per case.'
+},
+{
+  id: 'r12',
+  productId: 'lavender-body-oil',
+  brandId: 'saltwork',
+  author: 'Nora P.',
+  store: 'Bloom Apothecary',
+  storeType: 'Wellness',
+  location: 'Portland, OR',
+  rating: 5,
+  date: '2026-09-06',
+  body: 'Tester units helped it fly off the shelf. Beautiful packaging at this price point.'
+}];

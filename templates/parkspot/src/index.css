@@ -1,0 +1,37 @@
+/* @import url() FONT IMPORTS MUST ALWAYS BE AT THE VERY TOP OF THIS FILE, ABOVE THE TAILWIND IMPORTS — DO NOT DELETE THIS COMMENT */
+@import url('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css');
+
+/* CRITICAL: THE FOLLOWING TAILWIND IMPORTS MUST NEVER BE DELETED OR REORDERED — DO NOT DELETE THIS COMMENT */
+@import './_designSystem/ds-97ed19b0-3b48-480a-9762-c31eea74ed4b/index.css';
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* END TAILWIND IMPORTS — ALL OTHER CSS MUST GO BELOW THIS LINE */
+
+/* Brand font + colors are injected from data/brand.ts by components/layout/BrandStyles.tsx */
+html,
+body,
+#root {
+  min-height: 100%;
+}
+body {
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  background-color: rgb(var(--c-canvas));
+  color: rgb(var(--c-ink));
+  -webkit-font-smoothing: antialiased;
+}
+.leaflet-container {
+  font-family: inherit;
+  background: rgb(var(--c-canvas));
+}
+.leaflet-div-icon.price-pin-icon {
+  background: transparent;
+  border: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  scrollbar-width: none;
+}
