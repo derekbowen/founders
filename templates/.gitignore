@@ -5,3 +5,4 @@ node_modules/
 dist/
 .store-src/
 .image-cache/
+.zip-src/

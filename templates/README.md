@@ -45,6 +45,7 @@ template folder also works without a second install.
 | `tools/gallery-index.mjs` | Writes the gallery page |
 | `tools/build-store-previews.mjs` | Builds the previews the founders.click template store serves (see below) |
 | `tools/store-thumbnails.mjs` | Captures the store's 960×720 catalog thumbnails and checks those previews render |
+| `tools/build-download-zips.mjs` | Builds the zip a buyer downloads from the store (see below) |
 
 The gallery build never edits a template's source. It copies each template and changes the copy
 so it runs from a sub-folder: `BrowserRouter` becomes `HashRouter`, absolute paths to files in
@@ -67,6 +68,18 @@ The store build follows the store's own preview rules: every photo is self-hoste
 `templates/.image-cache/`) and shipped with the preview, photos are recompressed, and maps use
 OpenStreetMap tiles. The store's catalog entries (name, price, flow, highlights) live in that
 app's `src/lib/template-store.ts` and `supabase/functions/_shared/template-catalog.ts`.
+
+### Download zips
+
+```sh
+node templates/tools/build-download-zips.mjs [slug...]   # → templates/dist/downloads/<slug>.zip
+```
+
+Each zip is a standalone project (`npm install`, `npm run dev`) with the photos the export left
+out restored, OpenStreetMap map tiles, pinned dependency versions, a buyer-facing README and no
+Magic Patterns project metadata. A template becomes sellable once its zip is in the store's
+private `template-downloads` Supabase bucket under the name `<slug>.zip`; until then checkout
+refuses it.
 
 ## Known issues in the exports
 
